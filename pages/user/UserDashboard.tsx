@@ -15,14 +15,11 @@ import CurrencyConverter from './CurrencyConverter';
 import Accounting from './Accounting';
 import Settings from './Settings';
 import RecurringPayments from './RecurringPayments';
-import UpgradePrompt from '../../components/common/UpgradePrompt';
 import ApiManagement from './ApiManagement';
 import SubscriptionPage from './SubscriptionPage';
 import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
-
-// Mock content components
-const Payroll: React.FC = () => <div className="text-gray-900 dark:text-white p-4">Payroll Management Page</div>;
+import Payroll from './Payroll';
 
 type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support';
 
@@ -33,20 +30,15 @@ const UserDashboard: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const renderContent = () => {
-        const isSubscribed = user?.isSubscribed ?? false;
-
         switch (activeView) {
             case 'Dashboard': return <UserAnalytics />;
             case 'Send Payment': return <SendPayment />;
             case 'Recurring Payments': return <RecurringPayments />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
-            case 'Invoices': 
-                return isSubscribed ? <Invoices /> : <UpgradePrompt featureName="Invoicing" />;
-            case 'Payroll':
-                 return isSubscribed ? <Payroll /> : <UpgradePrompt featureName="Payroll" />;
+            case 'Invoices': return <Invoices />;
+            case 'Payroll': return <Payroll />;
             case 'Currency Converter': return <CurrencyConverter />;
-            case 'Accounting': 
-                return isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
+            case 'Accounting': return <Accounting />;
             case 'API Management':
                 return <ApiManagement />;
             case 'Subscription': return <SubscriptionPage />;
@@ -70,12 +62,12 @@ const UserDashboard: React.FC = () => {
                     <NavItemLink icon={<SendIcon />} label="Send Payment" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<RefreshIcon />} label="Recurring Payments" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
-                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SubscriptionIcon />} label="Subscription" activeItem={activeView} setItem={setActiveView} />
