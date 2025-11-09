@@ -1,5 +1,6 @@
+
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import { User, UserRole } from '../types';
+import { User, UserRole, UserSubRole, BankAccount } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -21,13 +22,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTimeout(() => {
       let name = 'User';
       let companyName = 'Business Inc.';
+      let bankAccounts: BankAccount[] = [];
       switch (role) {
         case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; break;
         case UserRole.PARTNER: name = 'Financial Partner'; companyName = 'Global Bank'; break;
         case UserRole.MERCHANT: name = 'Crypto Merchant'; companyName = 'Digital Assets LLC'; break;
-        case UserRole.USER: name = 'John Doe'; companyName = 'Creative Solutions'; break;
+        case UserRole.USER: 
+          name = 'John Doe'; 
+          companyName = 'Creative Solutions'; 
+          bankAccounts = [
+            { id: 'acc_1', bankName: 'Chase Bank', accountNumber: '**** **** **** 1234', country: 'USA', currency: 'USD', isDefault: true },
+            { id: 'acc_2', bankName: 'Access Bank', accountNumber: '**** **** **** 5678', country: 'Nigeria', currency: 'NGN' },
+          ];
+          break;
       }
-      const mockUser: User = { id: '1', email, role, name, companyName };
+      const mockUser: User = { 
+        id: '1', 
+        email, 
+        role, 
+        name, 
+        companyName,
+        subRole: role === UserRole.USER ? UserSubRole.ADMINISTRATOR : undefined,
+        bankAccounts,
+        preferredCurrency: 'USD',
+      };
       setUser(mockUser);
       setIsLoading(false);
     }, 1000);

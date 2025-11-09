@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../types';
@@ -10,19 +10,28 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole>(UserRole.USER);
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   const navigate = useNavigate();
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (user && submitted) {
+        let destination = '/';
+        switch (user.role) {
+            case UserRole.USER: destination = '/dashboard'; break;
+            case UserRole.PARTNER: destination = '/partner'; break;
+            case UserRole.MERCHANT: destination = '/merchant'; break;
+            case UserRole.ADMIN: destination = '/admin'; break;
+        }
+        navigate('/2fa', { state: { destination } });
+    }
+  }, [user, submitted, navigate]);
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     login(email, role);
-    switch (role) {
-      case UserRole.USER: navigate('/dashboard'); break;
-      case UserRole.PARTNER: navigate('/partner'); break;
-      case UserRole.MERCHANT: navigate('/merchant'); break;
-      case UserRole.ADMIN: navigate('/admin'); break;
-      default: navigate('/');
-    }
+    setSubmitted(true);
   };
 
   return (
@@ -95,12 +104,17 @@ const LoginPage: React.FC = () => {
             </div>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-light">
-            Don't have an account?{' '}
-            <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:text-yellow-400 cursor-pointer">
-              Sign up
+          <div className="mt-6 text-center text-sm text-gray-light">
+            <p className="mb-2">
+                Don't have an account?{' '}
+                <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:text-yellow-400 cursor-pointer">
+                Sign up
+                </a>
+            </p>
+            <a onClick={() => navigate('/')} className="font-medium text-gray-light hover:text-white cursor-pointer">
+              &larr; Back to Home
             </a>
-          </p>
+          </div>
         </div>
       </div>
     </div>

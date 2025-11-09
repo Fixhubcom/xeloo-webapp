@@ -6,12 +6,31 @@ export enum UserRole {
   ADMIN = 'ADMIN',
 }
 
+export enum UserSubRole {
+  ADMINISTRATOR = 'Administrator',
+  ACCOUNTANT = 'Accountant',
+  AUDITOR = 'Auditor',
+  STANDARD = 'Standard',
+}
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  country: string;
+  currency: string;
+  isDefault?: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  subRole?: UserSubRole;
   companyName?: string;
+  bankAccounts?: BankAccount[];
+  preferredCurrency?: string;
 }
 
 export interface Transaction {

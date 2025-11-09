@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingSuggestions } from '../types';
 import { getOnboardingSuggestions } from '../services/geminiService';
@@ -7,9 +7,11 @@ import Logo from '../components/common/Logo';
 import Spinner from '../components/common/Spinner';
 import Card from '../components/common/Card';
 import { ArrowRightIcon, CheckCircleIcon, LightbulbIcon } from '../components/icons/Icons';
+import PasswordStrengthIndicator from '../components/common/PasswordStrengthIndicator';
+import KYCForm from './onboarding/KYCForm';
 
 const StepIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) => {
-    const steps = ["Account Info", "Business Details", "Verification"];
+    const steps = ["Account Info", "Business Details", "Compliance", "Verification"];
     return (
         <nav className="flex items-center justify-center mb-8" aria-label="Progress">
             {steps.map((step, index) => (
@@ -28,21 +30,41 @@ const StepIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) => {
 };
 
 const OnboardingPage: React.FC = () => {
-    const [step, setStep] = useState(0);
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-        companyName: '',
-        businessDescription: '',
+    const [step, setStep] = useState(() => {
+        const savedStep = localStorage.getItem('onboardingStep');
+        return savedStep ? JSON.parse(savedStep) : 0;
     });
+    
+    const [formData, setFormData] = useState(() => {
+        const savedData = localStorage.getItem('onboardingData');
+        return savedData ? JSON.parse(savedData) : {
+            fullName: '',
+            email: '',
+            password: '',
+            companyName: '',
+            businessDescription: '',
+        };
+    });
+    
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [suggestions, setSuggestions] = useState<OnboardingSuggestions | null>(null);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        localStorage.setItem('onboardingStep', JSON.stringify(step));
+    }, [step]);
+
+    useEffect(() => {
+        localStorage.setItem('onboardingData', JSON.stringify(formData));
+    }, [formData]);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
     };
 
     const fetchSuggestions = useCallback(async () => {
@@ -59,14 +81,36 @@ const OnboardingPage: React.FC = () => {
         }
     }, [formData.businessDescription]);
 
-    const nextStep = () => setStep(s => s + 1);
+    const validateStep = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (step === 0) {
+            if (!formData.fullName) newErrors.fullName = 'Full name is required.';
+            if (!formData.email) newErrors.email = 'Email is required.';
+            else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid.';
+            if (!formData.password) newErrors.password = 'Password is required.';
+            else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters long.';
+        } else if (step === 1) {
+            if (!formData.companyName) newErrors.companyName = 'Company name is required.';
+            if (!formData.businessDescription) newErrors.businessDescription = 'Business description is required.';
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const nextStep = () => {
+        if (validateStep()) {
+            setStep(s => s + 1);
+        }
+    };
+    
     const prevStep = () => setStep(s => s - 1);
     
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log("Onboarding complete:", formData);
-        // In a real app, you would register the user and then log them in.
-        navigate('/login');
+        localStorage.removeItem('onboardingStep');
+        localStorage.removeItem('onboardingData');
+        navigate('/confirm-email');
     };
 
     return (
@@ -83,9 +127,19 @@ const OnboardingPage: React.FC = () => {
                         <div>
                             <h2 className="text-xl font-bold mb-4">Create Your Account</h2>
                             <div className="space-y-4">
-                                <input name="fullName" placeholder="Full Name" onChange={handleInputChange} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
-                                <input name="email" type="email" placeholder="Email Address" onChange={handleInputChange} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
-                                <input name="password" type="password" placeholder="Password" onChange={handleInputChange} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
+                                <div>
+                                    <input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleInputChange} className={`w-full bg-gray-dark p-2 rounded border ${errors.fullName ? 'border-red-500' : 'border-gray-medium'}`} />
+                                    {errors.fullName && <p className="text-red-400 text-xs mt-1">{errors.fullName}</p>}
+                                </div>
+                                <div>
+                                    <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleInputChange} className={`w-full bg-gray-dark p-2 rounded border ${errors.email ? 'border-red-500' : 'border-gray-medium'}`} />
+                                    {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleInputChange} className={`w-full bg-gray-dark p-2 rounded border ${errors.password ? 'border-red-500' : 'border-gray-medium'}`} />
+                                    <PasswordStrengthIndicator password={formData.password} />
+                                    {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
+                                </div>
                             </div>
                             <button onClick={nextStep} className="mt-6 w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center">
                                 Next <ArrowRightIcon className="ml-2 w-5 h-5" />
@@ -96,8 +150,14 @@ const OnboardingPage: React.FC = () => {
                          <div>
                             <h2 className="text-xl font-bold mb-4">Tell Us About Your Business</h2>
                             <div className="space-y-4">
-                                <input name="companyName" placeholder="Company Name" onChange={handleInputChange} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
-                                <textarea name="businessDescription" placeholder="Describe your business activities..." onChange={handleInputChange} onBlur={fetchSuggestions} rows={4} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
+                                <div>
+                                    <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleInputChange} className={`w-full bg-gray-dark p-2 rounded border ${errors.companyName ? 'border-red-500' : 'border-gray-medium'}`} />
+                                    {errors.companyName && <p className="text-red-400 text-xs mt-1">{errors.companyName}</p>}
+                                </div>
+                                <div>
+                                    <textarea name="businessDescription" placeholder="Describe your business activities..." value={formData.businessDescription} onChange={handleInputChange} onBlur={fetchSuggestions} rows={4} className={`w-full bg-gray-dark p-2 rounded border ${errors.businessDescription ? 'border-red-500' : 'border-gray-medium'}`} />
+                                    {errors.businessDescription && <p className="text-red-400 text-xs mt-1">{errors.businessDescription}</p>}
+                                </div>
                                 
                                 {isLoadingAI && <div className="flex items-center text-gray-light"><Spinner className="mr-2" /> AI is analyzing your business...</div>}
 
@@ -124,11 +184,22 @@ const OnboardingPage: React.FC = () => {
                         </div>
                     )}
                     {step === 2 && (
+                         <div>
+                            <KYCForm />
+                            <div className="flex justify-between mt-6">
+                                <button onClick={prevStep} className="bg-gray-medium text-white font-bold py-2 px-4 rounded hover:bg-gray-500">Back</button>
+                                <button onClick={nextStep} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center">
+                                    Next <ArrowRightIcon className="ml-2 w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {step === 3 && (
                          <div className="text-center">
-                            <h2 className="text-xl font-bold mb-4">Identity Verification</h2>
-                            <p className="text-gray-light mb-4">To comply with regulations, we need to verify your identity. In a real application, this would involve a KYC/KYB provider integration.</p>
-                            <div className="p-4 border-2 border-dashed border-gray-medium rounded-lg text-gray-light">
-                                [KYC/KYB Upload Component Here]
+                            <h2 className="text-xl font-bold mb-4">Final Verification</h2>
+                            <p className="text-gray-light mb-4">Please upload a government-issued ID and a proof of address. In a real application, this would involve a KYC/KYB provider integration.</p>
+                            <div className="p-4 border-2 border-dashed border-gray-medium rounded-lg text-gray-light mb-6">
+                                [KYC/KYB Document Upload Component Here]
                             </div>
                              <div className="flex justify-between mt-6">
                                 <button onClick={prevStep} className="bg-gray-medium text-white font-bold py-2 px-4 rounded hover:bg-gray-500">Back</button>

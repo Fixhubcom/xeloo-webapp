@@ -1,0 +1,89 @@
+
+import React, { useState, useEffect } from 'react';
+import Card from '../../components/common/Card';
+import { ConverterIcon } from '../../components/icons/Icons';
+
+const INITIAL_MOCK_RATES: { [key: string]: number } = {
+    USD: 1,
+    NGN: 1450.50,
+    GHS: 13.10,
+    KES: 129.50,
+    GBP: 0.79,
+    EUR: 0.92,
+};
+
+const CurrencyConverter: React.FC = () => {
+    const [amount, setAmount] = useState('100');
+    const [fromCurrency, setFromCurrency] = useState('USD');
+    const [toCurrency, setToCurrency] = useState('NGN');
+    const [result, setResult] = useState(0);
+    const [rates, setRates] = useState(INITIAL_MOCK_RATES);
+
+    // Simulate real-time rate fluctuation
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRates(prevRates => {
+                const newRates = { ...prevRates };
+                for (const currency in newRates) {
+                    if (currency !== 'USD') {
+                        // Fluctuate by +/- 0.5%
+                        const factor = 1 + (Math.random() - 0.5) * 0.01;
+                        newRates[currency] = prevRates[currency] * factor;
+                    }
+                }
+                return newRates;
+            });
+        }, 3000); // Update every 3 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const numAmount = parseFloat(amount);
+        if (!isNaN(numAmount) && rates[fromCurrency] && rates[toCurrency]) {
+            const baseAmount = numAmount / rates[fromCurrency]; // Convert to USD base
+            const convertedAmount = baseAmount * rates[toCurrency];
+            setResult(convertedAmount);
+        } else {
+            setResult(0);
+        }
+    }, [amount, fromCurrency, toCurrency, rates]);
+
+    return (
+        <Card className="max-w-xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">Currency Conversion Tool</h2>
+            <div className="flex items-center justify-between space-x-4">
+                {/* From */}
+                <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-light">You send</label>
+                    <div className="flex mt-1">
+                        <select value={fromCurrency} onChange={e => setFromCurrency(e.target.value)} className="bg-gray-dark p-3 rounded-l-md border border-gray-medium appearance-none">
+                            {Object.keys(rates).map(curr => <option key={curr}>{curr}</option>)}
+                        </select>
+                        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-gray-medium text-right font-mono text-xl" />
+                    </div>
+                </div>
+                
+                <div className="pt-6">
+                    <ConverterIcon className="w-8 h-8 text-accent"/>
+                </div>
+
+                {/* To */}
+                <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-light">They receive</label>
+                     <div className="flex mt-1">
+                        <select value={toCurrency} onChange={e => setToCurrency(e.target.value)} className="bg-gray-dark p-3 rounded-l-md border border-gray-medium appearance-none">
+                            {Object.keys(rates).map(curr => <option key={curr}>{curr}</option>)}
+                        </select>
+                        <input type="text" value={result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} readOnly className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-gray-medium text-right font-mono text-xl text-green-400" />
+                    </div>
+                </div>
+            </div>
+            <div className="text-center mt-6 text-gray-light">
+                1 {fromCurrency} ≈ {(rates[toCurrency] / rates[fromCurrency]).toFixed(4)} {toCurrency}
+            </div>
+        </Card>
+    );
+};
+
+export default CurrencyConverter;

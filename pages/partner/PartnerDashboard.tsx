@@ -1,10 +1,10 @@
-
 import React from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
-import { LogoutIcon } from '../../components/icons/Icons';
+import { LogoutIcon, SearchIcon } from '../../components/icons/Icons';
 import { User } from '../../types';
+import PartnerSettlements from './PartnerSettlements';
 
 const PartnerDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -26,18 +26,32 @@ const PartnerDashboard: React.FC = () => {
             </aside>
              <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
-                    <h1 className="text-2xl font-bold text-white">Partner Portal</h1>
+                    <div className="relative">
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input type="text" placeholder="Search settlements..." className="bg-primary-light border border-gray-medium rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
+                    </div>
                     <div className="text-right">
                         <p className="font-semibold text-white">{(user as User)?.name}</p>
                         <p className="text-sm text-gray-light">{(user as User)?.companyName}</p>
                     </div>
                 </header>
                 <div className="flex-1 overflow-y-auto p-8 bg-gray-dark">
-                    <Card>
-                        <h2 className="text-xl font-bold mb-4">Transaction Ledger</h2>
-                        <p className="text-gray-light">This area will display a real-time ledger of transactions to be settled, API activity, and balance information.</p>
-                        {/* A table or list of transactions would go here */}
-                    </Card>
+                    <h1 className="text-3xl font-bold text-white mb-8">Partner Portal</h1>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <Card className="text-center">
+                            <h3 className="text-lg text-gray-light">Total Volume (30d)</h3>
+                            <p className="text-3xl font-bold text-accent">$2.5M</p>
+                        </Card>
+                        <Card className="text-center">
+                            <h3 className="text-lg text-gray-light">Pending Settlements</h3>
+                            <p className="text-3xl font-bold text-yellow-400">$150,000</p>
+                        </Card>
+                        <Card className="text-center">
+                            <h3 className="text-lg text-gray-light">Commission Earned (30d)</h3>
+                            <p className="text-3xl font-bold text-green-400">$25,000</p>
+                        </Card>
+                    </div>
+                    <PartnerSettlements />
                 </div>
             </main>
         </div>
