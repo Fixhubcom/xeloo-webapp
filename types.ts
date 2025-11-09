@@ -83,3 +83,14 @@ export interface OnboardingSuggestions {
   kybRiskLevel: 'Low' | 'Medium' | 'High';
   complianceNotes: string[];
 }
+
+export interface RecurringPayment {
+  id: string;
+  recipientName: string;
+  amount: number;
+  currency: string;
+  frequency: 'Weekly' | 'Monthly' | 'Quarterly';
+  nextPaymentDate: string;
+  endDate?: string;
+  status: 'Active' | 'Paused';
+}

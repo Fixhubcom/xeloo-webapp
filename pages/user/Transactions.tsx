@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -33,6 +34,7 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [countryFilter, setCountryFilter] = useState('All Countries');
     const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
+    const [amountFilter, setAmountFilter] = useState({ min: '', max: '' });
     const [showAnalysis, setShowAnalysis] = useState(false);
     const [analysisResult, setAnalysisResult] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -46,6 +48,10 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
             const countryMatch = countryFilter === 'All Countries' || tx.recipientCountry === countryFilter;
             const searchMatch = !searchQuery || tx.recipient.toLowerCase().includes(searchQuery.toLowerCase());
             
+            const minAmount = parseFloat(amountFilter.min);
+            const maxAmount = parseFloat(amountFilter.max);
+            const amountMatch = (isNaN(minAmount) || tx.amountSent >= minAmount) && (isNaN(maxAmount) || tx.amountSent <= maxAmount);
+
             // Date matching logic
             const txDate = new Date(tx.date);
             const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
@@ -55,9 +61,9 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
             
             const dateMatch = (!startDate || txDate >= startDate) && (!endDate || txDate <= endDate);
 
-            return statusMatch && searchMatch && dateMatch && countryMatch;
+            return statusMatch && searchMatch && dateMatch && countryMatch && amountMatch;
         });
-    }, [statusFilter, searchQuery, dateFilter, countryFilter, transactions]);
+    }, [statusFilter, searchQuery, dateFilter, countryFilter, amountFilter, transactions]);
 
     const handleExport = () => {
         const headers = ['ID', 'Date', 'Recipient', 'Recipient Country', 'Amount Sent', 'Currency Sent', 'Amount Received', 'Currency Received', 'Commission', 'Status', 'Category'];
@@ -116,6 +122,22 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                         onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value}))}
                         className="bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                      />
+                    <div className="flex items-center gap-1">
+                        <input
+                            type="number"
+                            placeholder="Min Amount"
+                            value={amountFilter.min}
+                            onChange={(e) => setAmountFilter(prev => ({ ...prev, min: e.target.value }))}
+                            className="w-28 bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                        />
+                        <input
+                            type="number"
+                            placeholder="Max Amount"
+                            value={amountFilter.max}
+                            onChange={(e) => setAmountFilter(prev => ({ ...prev, max: e.target.value }))}
+                            className="w-28 bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                        />
+                    </div>
                       <select 
                          value={countryFilter}
                          onChange={(e) => setCountryFilter(e.target.value)}

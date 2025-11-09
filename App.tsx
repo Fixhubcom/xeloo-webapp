@@ -13,6 +13,7 @@ import { UserRole } from './types';
 import LandingPage from './pages/LandingPage';
 import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import ConfirmEmailPage from './pages/ConfirmEmailPage';
+import TermsPage from './pages/TermsPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -56,6 +57,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/2fa" element={<TwoFactorAuthPage />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={[UserRole.USER]}><UserDashboard /></ProtectedRoute>} />
             <Route path="/partner" element={<ProtectedRoute allowedRoles={[UserRole.PARTNER]}><PartnerDashboard /></ProtectedRoute>} />

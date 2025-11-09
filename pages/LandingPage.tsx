@@ -48,7 +48,7 @@ const LandingPage: React.FC = () => {
             {/* Footer */}
             <footer className="py-6 px-8 mt-16">
                 <div className="container mx-auto text-center text-gray-light text-sm">
-                    <p>&copy; {new Date().getFullYear()} Xeloo. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Xeloo. All rights reserved. | <a href="#/terms" className="hover:text-accent underline">Terms & Conditions</a></p>
                 </div>
             </footer>
         </div>

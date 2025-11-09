@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
 import Avatar from '../../components/common/Avatar';
+import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon } from '../../components/icons/Icons';
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -12,11 +14,12 @@ import Invoices from './Invoices';
 import CurrencyConverter from './CurrencyConverter';
 import Accounting from './Accounting';
 import Settings from './Settings';
+import RecurringPayments from './RecurringPayments';
 
 // Mock content components
 const Payroll: React.FC = () => <div className="text-gray-900 dark:text-white p-4">Payroll Management Page</div>;
 
-type NavItem = 'Dashboard' | 'Send Payment' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'Settings';
+type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'Settings';
 
 const UserDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -28,6 +31,7 @@ const UserDashboard: React.FC = () => {
         switch (activeView) {
             case 'Dashboard': return <UserAnalytics />;
             case 'Send Payment': return <SendPayment />;
+            case 'Recurring Payments': return <RecurringPayments />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
             case 'Invoices': return <Invoices />;
             case 'Payroll': return <Payroll />;
@@ -49,6 +53,7 @@ const UserDashboard: React.FC = () => {
                     <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
                     <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SendIcon />} label="Send Payment" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<RefreshIcon />} label="Recurring Payments" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} />
@@ -67,7 +72,7 @@ const UserDashboard: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden relative">
                 <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-8 border-b border-gray-200 dark:border-primary-light">
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -100,6 +105,7 @@ const UserDashboard: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
+                <HelpWidget />
             </main>
         </div>
     );
