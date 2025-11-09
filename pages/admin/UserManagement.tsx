@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { UserRole, UserSubRole } from '../../types';
@@ -36,11 +35,86 @@ const StatusBadge: React.FC<{ status: MockUser['status'] }> = ({ status }) => {
     return <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusClasses[status]}`}>{status}</span>;
 };
 
+
+const EditUserModal: React.FC<{
+    user: MockUser;
+    onClose: () => void;
+    onSave: (updatedUser: MockUser) => void;
+}> = ({ user, onClose, onSave }) => {
+    const [formData, setFormData] = useState<MockUser>(user);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSave = () => {
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+            <Card className="w-full max-w-lg">
+                <h2 className="text-2xl font-bold mb-4">Edit User: <span className="text-accent">{user.name}</span></h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="text-sm text-gray-400">Name</label>
+                        <input name="name" value={formData.name} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                    </div>
+                     <div>
+                        <label className="text-sm text-gray-400">Company Name</label>
+                        <input name="companyName" value={formData.companyName} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm text-gray-400">Role</label>
+                            <select name="role" value={formData.role} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1">
+                                {Object.values(UserRole).map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-400">Sub-Role</label>
+                            <select name="subRole" value={formData.subRole} onChange={handleInputChange} disabled={formData.role === UserRole.ADMIN} className="w-full bg-primary p-2 rounded border border-primary-light mt-1 disabled:opacity-50">
+                                {Object.values(UserSubRole).map(subRole => <option key={subRole} value={subRole}>{subRole}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm text-gray-400">Status</label>
+                            <select name="status" value={formData.status} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1">
+                                <option value="Active">Active</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Deactivated">Deactivated</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-400">Account Officer</label>
+                            <select name="accountOfficerId" value={formData.accountOfficerId} onChange={handleInputChange} disabled={formData.role === UserRole.ADMIN} className="w-full bg-primary p-2 rounded border border-primary-light mt-1 disabled:opacity-50">
+                                <option value="">Unassigned</option>
+                                {accountOfficers.map(officer => <option key={officer.id} value={officer.id}>{officer.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                    <button onClick={handleSave} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Save Changes</button>
+                </div>
+            </Card>
+        </div>
+    );
+};
+
+
 const UserManagement: React.FC = () => {
     const [users, setUsers] = useState(mockUsers);
     const [onboardingLink, setOnboardingLink] = useState('');
     const [linkEmail, setLinkEmail] = useState('');
     const [linkRole, setLinkRole] = useState<'PARTNER' | 'MERCHANT'>('PARTNER');
+    
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<MockUser | null>(null);
 
     const handleGenerateLink = (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,6 +128,23 @@ const UserManagement: React.FC = () => {
         // Add a temporary visual feedback if desired
     };
 
+    const handleEditClick = (user: MockUser) => {
+        setEditingUser(user);
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsEditModalOpen(false);
+        setEditingUser(null);
+    };
+
+    const handleSaveUser = (updatedUser: MockUser) => {
+        setUsers(currentUsers =>
+            currentUsers.map(u => (u.id === updatedUser.id ? updatedUser : u))
+        );
+        handleCloseModal();
+    };
+
     return (
         <div className="space-y-8">
             <Card>
@@ -62,17 +153,17 @@ const UserManagement: React.FC = () => {
                 <form onSubmit={handleGenerateLink} className="flex flex-col md:flex-row items-end gap-4">
                     <div className="w-full">
                         <label className="text-sm text-gray-400">Prospective User's Email</label>
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             value={linkEmail}
                             onChange={(e) => setLinkEmail(e.target.value)}
-                            placeholder="partner@example.com" 
-                            required 
+                            placeholder="partner@example.com"
+                            required
                             className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
                     </div>
                      <div className="w-full md:w-auto">
                         <label className="text-sm text-gray-400">Role</label>
-                        <select 
+                        <select
                             value={linkRole}
                             onChange={(e) => setLinkRole(e.target.value as 'PARTNER' | 'MERCHANT')}
                             className="w-full bg-primary p-2 rounded border border-primary-light mt-1"
@@ -117,36 +208,17 @@ const UserManagement: React.FC = () => {
                                         <div className="text-xs text-gray-400">{user.email}</div>
                                     </td>
                                     <td className="px-6 py-4">{user.companyName}</td>
+                                    <td className="px-6 py-4">{user.role}</td>
+                                    <td className="px-6 py-4">{user.subRole || 'N/A'}</td>
                                     <td className="px-6 py-4">
-                                        <select defaultValue={user.role} className="bg-primary border border-primary-light rounded-md py-1 px-2 text-xs text-accent focus:outline-none focus:ring-accent focus:border-accent">
-                                            {Object.values(UserRole).map(role => <option key={role} value={role}>{role}</option>)}
-                                        </select>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {user.role !== UserRole.ADMIN ? (
-                                            <select defaultValue={user.subRole || UserSubRole.STANDARD} className="bg-primary border border-primary-light rounded-md py-1 px-2 text-xs text-white focus:outline-none focus:ring-accent focus:border-accent">
-                                                {Object.values(UserSubRole).map(subRole => <option key={subRole} value={subRole}>{subRole}</option>)}
-                                            </select>
-                                        ) : (
-                                            'N/A'
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {user.role !== UserRole.ADMIN && (
-                                            <select 
-                                                defaultValue={user.accountOfficerId || ''} 
-                                                className="w-full bg-primary border border-primary-light rounded-md py-1 px-2 text-xs text-white focus:outline-none focus:ring-accent focus:border-accent"
-                                            >
-                                                <option value="">Unassigned</option>
-                                                {accountOfficers.map(officer => (
-                                                    <option key={officer.id} value={officer.id}>{officer.name}</option>
-                                                ))}
-                                            </select>
-                                        )}
+                                        {user.role !== UserRole.ADMIN
+                                            ? accountOfficers.find(ao => ao.id === user.accountOfficerId)?.name || <span className="text-gray-500">Unassigned</span>
+                                            : 'N/A'
+                                        }
                                     </td>
                                     <td className="px-6 py-4"><StatusBadge status={user.status} /></td>
                                     <td className="px-6 py-4">
-                                        <button className="font-medium text-accent hover:underline">Edit</button>
+                                        <button onClick={() => handleEditClick(user)} className="font-medium text-accent hover:underline">Edit</button>
                                     </td>
                                 </tr>
                             ))}
@@ -154,6 +226,14 @@ const UserManagement: React.FC = () => {
                     </table>
                 </div>
             </Card>
+            
+            {isEditModalOpen && editingUser && (
+                <EditUserModal 
+                    user={editingUser}
+                    onClose={handleCloseModal}
+                    onSave={handleSaveUser}
+                />
+            )}
         </div>
     );
 };
