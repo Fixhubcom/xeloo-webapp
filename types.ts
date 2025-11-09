@@ -49,6 +49,9 @@ export interface Transaction {
   commission: number;
   status: 'Completed' | 'Pending' | 'Failed';
   category?: string;
+  recipientAccount?: string;
+  amountSentUSD?: number;
+  amountReceivedUSD?: number;
 }
 
 export interface Invoice {
