@@ -235,7 +235,7 @@ const FAQ: React.FC = () => {
                 <div>
                     {faqs.map((faq, i) => <FAQItem key={i} q={faq.q} a={faq.a} />)}
                 </div>
-                 <p className="text-center mt-8 text-gray-300">Have another question? <a href="#" className="text-accent font-semibold hover:underline">Talk to our team →</a></p>
+                 <p className="text-center mt-8 text-gray-300">Have another question? <a href="#/contact-us" className="text-accent font-semibold hover:underline">Talk to our team →</a></p>
             </div>
         </section>
     );
@@ -249,7 +249,7 @@ const CTA: React.FC = () => {
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the platform customers love.</h2>
                 <p className="text-gray-300 max-w-2xl mx-auto mb-8">Trust your business with the world’s leading payment gateway.</p>
                 <div className="flex justify-center space-x-4">
-                    <button className="border border-accent text-accent font-bold py-3 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors">Book A Demo</button>
+                    <button onClick={() => navigate('/contact-us')} className="border border-accent text-accent font-bold py-3 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors">Book A Demo</button>
                     <button onClick={() => navigate('/onboarding')} className="bg-accent text-primary font-bold py-3 px-6 rounded-lg hover:opacity-90">Create free account</button>
                 </div>
             </div>
@@ -273,9 +273,22 @@ const Footer: React.FC = () => {
                             <a href="#" className="text-gray-300 hover:text-accent"><LinkedInIcon /></a>
                         </div>
                     </div>
-                    <div><h3 className="font-bold mb-4">Pages</h3><ul className="space-y-2 text-gray-300"><li><a href="#" className="hover:text-accent">About Us</a></li><li><a href="#" className="hover:text-accent">Our Services</a></li><li><a href="#" className="hover:text-accent">Contact Us</a></li></ul></div>
-                    <div><h3 className="font-bold mb-4">Product</h3><ul className="space-y-2 text-gray-300"><li><a href="#" className="hover:text-accent">Cross-border</a></li><li><a href="#" className="hover:text-accent">Payroll</a></li><li><a href="#" className="hover:text-accent">Escrow</a></li></ul></div>
-                    <div><h3 className="font-bold mb-4">Extra</h3><ul className="space-y-2 text-gray-300"><li><a href="#/terms" className="hover:text-accent">Terms</a></li><li><a href="#" className="hover:text-accent">Privacy Policy</a></li><li><a href="#" className="hover:text-accent">Affiliate</a></li></ul></div>
+                    <div><h3 className="font-bold mb-4">Pages</h3><ul className="space-y-2 text-gray-300">
+                        <li><a href="#/about-us" className="hover:text-accent">About Us</a></li>
+                        <li><a href="#/services" className="hover:text-accent">Our Services</a></li>
+                        <li><a href="#/contact-us" className="hover:text-accent">Contact Us</a></li>
+                        <li><a href="#/product" className="hover:text-accent">Product</a></li>
+                    </ul></div>
+                    <div><h3 className="font-bold mb-4">Product</h3><ul className="space-y-2 text-gray-300">
+                        <li><a href="#/cross-border" className="hover:text-accent">Cross-border</a></li>
+                        <li><a href="#/payroll-info" className="hover:text-accent">Payroll</a></li>
+                        <li><a href="#/resources" className="hover:text-accent">Resources</a></li>
+                    </ul></div>
+                    <div><h3 className="font-bold mb-4">Extra</h3><ul className="space-y-2 text-gray-300">
+                        <li><a href="#/terms" className="hover:text-accent">Terms</a></li>
+                        <li><a href="#/privacy-policy" className="hover:text-accent">Privacy Policy</a></li>
+                        <li><a href="#/affiliate" className="hover:text-accent">Affiliate</a></li>
+                    </ul></div>
                 </div>
                 <div className="border-t border-primary-light pt-6 flex justify-between items-center text-gray-400 text-sm">
                     <p>© {new Date().getFullYear()} Xeloo ・All rights reserved by Fix Hub Communications Ltd</p>

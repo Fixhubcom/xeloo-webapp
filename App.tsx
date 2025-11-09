@@ -17,6 +17,14 @@ import TermsPage from './pages/TermsPage';
 import BusinessPage from './pages/BusinessPage';
 import ProductPage from './pages/ProductPage';
 import ApiPage from './pages/ApiPage';
+import AboutUsPage from './pages/AboutUsPage';
+import OurServicesPage from './pages/OurServicesPage';
+import ContactUsPage from './pages/ContactUsPage';
+import ResourcesPage from './pages/ResourcesPage';
+import CrossBorderPage from './pages/CrossBorderPage';
+import PayrollInfoPage from './pages/PayrollInfoPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import AffiliatePage from './pages/AffiliatePage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -64,6 +72,14 @@ const AppRoutes: React.FC = () => {
             <Route path="/business" element={<BusinessPage />} />
             <Route path="/product" element={<ProductPage />} />
             <Route path="/api" element={<ApiPage />} />
+            <Route path="/about-us" element={<AboutUsPage />} />
+            <Route path="/services" element={<OurServicesPage />} />
+            <Route path="/contact-us" element={<ContactUsPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/cross-border" element={<CrossBorderPage />} />
+            <Route path="/payroll-info" element={<PayrollInfoPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/affiliate" element={<AffiliatePage />} />
             
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={[UserRole.USER]}><UserDashboard /></ProtectedRoute>} />
             <Route path="/partner" element={<ProtectedRoute allowedRoles={[UserRole.PARTNER]}><PartnerDashboard /></ProtectedRoute>} />
