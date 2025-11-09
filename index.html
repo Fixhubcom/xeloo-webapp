@@ -21,6 +21,32 @@
         },
       };
     </script>
+    <style>
+      @keyframes float-left {
+        0% { transform: translateY(0) rotate(-3deg); }
+        50% { transform: translateY(-15px) rotate(1deg); }
+        100% { transform: translateY(0) rotate(-3deg); }
+      }
+      @keyframes float-center {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(10px); }
+        100% { transform: translateY(0); }
+      }
+      @keyframes float-right {
+        0% { transform: translateY(0) rotate(3deg); }
+        50% { transform: translateY(-12px) rotate(-1deg); }
+        100% { transform: translateY(0) rotate(3deg); }
+      }
+      .animate-float-left {
+        animation: float-left 6s ease-in-out infinite;
+      }
+      .animate-float-center {
+        animation: float-center 7s ease-in-out infinite 0.5s;
+      }
+      .animate-float-right {
+        animation: float-right 8s ease-in-out infinite 0.2s;
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
