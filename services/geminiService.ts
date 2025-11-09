@@ -1,6 +1,5 @@
-
-import { GoogleGenAI, Type } from "@google/genai";
-import { OnboardingSuggestions, Transaction } from "../types";
+import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
+import { OnboardingSuggestions, Transaction, JournalEntry } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -141,5 +140,69 @@ export const getSupportResponseSuggestion = async (prompt: string): Promise<stri
     } catch (error) {
         console.error("Error calling Gemini API for support suggestion:", error);
         return "Sorry, I couldn't generate a suggestion at this time. Please try again.";
+    }
+};
+
+export const processAccountingEntry = async (prompt: string, image?: { mimeType: string, data: string }): Promise<Omit<JournalEntry, 'id'>[]> => {
+    const systemInstruction = `You are an expert accountant AI. Your task is to analyze user input (text or an image of a receipt/invoice) and convert it into a standard double-entry bookkeeping journal entry.
+    - Always generate two entries: one debit and one credit.
+    - The debit and credit amounts must be equal.
+    - Today's date is ${new Date().toISOString().split('T')[0]}. If no date is provided, use today's date.
+    - Infer the correct accounts. For example, cash payments affect '1010 - Cash and Bank'. Software costs affect '5010 - Software Subscriptions'. Sales affect '4010 - Service Revenue'. Payments to suppliers affect '2010 - Accounts Payable'.
+    - The description should be a concise summary of the transaction.
+    - ALWAYS return a JSON array with two journal entry objects.`;
+    
+    const contents: any = {
+      parts: [{ text: prompt }]
+    };
+
+    if (image) {
+      contents.parts.push({
+        inlineData: {
+          mimeType: image.mimeType,
+          data: image.data,
+        },
+      });
+    }
+
+    try {
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: contents,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            date: { type: Type.STRING, description: "Transaction date in YYYY-MM-DD format." },
+                            description: { type: Type.STRING, description: "A brief description of the transaction." },
+                            account: { type: Type.STRING, description: "The account name and code, e.g., '1010 - Cash and Bank'." },
+                            debit: { type: Type.NUMBER, description: "The debit amount. Should be 0 if it's a credit entry." },
+                            credit: { type: Type.NUMBER, description: "The credit amount. Should be 0 if it's a debit entry." },
+                        },
+                        required: ["date", "description", "account", "debit", "credit"],
+                    },
+                },
+            },
+        });
+        
+        let jsonStr = response.text.trim();
+        const result = JSON.parse(jsonStr);
+        
+        if (Array.isArray(result) && result.length === 2 && result[0].debit === result[1].credit) {
+            return result;
+        } else {
+             throw new Error("Invalid journal entry format returned by AI.");
+        }
+    } catch (error) {
+        console.error("Error calling Gemini API for accounting entry:", error);
+        // Fallback mock response on error
+        return [
+            { date: new Date().toISOString().split('T')[0], description: "Mock - Software purchase", account: "5010 - Software Subscriptions", debit: 50.00, credit: 0 },
+            { date: new Date().toISOString().split('T')[0], description: "Mock - Software purchase", account: "1010 - Cash and Bank", debit: 0, credit: 50.00 }
+        ];
     }
 };

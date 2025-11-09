@@ -1,4 +1,3 @@
-
 export enum UserRole {
   USER = 'USER',
   PARTNER = 'PARTNER',
@@ -108,4 +107,13 @@ export interface MultiSigTransaction {
     currency: string;
     destinationAddress: string;
     status: 'Pending Admin' | 'Pending Partner' | 'Completed' | 'Rejected';
+}
+
+export interface JournalEntry {
+  id: number;
+  date: string;
+  description: string;
+  account: string; // e.g., '1010 - Cash and Bank'
+  debit: number;
+  credit: number;
 }

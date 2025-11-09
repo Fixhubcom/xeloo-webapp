@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { JournalEntry } from '../../types';
+import AIAccountingAssistant from './accounting/AIAccountingAssistant';
+import { SparklesIcon } from '../../components/icons/Icons';
 
-type AccountingView = 'Dashboard' | 'Chart of Accounts' | 'Journal' | 'Reports';
+type AccountingView = 'Dashboard' | 'AI Assistant' | 'Chart of Accounts' | 'Journal' | 'Reports';
 
 // Mock Data
-const accounts = [
+const initialAccounts = [
     { code: '1010', name: 'Cash and Bank', type: 'Asset', balance: 100245.50 },
     { code: '1200', name: 'Accounts Receivable', type: 'Asset', balance: 15000.00 },
     { code: '1500', name: 'Equipment', type: 'Asset', balance: 25000.00 },
@@ -14,12 +17,12 @@ const accounts = [
     { code: '3010', name: 'Owner\'s Capital', type: 'Equity', balance: 50000.00 },
     { code: '3300', name: 'Retained Earnings', type: 'Equity', balance: 42745.50 },
     { code: '4010', name: 'Service Revenue', type: 'Revenue', balance: 95000.00 },
-    { code: '5010', name: 'Software Subscriptions', type: 'Expense', balance: 2500.00 },
+    { code: '5010', name: 'Software & Subscriptions', type: 'Expense', balance: 2500.00 },
     { code: '5020', name: 'Marketing', type: 'Expense', balance: 5000.00 },
     { code: '5030', name: 'Rent', type: 'Expense', balance: 12000.00 },
 ];
 
-const journalEntries = [
+const initialJournalEntries: JournalEntry[] = [
     { id: 1, date: '2024-07-22', description: 'Client Payment - Acme Inc.', account: '1010 - Cash and Bank', debit: 495.00, credit: 0 },
     { id: 2, date: '2024-07-22', description: 'Client Payment - Acme Inc.', account: '4010 - Service Revenue', debit: 0, credit: 495.00 },
     { id: 3, date: '2024-07-21', description: 'Payout - Lagos Ventures', account: '2010 - Accounts Payable', debit: 1015.00, credit: 0 },
@@ -38,16 +41,23 @@ const expenseBreakdown = [
 const COLORS = ['#FDDA1A', '#FFFFFF', '#a8a29e'];
 
 const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view: AccountingView) => void }> = ({ activeView, setActiveView }) => {
-    const views: AccountingView[] = ['Dashboard', 'Chart of Accounts', 'Journal', 'Reports'];
+    const views: { name: AccountingView, icon?: React.ReactElement }[] = [
+        { name: 'Dashboard' },
+        { name: 'AI Assistant', icon: <SparklesIcon className="w-4 h-4 mr-2" /> },
+        { name: 'Chart of Accounts' },
+        { name: 'Journal' },
+        { name: 'Reports' }
+    ];
     return (
         <div className="mb-6 flex space-x-2 p-1 bg-primary rounded-lg">
             {views.map(view => (
                 <button
-                    key={view}
-                    onClick={() => setActiveView(view)}
-                    className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
+                    key={view.name}
+                    onClick={() => setActiveView(view.name)}
+                    className={`w-full flex items-center justify-center text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view.name ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
                 >
-                    {view}
+                    {view.icon}
+                    {view.name}
                 </button>
             ))}
         </div>
@@ -90,6 +100,20 @@ const ReportTable: React.FC<{ title: string, sections: { title: string, items: {
 
 const Accounting: React.FC = () => {
     const [activeView, setActiveView] = useState<AccountingView>('Dashboard');
+    const [accounts, setAccounts] = useState(initialAccounts);
+    const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(initialJournalEntries);
+
+    const handleAddEntry = (newEntries: Omit<JournalEntry, 'id'>[]) => {
+        const nextId = Math.max(0, ...journalEntries.map(e => e.id)) + 1;
+        const entriesToAdd: JournalEntry[] = newEntries.map((entry, index) => ({
+            ...entry,
+            id: nextId + index,
+        }));
+
+        setJournalEntries(prev => [...entriesToAdd, ...prev]);
+        // Here you would also update account balances, but we'll skip that for this mock-up
+    };
+
 
     const renderView = () => {
         switch (activeView) {
@@ -129,6 +153,8 @@ const Accounting: React.FC = () => {
                     </div>
                 );
             }
+            case 'AI Assistant':
+                return <AIAccountingAssistant onAddEntry={handleAddEntry} />;
             case 'Chart of Accounts':
                 return (
                     <Card>
