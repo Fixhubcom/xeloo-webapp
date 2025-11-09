@@ -134,3 +134,12 @@ export interface EscrowTransaction {
   fundedAt?: string;
   releasedAt?: string;
 }
+
+export interface PublicUserProfile {
+  id: string;
+  name: string;
+  username: string;
+  companyName: string;
+  avatarInitials: string;
+  avatarBgColor: string;
+}

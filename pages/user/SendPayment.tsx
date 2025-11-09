@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -52,11 +51,15 @@ const mockRecipients: Recipient[] = [
     { id: 'rec_3', name: 'Beijing Tech', country: 'China', accountNumber: '**** **** **** 9876', bankName: 'Bank of China', email: 'contact@beijingtech.cn' },
 ];
 
-const SendPayment: React.FC = () => {
+interface SendPaymentProps {
+    initialUsername?: string;
+}
+
+const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     const { user } = useAuth();
     const defaultAccount = user?.bankAccounts?.find(a => a.isDefault) || user?.bankAccounts?.[0];
 
-    const [activeTab, setActiveTab] = useState<'bank' | 'xeloo'>('bank');
+    const [activeTab, setActiveTab] = useState<'bank' | 'xeloo'>(initialUsername ? 'xeloo' : 'bank');
     const [amount, setAmount] = useState('');
     const [fromAccountId, setFromAccountId] = useState(defaultAccount?.id || '');
     
@@ -239,7 +242,7 @@ const SendPayment: React.FC = () => {
                 </div>
             </div>
 
-            {activeTab === 'xeloo' && <XelooTransfer />}
+            {activeTab === 'xeloo' && <XelooTransfer initialUsername={initialUsername} />}
 
             {activeTab === 'bank' && (
                 <>

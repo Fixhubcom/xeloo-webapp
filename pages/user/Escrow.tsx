@@ -3,7 +3,7 @@ import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { useAuth } from '../../hooks/useAuth';
 import { EscrowTransaction, EscrowStatus } from '../../types';
-import { CheckCircleIcon, ShieldCheckIcon } from '../../components/icons/Icons';
+import { CheckCircleIcon, ShieldCheckIcon, UploadIcon } from '../../components/icons/Icons';
 
 // Mock user data for search simulation
 const mockXelooUsers: { [key: string]: { name: string, company: string } } = {
@@ -33,19 +33,20 @@ const StatusBadge: React.FC<{ status: EscrowStatus }> = ({ status }) => {
 
 interface EscrowProps {
     searchQuery: string;
+    initialSeller?: string;
 }
 
-const Escrow: React.FC<EscrowProps> = ({ searchQuery }) => {
+const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
     const { user } = useAuth();
     // Assuming the current user's username is their name in lowercase
     const currentUser = user?.name.toLowerCase().replace(' ', '') || 'johndoe'; 
 
     const [transactions, setTransactions] = useState(mockEscrowTransactions);
-    const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'detail' | 'dispute' | 'dispute_submitted'>(initialSeller ? 'create' : 'list');
     const [selectedTx, setSelectedTx] = useState<EscrowTransaction | null>(null);
 
     // Form state
-    const [sellerUsername, setSellerUsername] = useState('');
+    const [sellerUsername, setSellerUsername] = useState(initialSeller || '');
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
@@ -53,6 +54,50 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery }) => {
     const [searchError, setSearchError] = useState('');
     const searchTimeout = useRef<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    
+    // Dispute state
+    const [disputeReason, setDisputeReason] = useState('');
+    const [disputeFiles, setDisputeFiles] = useState<File[]>([]);
+    const [fileErrors, setFileErrors] = useState<string[]>([]);
+    const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+    
+    useEffect(() => {
+        if (initialSeller) {
+            setView('create');
+            setSellerUsername(initialSeller);
+        }
+    }, [initialSeller]);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(event.target.files || []);
+        const newErrors: string[] = [];
+        const currentAndNewFiles = [...disputeFiles, ...files];
+
+        if (currentAndNewFiles.length > 5) {
+            newErrors.push('You can upload a maximum of 5 files.');
+        }
+
+        // FIX: Explicitly type `file` as `File` to resolve TypeScript errors.
+        files.forEach((file: File) => {
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                newErrors.push(`${file.name} is too large (max 10MB).`);
+            }
+            if (!['image/png', 'image/jpeg', 'image/gif', 'video/mp4', 'application/pdf'].includes(file.type)) {
+                newErrors.push(`${file.name} has an unsupported file type.`);
+            }
+        });
+
+        if (newErrors.length > 0) {
+            setFileErrors(newErrors);
+        } else {
+            setFileErrors([]);
+            setDisputeFiles(currentAndNewFiles.slice(0, 5));
+        }
+    };
+    
+    const removeFile = (fileName: string) => {
+        setDisputeFiles(disputeFiles.filter(f => f.name !== fileName));
+    };
 
 
     const searchUser = useCallback((searchUsername: string) => {
@@ -115,6 +160,22 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery }) => {
             }
             return tx;
         }));
+    };
+
+    const handleDisputeSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedTx) return;
+        setIsSubmittingDispute(true);
+        setTimeout(() => {
+            console.log('Dispute submitted:', {
+                txId: selectedTx.id,
+                reason: disputeReason,
+                files: disputeFiles.map(f => f.name),
+            });
+            handleAction(selectedTx.id, 'Disputed');
+            setIsSubmittingDispute(false);
+            setView('dispute_submitted');
+        }, 2000);
     };
     
     // RENDER VIEWS
@@ -227,17 +288,26 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery }) => {
                     </div>
 
                     <div className="mt-8">
-                        <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
-                        {isBuyer && selectedTx.status === 'Awaiting Funding' && <button onClick={() => handleAction(selectedTx.id, 'In Escrow')} className="w-full bg-accent text-primary font-bold py-3 rounded">Fund Escrow Now</button>}
-                        {isBuyer && selectedTx.status === 'In Escrow' && <p className="text-gray-300">Waiting for the seller to deliver. Once you have received the goods/services, you can release the funds.</p>}
-                        {isBuyer && selectedTx.status === 'Awaiting Release' && <button onClick={() => handleAction(selectedTx.id, 'Completed')} className="w-full bg-green-600 text-white font-bold py-3 rounded">Release Funds to Seller</button>}
-                        {!isBuyer && selectedTx.status === 'Awaiting Funding' && <p className="text-gray-300">Waiting for the buyer to fund the escrow.</p>}
-                        {!isBuyer && selectedTx.status === 'In Escrow' && <button onClick={() => handleAction(selectedTx.id, 'Awaiting Release')} className="w-full bg-blue-600 text-white font-bold py-3 rounded">Mark as Delivered / Service Rendered</button>}
-                        {!isBuyer && selectedTx.status === 'Awaiting Release' && <p className="text-gray-300">You have marked the transaction as complete. Waiting for the buyer to release the funds.</p>}
-                        {selectedTx.status === 'Completed' && <p className="text-center text-green-400 font-bold">This transaction was completed on {selectedTx.releasedAt}.</p>}
-                        
-                        {selectedTx.status !== 'Completed' && selectedTx.status !== 'Canceled' && (
-                             <button className="w-full mt-4 bg-red-800/50 text-red-300 font-bold py-2 rounded">Dispute Transaction</button>
+                        {selectedTx.status === 'Disputed' ? (
+                            <div className="text-center p-4 bg-red-500/10 text-red-300 rounded-md">
+                                <p className="font-bold">This transaction is disputed.</p>
+                                <p className="text-sm">A support officer is reviewing the case and will mediate. The funds are frozen until a resolution is reached.</p>
+                            </div>
+                        ) : (
+                            <>
+                                <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
+                                {isBuyer && selectedTx.status === 'Awaiting Funding' && <button onClick={() => handleAction(selectedTx.id, 'In Escrow')} className="w-full bg-accent text-primary font-bold py-3 rounded">Fund Escrow Now</button>}
+                                {isBuyer && selectedTx.status === 'In Escrow' && <p className="text-gray-300">Waiting for the seller to deliver. Once you have received the goods/services, you can release the funds.</p>}
+                                {isBuyer && selectedTx.status === 'Awaiting Release' && <button onClick={() => handleAction(selectedTx.id, 'Completed')} className="w-full bg-green-600 text-white font-bold py-3 rounded">Release Funds to Seller</button>}
+                                {!isBuyer && selectedTx.status === 'Awaiting Funding' && <p className="text-gray-300">Waiting for the buyer to fund the escrow.</p>}
+                                {!isBuyer && selectedTx.status === 'In Escrow' && <button onClick={() => handleAction(selectedTx.id, 'Awaiting Release')} className="w-full bg-blue-600 text-white font-bold py-3 rounded">Mark as Delivered / Service Rendered</button>}
+                                {!isBuyer && selectedTx.status === 'Awaiting Release' && <p className="text-gray-300">You have marked the transaction as complete. Waiting for the buyer to release the funds.</p>}
+                                {selectedTx.status === 'Completed' && <p className="text-center text-green-400 font-bold">This transaction was completed on {selectedTx.releasedAt}.</p>}
+                                
+                                {selectedTx.status !== 'Completed' && selectedTx.status !== 'Canceled' && (
+                                     <button onClick={() => setView('dispute')} className="w-full mt-4 bg-red-800/50 text-red-300 font-bold py-2 rounded">Dispute Transaction</button>
+                                )}
+                            </>
                         )}
                     </div>
                 </Card>
@@ -245,9 +315,77 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery }) => {
         )
     };
     
+    const renderDisputeFormView = () => {
+        if (!selectedTx) return null;
+        return (
+            <Card className="max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold mb-2">Dispute Transaction #{selectedTx.id}</h2>
+                <p className="text-gray-400 mb-6">Please explain the issue in detail and provide any relevant evidence. A support officer will review your case.</p>
+                <form onSubmit={handleDisputeSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400">Reason for Dispute</label>
+                        <textarea value={disputeReason} onChange={e => setDisputeReason(e.target.value)} rows={5} className="mt-1 w-full bg-primary p-2 rounded border border-primary-light" required />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400">Upload Evidence ({disputeFiles.length} / 5 selected)</label>
+                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-primary-light border-dashed rounded-md">
+                            <div className="space-y-1 text-center">
+                                <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
+                                <div className="flex text-sm text-gray-400">
+                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-primary rounded-md font-medium text-accent hover:text-yellow-300 focus-within:outline-none">
+                                        <span>Upload files</span>
+                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} />
+                                    </label>
+                                    <p className="pl-1">or drag and drop</p>
+                                </div>
+                                <p className="text-xs text-gray-500">PNG, JPG, GIF, MP4, PDF up to 10MB each</p>
+                            </div>
+                        </div>
+                        {fileErrors.length > 0 && (
+                            <div className="mt-2 text-sm text-yellow-400 space-y-1">
+                                {fileErrors.map((err, i) => <p key={i}>- {err}</p>)}
+                            </div>
+                        )}
+                        {disputeFiles.length > 0 && (
+                            <div className="mt-2 text-sm text-gray-300 space-y-2">
+                                {disputeFiles.map(file => (
+                                    <div key={file.name} className="flex justify-between items-center bg-primary p-2 rounded">
+                                        <span>{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                                        <button type="button" onClick={() => removeFile(file.name)} className="text-red-400 hover:text-red-300 font-bold">&times;</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end space-x-4 pt-4">
+                        <button type="button" onClick={() => setView('detail')} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                        <button type="submit" disabled={isSubmittingDispute || fileErrors.length > 0} className="bg-red-600 text-white font-bold py-2 px-6 rounded hover:opacity-90 flex items-center justify-center w-40 disabled:bg-gray-500">
+                            {isSubmittingDispute ? <Spinner /> : 'Submit Dispute'}
+                        </button>
+                    </div>
+                </form>
+            </Card>
+        );
+    };
+
+    const renderDisputeSubmittedView = () => (
+        <Card className="max-w-2xl mx-auto text-center">
+            <CheckCircleIcon className="w-16 h-16 text-accent mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-accent mb-2">Dispute Submitted</h2>
+            <p className="text-gray-light mb-6">
+                Your case has been submitted and the transaction has been frozen. A support officer will review the details and contact you within 24-48 hours.
+            </p>
+            <button onClick={() => { setView('list'); setSelectedTx(null); }} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                Back to Escrow List
+            </button>
+        </Card>
+    );
+    
     switch(view) {
         case 'create': return renderCreateView();
         case 'detail': return renderDetailView();
+        case 'dispute': return renderDisputeFormView();
+        case 'dispute_submitted': return renderDisputeSubmittedView();
         default: return renderListView();
     }
 };

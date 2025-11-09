@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -12,12 +11,16 @@ const mockXelooUsers: { [key: string]: { name: string, company: string } } = {
     'lagosventures': { name: 'Lagos Ventures', company: 'LV Capital' },
 };
 
-const XelooTransfer: React.FC = () => {
+interface XelooTransferProps {
+    initialUsername?: string;
+}
+
+const XelooTransfer: React.FC<XelooTransferProps> = ({ initialUsername }) => {
     const { user } = useAuth();
     const [step, setStep] = useState<'form' | 'confirm' | 'success'>('form');
     
     // Form state
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState(initialUsername || '');
     const [amount, setAmount] = useState('');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -45,6 +48,12 @@ const XelooTransfer: React.FC = () => {
             setIsSearching(false);
         }, 500);
     }, []);
+
+    useEffect(() => {
+        if (initialUsername) {
+            setUsername(initialUsername);
+        }
+    }, [initialUsername]);
 
     useEffect(() => {
         if (searchTimeout.current) {
