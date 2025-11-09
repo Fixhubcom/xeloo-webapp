@@ -25,6 +25,7 @@ import BlockchainManagement from './BlockchainManagement';
 import PartnerSettings from './PartnerSettings';
 import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
+import PartnerTransactions from './PartnerTransactions';
 
 // Data for the main dashboard chart
 const partnerFundsFlowData = [
@@ -47,17 +48,6 @@ type NavItem =
     | 'Settings'
     | 'Support';
 
-// Placeholder components
-const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
-    <Card>
-        <h2 className="text-xl font-bold mb-4">{title} Management</h2>
-        <p className="text-gray-400">This is the dedicated section for managing {title.toLowerCase()}.</p>
-        <div className="mt-6 p-8 border-2 border-dashed border-primary rounded-lg text-center text-gray-500">
-            [Feature component for {title} will be displayed here.]
-        </div>
-    </Card>
-);
-
 const PartnerOverview: React.FC = () => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -70,8 +60,8 @@ const PartnerOverview: React.FC = () => (
                 <p className="text-3xl font-bold text-accent">$150,000</p>
             </Card>
             <Card className="text-center">
-                <h3 className="text-lg text-gray-400">Commission Earned (30d)</h3>
-                <p className="text-3xl font-bold text-accent">$25,000</p>
+                <h3 className="text-lg text-gray-400">Total Funds Sent Out (30d)</h3>
+                <p className="text-3xl font-bold text-accent">$1.8M</p>
             </Card>
         </div>
         <Card>
@@ -100,7 +90,7 @@ const PartnerDashboard: React.FC = () => {
   const renderContent = () => {
         switch (activeView) {
             case 'Dashboard': return <PartnerOverview />;
-            case 'Transactions': return <PlaceholderContent title="Transactions" />;
+            case 'Transactions': return <PartnerTransactions />;
             case 'Settlements': return <PartnerSettlements />;
             case 'API Management': return <ApiManagement />;
             case 'Blockchain': return <BlockchainManagement />;

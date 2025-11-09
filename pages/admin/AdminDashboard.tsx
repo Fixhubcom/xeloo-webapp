@@ -29,6 +29,8 @@ import AdminTeamManagement from './TeamManagement';
 import PartnersManagement from './PartnersManagement';
 import MerchantsManagement from './MerchantsManagement';
 import TransactionsManagement from './TransactionsManagement';
+import AdminReports from './AdminReports';
+import AdminApiManagement from './AdminApiManagement';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -60,9 +62,9 @@ const AdminOverview: React.FC = () => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="text-center"><h3 className="text-lg text-gray-400">Total Users</h3><p className="text-3xl font-bold text-accent">102,495</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Partners</h3><p className="text-3xl font-bold text-accent">15</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Merchants</h3><p className="text-3xl font-bold text-accent">350</p></Card>
             <Card className="text-center"><h3 className="text-lg text-gray-400">Volume (24h)</h3><p className="text-3xl font-bold text-accent">$1.2M</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Commission Earned (30d)</h3><p className="text-3xl font-bold text-accent">$75,320</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Subscription Earnings (30d)</h3><p className="text-3xl font-bold text-accent">$12,850</p></Card>
         </div>
         <Card>
             <h2 className="text-xl font-bold mb-4">Top Transaction Corridors by Volume</h2>
@@ -79,16 +81,6 @@ const AdminOverview: React.FC = () => (
     </div>
 );
 
-const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
-    <Card>
-        <h2 className="text-xl font-bold mb-4">{title} Management</h2>
-        <p className="text-gray-400">This is the central control panel for managing all {title.toLowerCase()}. You can view, add, edit, and approve records from this section.</p>
-        <div className="mt-6 p-8 border-2 border-dashed border-primary rounded-lg text-center text-gray-500">
-            [Management table and controls for {title} will be displayed here.]
-        </div>
-    </Card>
-);
-
 const AdminDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState<NavItem>('Dashboard');
@@ -103,8 +95,8 @@ const AdminDashboard: React.FC = () => {
             case 'Transactions': return <TransactionsManagement />;
             case 'Support': return <SupportManagement />;
             case 'Blockchain': return <BlockchainManagement />;
-            case 'API': return <PlaceholderContent title="API" />;
-            case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
+            case 'API': return <AdminApiManagement />;
+            case 'Reports': return <AdminReports />;
             case 'Security': return <SecurityManagement />;
             case 'Settings': return <AdminSettings />;
             default: return <AdminOverview />;

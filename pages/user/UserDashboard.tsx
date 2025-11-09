@@ -116,7 +116,7 @@ const UserDashboard: React.FC = () => {
                         </div>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-gray-dark">
+                <div className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-dark-green">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>

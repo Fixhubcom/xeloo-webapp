@@ -24,6 +24,8 @@ import TeamManagement from './TeamManagement';
 import MerchantSettings from './MerchantSettings';
 import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
+import MerchantSettlements from './MerchantSettlements';
+import ApiManagement from '../user/ApiManagement';
 
 const mockListings: AssetListing[] = [
     { id: 'LST-001', asset: 'USDT', amount: 5000, pricePerUnit: 1450.50, localCurrency: 'NGN', status: 'Active' },
@@ -195,9 +197,9 @@ const MerchantDashboard: React.FC = () => {
             case 'Dashboard': return <MerchantOverview />;
             case 'Listings': return <ListingManagement />;
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
-            case 'Settlements': return <PlaceholderContent title="Settlements" />;
+            case 'Settlements': return <MerchantSettlements />;
             case 'Reports': return <ReportsManagement userRole={UserRole.MERCHANT} />;
-            case 'API Management': return <PlaceholderContent title="API Management" />;
+            case 'API Management': return <ApiManagement />;
             case 'Team Management': return <TeamManagement />;
             case 'Settings': return <MerchantSettings />;
             case 'Support': return <SupportManagement />;

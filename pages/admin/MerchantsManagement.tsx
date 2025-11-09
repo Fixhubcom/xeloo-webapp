@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 
 interface MockMerchant {
@@ -6,7 +7,7 @@ interface MockMerchant {
     name: string;
     email: string;
     companyName: string;
-    status: 'Approved' | 'Pending Review' | 'Suspended';
+    status: 'Approved' | 'Pending Review' | 'Suspended' | 'Rejected';
     joinedDate: string;
     totalSales: number;
 }
@@ -23,12 +24,23 @@ const StatusBadge: React.FC<{ status: MockMerchant['status'] }> = ({ status }) =
         'Approved': "bg-accent/20 text-accent",
         'Pending Review': "bg-yellow-500/20 text-yellow-300",
         'Suspended': "bg-red-500/20 text-red-300",
+        'Rejected': "bg-red-500/20 text-red-300",
     };
     return <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusClasses[status]}`}>{status}</span>;
 };
 
 
 const MerchantsManagement: React.FC = () => {
+    const [merchants, setMerchants] = useState(mockMerchants);
+
+    const handleStatusChange = (merchantId: string, newStatus: MockMerchant['status']) => {
+        setMerchants(currentMerchants =>
+            currentMerchants.map(m =>
+                m.id === merchantId ? { ...m, status: newStatus } : m
+            )
+        );
+    };
+
     return (
         <Card>
             <div className="flex justify-between items-center mb-6">
@@ -46,11 +58,11 @@ const MerchantsManagement: React.FC = () => {
                             <th className="px-6 py-3">Joined Date</th>
                             <th className="px-6 py-3 text-right">Total Sales (USD)</th>
                             <th className="px-6 py-3">Status</th>
-                            <th className="px-6 py-3">Actions</th>
+                            <th className="px-6 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {mockMerchants.map(merchant => (
+                        {merchants.map(merchant => (
                             <tr key={merchant.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-white">{merchant.name}</div>
@@ -60,9 +72,18 @@ const MerchantsManagement: React.FC = () => {
                                 <td className="px-6 py-4">{merchant.joinedDate}</td>
                                 <td className="px-6 py-4 font-mono text-right">${merchant.totalSales.toLocaleString()}</td>
                                 <td className="px-6 py-4"><StatusBadge status={merchant.status} /></td>
-                                <td className="px-6 py-4 space-x-2">
-                                     <button className="font-medium text-accent hover:underline text-xs">Edit</button>
-                                     <button className="font-medium text-accent hover:underline text-xs">View Listings</button>
+                                <td className="px-6 py-4 space-x-2 text-center">
+                                     {merchant.status === 'Pending Review' ? (
+                                        <>
+                                            <button onClick={() => handleStatusChange(merchant.id, 'Approved')} className="font-medium text-green-400 hover:underline text-xs">Approve</button>
+                                            <button onClick={() => handleStatusChange(merchant.id, 'Rejected')} className="font-medium text-red-400 hover:underline text-xs">Reject</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button className="font-medium text-accent hover:underline text-xs">Edit</button>
+                                            <button className="font-medium text-accent hover:underline text-xs">View</button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         ))}
