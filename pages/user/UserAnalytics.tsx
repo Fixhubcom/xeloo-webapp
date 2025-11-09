@@ -19,6 +19,14 @@ const cashflowData = [
   { name: 'Week 4', Inflow: 2500, Outflow: 1200 },
 ];
 
+const userFundsFlowData = [
+  { country: 'Nigeria', Sent: 4500, Received: 1200 },
+  { country: 'USA', Sent: 1500, Received: 8500 },
+  { country: 'UK', Sent: 2200, Received: 500 },
+  { country: 'Ghana', Sent: 800, Received: 3000 },
+  { country: 'Kenya', Sent: 1800, Received: 1500 },
+];
+
 const UserAnalytics: React.FC = () => {
   return (
     <div className="space-y-8">
@@ -48,6 +56,21 @@ const UserAnalytics: React.FC = () => {
             <Legend />
             <Bar dataKey="Received" fill="#4ade80" />
             <Bar dataKey="Sent" fill="#fdda1a" />
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card>
+        <h3 className="text-xl font-bold mb-4">Funds Flow by Country</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={userFundsFlowData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="country" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+            <Legend />
+            <Bar dataKey="Received" fill="#4ade80" />
+            <Bar dataKey="Sent" fill="#f87171" />
           </BarChart>
         </ResponsiveContainer>
       </Card>

@@ -1,9 +1,19 @@
+
 import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
 import { LogoutIcon, SearchIcon } from '../../components/icons/Icons';
 import { User } from '../../types';
+
+const adminFundsFlowData = [
+  { corridor: 'USA → NGN', volume: 5000000 },
+  { corridor: 'UK → GHS', volume: 2500000 },
+  { corridor: 'USA → KES', volume: 1800000 },
+  { corridor: 'EUR → NGN', volume: 3200000 },
+  { corridor: 'CAN → USD', volume: 4100000 },
+];
 
 const AdminDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -36,11 +46,28 @@ const AdminDashboard: React.FC = () => {
                 </header>
                 <div className="flex-1 overflow-y-auto p-8 bg-gray-dark">
                     <h1 className="text-3xl font-bold text-white mb-8">Super Admin Dashboard</h1>
-                    <Card>
-                        <h2 className="text-xl font-bold mb-4">Platform Overview</h2>
-                        <p className="text-gray-light">This is the central control panel for monitoring all transactions, commissions, partner settlements, and system health.</p>
-                        {/* High-level analytics and management tools would go here */}
-                    </Card>
+                    <div className="space-y-8">
+                        <Card>
+                            <h2 className="text-xl font-bold mb-4">Top Transaction Corridors by Volume</h2>
+                            <ResponsiveContainer width="100%" height={350}>
+                                <BarChart data={adminFundsFlowData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                    <XAxis dataKey="corridor" stroke="#9ca3af" />
+                                    <YAxis stroke="#9ca3af" tickFormatter={(value) => `$${Number(value / 1000000)}M`} />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} 
+                                        formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']}
+                                    />
+                                    <Bar dataKey="volume" fill="#8b5cf6" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Card>
+                        <Card>
+                            <h2 className="text-xl font-bold mb-4">Platform Overview</h2>
+                            <p className="text-gray-light">This is the central control panel for monitoring all transactions, commissions, partner settlements, and system health.</p>
+                            {/* High-level analytics and management tools would go here */}
+                        </Card>
+                    </div>
                 </div>
             </main>
         </div>

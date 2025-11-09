@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -10,6 +12,12 @@ const mockListings: AssetListing[] = [
     { id: 'LST-001', asset: 'USDT', amount: 5000, pricePerUnit: 1450.50, localCurrency: 'NGN', status: 'Active' },
     { id: 'LST-002', asset: 'USDT', amount: 10000, pricePerUnit: 1.00, localCurrency: 'USD', status: 'Sold' },
     { id: 'LST-003', asset: 'USDT', amount: 2500, pricePerUnit: 13.10, localCurrency: 'GHS', status: 'Active' },
+];
+
+const merchantFundsFlowData = [
+    { currency: 'NGN', volume: 7252500 },
+    { currency: 'USD', volume: 10000 },
+    { currency: 'GHS', volume: 32750 },
 ];
 
 const StatusBadge: React.FC<{ status: AssetListing['status'] }> = ({ status }) => {
@@ -75,7 +83,7 @@ const MerchantDashboard: React.FC = () => {
                 <div className="flex-1 overflow-y-auto p-8 bg-gray-dark">
                     <h1 className="text-3xl font-bold text-white mb-8">Merchant Portal</h1>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-1 space-y-8">
                             <Card>
                                 <h2 className="text-xl font-bold mb-4">Create New Listing</h2>
                                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,6 +112,22 @@ const MerchantDashboard: React.FC = () => {
                                          {isSubmitting ? <Spinner /> : 'Create Listing'}
                                      </button>
                                 </form>
+                            </Card>
+                            <Card>
+                                <h2 className="text-xl font-bold mb-4">Sales Volume by Currency</h2>
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <BarChart data={merchantFundsFlowData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                        <XAxis type="number" stroke="#9ca3af" tickFormatter={(value) => `${Number(value / 1000).toLocaleString()}k`} />
+                                        <YAxis type="category" dataKey="currency" stroke="#9ca3af" width={40} />
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }}
+                                            formatter={(value: number, name: string, props) => [`${value.toLocaleString()} ${props.payload.currency}`, 'Volume']}
+                                            labelFormatter={() => ''}
+                                        />
+                                        <Bar dataKey="volume" fill="#4ade80" />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </Card>
                         </div>
                          <div className="lg:col-span-2">
