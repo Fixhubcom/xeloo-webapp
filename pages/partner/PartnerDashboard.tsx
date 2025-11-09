@@ -17,12 +17,14 @@ import {
     UsersIcon,
     CubeIcon
 } from '../../components/icons/Icons';
-import { User } from '../../types';
+import { User, UserRole } from '../../types';
 import PartnerSettlements from './PartnerSettlements';
 import TeamManagement from './TeamManagement';
 import ApiManagement from './ApiManagement';
 import BlockchainManagement from './BlockchainManagement';
 import PartnerSettings from './PartnerSettings';
+import ReportsManagement from '../ReportsManagement';
+import SupportManagement from '../SupportManagement';
 
 // Data for the main dashboard chart
 const partnerFundsFlowData = [
@@ -103,9 +105,9 @@ const PartnerDashboard: React.FC = () => {
             case 'API Management': return <ApiManagement />;
             case 'Blockchain': return <BlockchainManagement />;
             case 'Team Management': return <TeamManagement />;
-            case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
+            case 'Reports': return <ReportsManagement userRole={UserRole.PARTNER} />;
             case 'Settings': return <PartnerSettings />;
-            case 'Support': return <PlaceholderContent title="Support" />;
+            case 'Support': return <SupportManagement />;
             default: return <PartnerOverview />;
         }
     };
