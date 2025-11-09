@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { OnboardingSuggestions } from "../types";
+import { OnboardingSuggestions, Transaction } from "../types";
 
 // FIX: Initialize GoogleGenAI with API_KEY from environment variables directly as per guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -69,4 +69,59 @@ const getMockSuggestions = (description: string): OnboardingSuggestions => {
             "Implement secure payment processing for subscriptions."
         ]
     };
+};
+
+export const getTransactionsSummary = async (transactions: Transaction[]): Promise<string> => {
+  if (transactions.length === 0) {
+    return "There are no transactions to analyze in the current view.";
+  }
+  
+  console.log("Calling Gemini API for transaction summary:", transactions);
+  const prompt = `
+    Based on the following JSON data of transactions, provide a brief, insightful summary for the user in 3-4 sentences.
+    Mention the total number of transactions, total amount sent (in USD), the most frequent recipient country, and any notable large transactions.
+    Keep the tone friendly and professional.
+    
+    Transactions:
+    ${JSON.stringify(transactions, null, 2)}
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Error calling Gemini API for transaction summary:", error);
+    return "There was an error analyzing your transactions. Please try again later.";
+  }
+};
+
+export const categorizeTransaction = async (recipient: string, amount: number): Promise<{ category: string }> => {
+  const prompt = `Based on the recipient name "${recipient}" and amount "${amount}", categorize this transaction into one of the following business expense categories: "Software & Subscriptions", "Utilities", "Travel", "Payroll", "Supplies", "Marketing", "Rent", "Other".`;
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            category: {
+              type: Type.STRING,
+              description: "The most likely transaction category."
+            }
+          },
+          required: ["category"]
+        }
+      }
+    });
+    return JSON.parse(response.text.trim());
+  } catch (error) {
+    console.error("Error calling Gemini API for categorization:", error);
+    return { category: 'Other' }; // Fallback
+  }
 };

@@ -23,13 +23,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let name = 'User';
       let companyName = 'Business Inc.';
       let bankAccounts: BankAccount[] = [];
+      let avatarInitials = 'U';
+      let avatarBgColor = '#3b82f6';
+
       switch (role) {
-        case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; break;
-        case UserRole.PARTNER: name = 'Financial Partner'; companyName = 'Global Bank'; break;
-        case UserRole.MERCHANT: name = 'Crypto Merchant'; companyName = 'Digital Assets LLC'; break;
+        case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; break;
+        case UserRole.PARTNER: name = 'Financial Partner'; companyName = 'Global Bank'; avatarInitials="FP"; avatarBgColor="#10b981"; break;
+        case UserRole.MERCHANT: name = 'Crypto Merchant'; companyName = 'Digital Assets LLC'; avatarInitials="CM"; avatarBgColor="#8b5cf6"; break;
         case UserRole.USER: 
           name = 'John Doe'; 
           companyName = 'Creative Solutions'; 
+          avatarInitials="JD";
+          avatarBgColor="#fdda1a";
           bankAccounts = [
             { id: 'acc_1', bankName: 'Chase Bank', accountNumber: '**** **** **** 1234', country: 'USA', currency: 'USD', isDefault: true },
             { id: 'acc_2', bankName: 'Access Bank', accountNumber: '**** **** **** 5678', country: 'Nigeria', currency: 'NGN' },
@@ -45,6 +50,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         subRole: role === UserRole.USER ? UserSubRole.ADMINISTRATOR : undefined,
         bankAccounts,
         preferredCurrency: 'USD',
+        avatarInitials,
+        avatarBgColor,
       };
       setUser(mockUser);
       setIsLoading(false);

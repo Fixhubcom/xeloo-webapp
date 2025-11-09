@@ -31,6 +31,9 @@ export interface User {
   companyName?: string;
   bankAccounts?: BankAccount[];
   preferredCurrency?: string;
+  avatarInitials: string;
+  // FIX: Corrected typo in property name from avatarBgCcolor to avatarBgColor.
+  avatarBgColor: string;
 }
 
 export interface Transaction {
@@ -44,6 +47,7 @@ export interface Transaction {
   currencyReceived: string;
   commission: number;
   status: 'Completed' | 'Pending' | 'Failed';
+  category?: string;
 }
 
 export interface Invoice {

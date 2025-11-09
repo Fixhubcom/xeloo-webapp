@@ -2,6 +2,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
 import UserDashboard from './pages/user/UserDashboard';
@@ -69,11 +70,13 @@ const AppRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <HashRouter>
-        <div className="min-h-screen bg-primary">
-          <AppRoutes />
-        </div>
-      </HashRouter>
+      <ThemeProvider>
+        <HashRouter>
+          <div className="min-h-screen">
+            <AppRoutes />
+          </div>
+        </HashRouter>
+      </ThemeProvider>
     </AuthProvider>
   );
 };

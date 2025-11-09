@@ -9,8 +9,9 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ p
     const getStrength = () => {
         let score = 0;
         if (!password) return 0;
-        if (password.length > 8) score++;
-        if (password.length > 12) score++;
+        // Award points for different criteria
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
         if (/[A-Z]/.test(password)) score++;
         if (/[0-9]/.test(password)) score++;
         if (/[^A-Za-z0-9]/.test(password)) score++;
@@ -21,12 +22,12 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ p
     const label = ['', 'Very Weak', 'Weak', 'Medium', 'Strong', 'Very Strong'][strength] || '';
     
     const colorClasses = [
-        { bar: 'bg-gray-500', text: 'text-gray-400' }, // 0
-        { bar: 'bg-red-500', text: 'text-red-400' },   // 1
-        { bar: 'bg-red-500', text: 'text-red-400' },   // 2
-        { bar: 'bg-yellow-500', text: 'text-yellow-400' },// 3
-        { bar: 'bg-green-500', text: 'text-green-400' }, // 4
-        { bar: 'bg-green-500', text: 'text-green-400' }  // 5
+        { bar: 'bg-gray-400 dark:bg-gray-500', text: 'text-gray-500 dark:text-gray-400' }, // 0
+        { bar: 'bg-red-500', text: 'text-red-500' },   // 1
+        { bar: 'bg-red-500', text: 'text-red-500' },   // 2
+        { bar: 'bg-yellow-500', text: 'text-yellow-500' },// 3
+        { bar: 'bg-green-500', text: 'text-green-500' }, // 4
+        { bar: 'bg-green-500', text: 'text-green-500' }  // 5
     ][strength] || { bar: 'bg-gray-500', text: 'text-gray-400' };
     
     const width = `${(strength / 5) * 100}%`;
@@ -37,7 +38,7 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ p
 
     return (
         <div className="w-full mt-2">
-            <div className="w-full bg-gray-dark rounded-full h-1.5">
+            <div className="w-full bg-gray-200 dark:bg-gray-dark rounded-full h-1.5">
                 <div className={`h-1.5 rounded-full ${colorClasses.bar} transition-all duration-300`} style={{ width }}></div>
             </div>
             <p className={`text-xs text-right mt-1 ${colorClasses.text}`}>{label}</p>
