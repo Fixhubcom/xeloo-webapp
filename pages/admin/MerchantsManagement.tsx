@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
 interface MockMerchant {
@@ -29,9 +29,22 @@ const StatusBadge: React.FC<{ status: MockMerchant['status'] }> = ({ status }) =
     return <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusClasses[status]}`}>{status}</span>;
 };
 
+interface MerchantsManagementProps {
+    searchQuery: string;
+}
 
-const MerchantsManagement: React.FC = () => {
+const MerchantsManagement: React.FC<MerchantsManagementProps> = ({ searchQuery }) => {
     const [merchants, setMerchants] = useState(mockMerchants);
+
+    const filteredMerchants = useMemo(() => {
+        if (!searchQuery) return merchants;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return merchants.filter(m => 
+            m.name.toLowerCase().includes(lowercasedQuery) ||
+            m.email.toLowerCase().includes(lowercasedQuery) ||
+            m.companyName.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [merchants, searchQuery]);
 
     const handleStatusChange = (merchantId: string, newStatus: MockMerchant['status']) => {
         setMerchants(currentMerchants =>
@@ -62,7 +75,7 @@ const MerchantsManagement: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {merchants.map(merchant => (
+                        {filteredMerchants.map(merchant => (
                             <tr key={merchant.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-white">{merchant.name}</div>
@@ -87,6 +100,11 @@ const MerchantsManagement: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
+                        {filteredMerchants.length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="text-center py-8 text-gray-400">No merchants found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

@@ -59,7 +59,11 @@ const StatusBadge: React.FC<{ status: Invoice['status'] }> = ({ status }) => {
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-const Invoices: React.FC = () => {
+interface InvoicesProps {
+  searchQuery: string;
+}
+
+const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
     const { user } = useAuth();
     const [view, setView] = useState<'list' | 'form' | 'detail'>('list');
     const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
@@ -76,6 +80,15 @@ const Invoices: React.FC = () => {
     const [items, setItems] = useState<Omit<InvoiceItem, 'id'>[]>([{ description: '', quantity: 1, price: 0 }]);
 
     const totalAmount = useMemo(() => items.reduce((sum, item) => sum + item.quantity * item.price, 0), [items]);
+
+    const filteredInvoices = useMemo(() => {
+        if (!searchQuery) return invoices;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return invoices.filter(invoice => 
+            invoice.client.name.toLowerCase().includes(lowercasedQuery) ||
+            invoice.id.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [invoices, searchQuery]);
 
     const handleItemChange = (index: number, field: keyof Omit<InvoiceItem, 'id'>, value: string | number) => {
         const newItems = [...items];
@@ -136,7 +149,7 @@ const Invoices: React.FC = () => {
                  <button onClick={() => setView('form')} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Create New Invoice</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {invoices.map(invoice => (
+                {filteredInvoices.map(invoice => (
                     <Card key={invoice.id} className="flex flex-col justify-between cursor-pointer hover:border-accent" onClick={() => { setSelectedInvoice(invoice); setView('detail'); }}>
                         <div>
                             <div className="flex justify-between items-start mb-2">
@@ -153,6 +166,11 @@ const Invoices: React.FC = () => {
                     </Card>
                 ))}
             </div>
+            {filteredInvoices.length === 0 && (
+                <div className="text-center py-12 text-gray-400">
+                    <p>No invoices found matching your search.</p>
+                </div>
+            )}
         </div>
     );
     

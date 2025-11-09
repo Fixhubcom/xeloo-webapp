@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
 enum AdminTeamRole {
@@ -22,9 +22,21 @@ const mockAdminTeam: AdminTeamMember[] = [
     { id: 3, name: 'Compliance Officer', email: 'compliance@xeloo.com', role: AdminTeamRole.COMPLIANCE_OFFICER },
 ];
 
+interface AdminTeamManagementProps {
+    searchQuery: string;
+}
 
-const AdminTeamManagement: React.FC = () => {
+const AdminTeamManagement: React.FC<AdminTeamManagementProps> = ({ searchQuery }) => {
     const [team, setTeam] = useState(mockAdminTeam);
+
+    const filteredTeam = useMemo(() => {
+        if (!searchQuery) return team;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return team.filter(member => 
+            member.name.toLowerCase().includes(lowercasedQuery) ||
+            member.email.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [team, searchQuery]);
 
     const handleRoleChange = (memberId: number, newRole: AdminTeamRole) => {
         setTeam(currentTeam =>
@@ -50,7 +62,7 @@ const AdminTeamManagement: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {team.map(member => (
+                                {filteredTeam.map(member => (
                                     <tr key={member.id} className="bg-primary-light border-b border-primary">
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-white">{member.name}</div>
@@ -72,6 +84,11 @@ const AdminTeamManagement: React.FC = () => {
                                         </td>
                                     </tr>
                                 ))}
+                                {filteredTeam.length === 0 && (
+                                    <tr>
+                                        <td colSpan={3} className="text-center py-8 text-gray-400">No team members found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

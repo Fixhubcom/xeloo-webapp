@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { Transaction } from '../../types';
 
@@ -26,7 +27,26 @@ const StatusBadge: React.FC<{ status: Transaction['status'] }> = ({ status }) =>
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-const TransactionsManagement: React.FC = () => {
+interface TransactionsManagementProps {
+    searchQuery: string;
+}
+
+const TransactionsManagement: React.FC<TransactionsManagementProps> = ({ searchQuery }) => {
+    const [transactions] = useState(mockPlatformTransactions);
+
+    const filteredTransactions = useMemo(() => {
+        if (!searchQuery) return transactions;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return transactions.filter(tx => 
+            tx.userName.toLowerCase().includes(lowercasedQuery) ||
+            tx.userCompany.toLowerCase().includes(lowercasedQuery) ||
+            tx.recipient.toLowerCase().includes(lowercasedQuery) ||
+            tx.recipientCountry.toLowerCase().includes(lowercasedQuery) ||
+            tx.type.toLowerCase().includes(lowercasedQuery) ||
+            tx.id.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [transactions, searchQuery]);
+
     return (
         <Card>
              <h2 className="text-xl font-bold text-white mb-6">Platform Transactions</h2>
@@ -45,7 +65,7 @@ const TransactionsManagement: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockPlatformTransactions.map(tx => (
+                        {filteredTransactions.map(tx => (
                             <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4">{tx.date}</td>
                                 <td className="px-6 py-4">
@@ -64,6 +84,11 @@ const TransactionsManagement: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
+                        {filteredTransactions.length === 0 && (
+                             <tr>
+                                <td colSpan={7} className="text-center py-8 text-gray-400">No transactions found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

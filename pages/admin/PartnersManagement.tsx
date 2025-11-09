@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
 interface MockPartner {
@@ -26,7 +27,22 @@ const StatusBadge: React.FC<{ status: MockPartner['status'] }> = ({ status }) =>
     return <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusClasses[status]}`}>{status}</span>;
 };
 
-const PartnersManagement: React.FC = () => {
+interface PartnersManagementProps {
+    searchQuery: string;
+}
+
+const PartnersManagement: React.FC<PartnersManagementProps> = ({ searchQuery }) => {
+    const [partners] = useState(mockPartners);
+
+    const filteredPartners = useMemo(() => {
+        if (!searchQuery) return partners;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return partners.filter(p => 
+            p.name.toLowerCase().includes(lowercasedQuery) ||
+            p.contactEmail.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [partners, searchQuery]);
+
     return (
         <Card>
              <div className="flex justify-between items-center mb-6">
@@ -48,7 +64,7 @@ const PartnersManagement: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockPartners.map(partner => (
+                        {filteredPartners.map(partner => (
                             <tr key={partner.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4 font-medium text-white">{partner.name}</td>
                                 <td className="px-6 py-4">{partner.contactEmail}</td>
@@ -61,6 +77,11 @@ const PartnersManagement: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
+                        {filteredPartners.length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="text-center py-8 text-gray-400">No partners found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

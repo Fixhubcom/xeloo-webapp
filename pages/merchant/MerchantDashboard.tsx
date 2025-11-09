@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
@@ -100,9 +100,18 @@ const StatusBadge: React.FC<{ status: AssetListing['status'] }> = ({ status }) =
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-const ListingManagement: React.FC = () => {
+const ListingManagement: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
     const [listings, setListings] = useState(mockListings);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const filteredListings = useMemo(() => {
+        if (!searchQuery) return listings;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return listings.filter(l => 
+            l.id.toLowerCase().includes(lowercasedQuery) ||
+            l.localCurrency.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [listings, searchQuery]);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -163,6 +172,7 @@ const ListingManagement: React.FC = () => {
                         <table className="w-full text-sm text-left text-gray-400">
                             <thead className="text-xs text-gray-400 uppercase bg-primary">
                                 <tr>
+                                    <th scope="col" className="px-4 py-3">ID</th>
                                     <th scope="col" className="px-4 py-3">Asset</th>
                                     <th scope="col" className="px-4 py-3">Amount</th>
                                     <th scope="col" className="px-4 py-3">Price</th>
@@ -170,14 +180,20 @@ const ListingManagement: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {listings.map(listing => (
+                                {filteredListings.map(listing => (
                                     <tr key={listing.id} className="bg-primary-light border-b border-primary">
+                                        <td className="px-4 py-3 font-medium text-white">{listing.id}</td>
                                         <td className="px-4 py-3 font-medium text-white">{listing.asset}</td>
                                         <td className="px-4 py-3 font-mono">{listing.amount.toFixed(2)}</td>
                                         <td className="px-4 py-3 font-mono">{listing.pricePerUnit.toFixed(2)} {listing.localCurrency}</td>
                                         <td className="px-4 py-3"><StatusBadge status={listing.status} /></td>
                                     </tr>
                                 ))}
+                                {filteredListings.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="text-center py-8 text-gray-400">No listings found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -191,16 +207,17 @@ const ListingManagement: React.FC = () => {
 const MerchantDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState<NavItem>('Dashboard');
+    const [searchQuery, setSearchQuery] = useState('');
 
      const renderContent = () => {
         switch (activeView) {
             case 'Dashboard': return <MerchantOverview />;
-            case 'Listings': return <ListingManagement />;
+            case 'Listings': return <ListingManagement searchQuery={searchQuery} />;
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
-            case 'Settlements': return <MerchantSettlements />;
-            case 'Reports': return <ReportsManagement userRole={UserRole.MERCHANT} />;
+            case 'Settlements': return <MerchantSettlements searchQuery={searchQuery} />;
+            case 'Reports': return <ReportsManagement userRole={UserRole.MERCHANT} searchQuery={searchQuery} />;
             case 'API Management': return <ApiManagement />;
-            case 'Team Management': return <TeamManagement />;
+            case 'Team Management': return <TeamManagement searchQuery={searchQuery} />;
             case 'Settings': return <MerchantSettings />;
             case 'Support': return <SupportManagement />;
             default: return <MerchantOverview />;
@@ -238,7 +255,13 @@ const MerchantDashboard: React.FC = () => {
                 <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input type="text" placeholder="Search listings, transactions..." className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"
+                        />
                     </div>
                     <div className="text-right">
                         <p className="font-semibold text-white">{(user as User)?.name}</p>

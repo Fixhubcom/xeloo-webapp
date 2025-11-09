@@ -84,18 +84,19 @@ const AdminOverview: React.FC = () => (
 const AdminDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState<NavItem>('Dashboard');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const renderContent = () => {
         switch (activeView) {
             case 'Dashboard': return <AdminOverview />;
-            case 'Partners': return <PartnersManagement />;
-            case 'Merchants': return <MerchantsManagement />;
-            case 'Users': return <UserManagement />;
-            case 'Team Management': return <AdminTeamManagement />;
-            case 'Transactions': return <TransactionsManagement />;
-            case 'Support': return <SupportManagement />;
-            case 'Blockchain': return <BlockchainManagement />;
-            case 'API': return <AdminApiManagement />;
+            case 'Partners': return <PartnersManagement searchQuery={searchQuery} />;
+            case 'Merchants': return <MerchantsManagement searchQuery={searchQuery} />;
+            case 'Users': return <UserManagement searchQuery={searchQuery} />;
+            case 'Team Management': return <AdminTeamManagement searchQuery={searchQuery} />;
+            case 'Transactions': return <TransactionsManagement searchQuery={searchQuery} />;
+            case 'Support': return <SupportManagement searchQuery={searchQuery} />;
+            case 'Blockchain': return <BlockchainManagement searchQuery={searchQuery} />;
+            case 'API': return <AdminApiManagement searchQuery={searchQuery} />;
             case 'Reports': return <AdminReports />;
             case 'Security': return <SecurityManagement />;
             case 'Settings': return <AdminSettings />;
@@ -140,7 +141,13 @@ const AdminDashboard: React.FC = () => {
                 <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input type="text" placeholder="Search users, txns, partners..." className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"
+                        />
                     </div>
                      <div className="text-right">
                         <p className="font-semibold text-white">{(user as User)?.name}</p>

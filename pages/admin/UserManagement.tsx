@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { UserRole, UserSubRole } from '../../types';
 
@@ -106,8 +107,11 @@ const EditUserModal: React.FC<{
     );
 };
 
+interface UserManagementProps {
+    searchQuery: string;
+}
 
-const UserManagement: React.FC = () => {
+const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
     const [users, setUsers] = useState(mockUsers);
     const [onboardingLink, setOnboardingLink] = useState('');
     const [linkEmail, setLinkEmail] = useState('');
@@ -115,6 +119,16 @@ const UserManagement: React.FC = () => {
     
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<MockUser | null>(null);
+
+    const filteredUsers = useMemo(() => {
+        if (!searchQuery) return users;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return users.filter(u => 
+            u.name.toLowerCase().includes(lowercasedQuery) ||
+            u.email.toLowerCase().includes(lowercasedQuery) ||
+            u.companyName.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [users, searchQuery]);
 
     const handleGenerateLink = (e: React.FormEvent) => {
         e.preventDefault();
@@ -201,7 +215,7 @@ const UserManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map(user => (
+                            {filteredUsers.map(user => (
                                 <tr key={user.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-white">{user.name}</div>
@@ -222,6 +236,11 @@ const UserManagement: React.FC = () => {
                                     </td>
                                 </tr>
                             ))}
+                            {filteredUsers.length === 0 && (
+                                <tr>
+                                    <td colSpan={7} className="text-center py-8 text-gray-400">No users found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

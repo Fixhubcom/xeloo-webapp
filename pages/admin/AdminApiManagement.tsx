@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
 interface ApiKey {
@@ -17,8 +17,21 @@ const mockApiKeys: ApiKey[] = [
     { id: 'key_3', key: 'xel_sk_test_************************9f8e', userName: 'Africa Payouts Ltd', userType: 'Partner', status: 'Revoked', created: '2022-11-10' },
 ];
 
-const AdminApiManagement: React.FC = () => {
+interface AdminApiManagementProps {
+    searchQuery: string;
+}
+
+const AdminApiManagement: React.FC<AdminApiManagementProps> = ({ searchQuery }) => {
     const [apiKeys, setApiKeys] = useState(mockApiKeys);
+
+    const filteredApiKeys = useMemo(() => {
+        if (!searchQuery) return apiKeys;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return apiKeys.filter(key => 
+            key.userName.toLowerCase().includes(lowercasedQuery) ||
+            key.userType.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [apiKeys, searchQuery]);
 
     return (
         <div className="space-y-8">
@@ -40,7 +53,7 @@ const AdminApiManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {apiKeys.map(key => (
+                            {filteredApiKeys.map(key => (
                                 <tr key={key.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-white">{key.userName}</div>
@@ -55,6 +68,11 @@ const AdminApiManagement: React.FC = () => {
                                     </td>
                                 </tr>
                             ))}
+                            {filteredApiKeys.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-8 text-gray-400">No API keys found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

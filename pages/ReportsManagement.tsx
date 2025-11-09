@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Card from '../components/common/Card';
 import { UserRole } from '../types';
 
@@ -12,9 +12,10 @@ interface Report {
 
 interface ReportsManagementProps {
     userRole: UserRole;
+    searchQuery: string;
 }
 
-const ReportsManagement: React.FC<ReportsManagementProps> = ({ userRole }) => {
+const ReportsManagement: React.FC<ReportsManagementProps> = ({ userRole, searchQuery }) => {
     const [reports, setReports] = useState<Report[]>([]);
 
     useEffect(() => {
@@ -48,6 +49,13 @@ const ReportsManagement: React.FC<ReportsManagementProps> = ({ userRole }) => {
         }
         setReports(mockReports);
     }, [userRole]);
+
+    const filteredReports = useMemo(() => {
+        if (!searchQuery) return reports;
+        return reports.filter(report => 
+            report.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [reports, searchQuery]);
     
     const handleDownload = (report: Report) => {
         const headers = ['id', 'name', 'dateRange', 'type'];
@@ -80,7 +88,7 @@ const ReportsManagement: React.FC<ReportsManagementProps> = ({ userRole }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {reports.map(report => (
+                        {filteredReports.map(report => (
                             <tr key={report.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4 font-medium text-white">{report.name}</td>
                                 <td className="px-6 py-4">{report.dateRange}</td>
@@ -92,6 +100,11 @@ const ReportsManagement: React.FC<ReportsManagementProps> = ({ userRole }) => {
                                 </td>
                             </tr>
                         ))}
+                        {filteredReports.length === 0 && (
+                            <tr>
+                                <td colSpan={4} className="text-center py-8 text-gray-400">No reports found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

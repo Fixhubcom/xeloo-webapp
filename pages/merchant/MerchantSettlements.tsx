@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
 interface Settlement {
@@ -26,8 +26,23 @@ const StatusBadge: React.FC<{ status: Settlement['status'] }> = ({ status }) => 
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
+interface MerchantSettlementsProps {
+    searchQuery: string;
+}
 
-const MerchantSettlements: React.FC = () => {
+const MerchantSettlements: React.FC<MerchantSettlementsProps> = ({ searchQuery }) => {
+    const [settlements] = useState(mockSettlements);
+
+    const filteredSettlements = useMemo(() => {
+        if (!searchQuery) return settlements;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return settlements.filter(s => 
+            s.id.toLowerCase().includes(lowercasedQuery) ||
+            s.destination.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [settlements, searchQuery]);
+
+
     return (
         <Card>
             <h2 className="text-xl font-bold text-white mb-6">Settlement History</h2>
@@ -44,7 +59,7 @@ const MerchantSettlements: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockSettlements.map((settlement) => (
+                        {filteredSettlements.map((settlement) => (
                             <tr key={settlement.id} className="bg-primary-light border-b border-primary hover:bg-primary/80">
                                 <td className="px-6 py-4">{settlement.date}</td>
                                 <td className="px-6 py-4 font-mono text-white">{settlement.id}</td>
@@ -53,6 +68,11 @@ const MerchantSettlements: React.FC = () => {
                                 <td className="px-6 py-4"><StatusBadge status={settlement.status} /></td>
                             </tr>
                         ))}
+                        {filteredSettlements.length === 0 && (
+                             <tr>
+                                <td colSpan={5} className="text-center py-8 text-gray-400">No settlements found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

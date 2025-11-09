@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -96,7 +97,11 @@ const EmployeeForm: React.FC<{
     );
 };
 
-const Payroll: React.FC = () => {
+interface PayrollProps {
+    searchQuery: string;
+}
+
+const Payroll: React.FC<PayrollProps> = ({ searchQuery }) => {
     const { user } = useAuth();
     const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
     const [view, setView] = useState<'list' | 'form' | 'confirm' | 'success'>('list');
@@ -105,14 +110,23 @@ const Payroll: React.FC = () => {
     
     const displayCurrency = user?.preferredCurrency || 'USD';
 
+    const filteredEmployees = useMemo(() => {
+        if (!searchQuery) return employees;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return employees.filter(emp =>
+            emp.name.toLowerCase().includes(lowercasedQuery) ||
+            emp.email.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [employees, searchQuery]);
+
     const totalPayrollDisplayCurrency = useMemo(() => {
-        const totalUSD = employees.reduce((total, emp) => {
+        const totalUSD = filteredEmployees.reduce((total, emp) => {
             const rate = MOCK_RATES[emp.currency] || 0;
             return total + (rate > 0 ? emp.salary / rate : 0);
         }, 0);
         const displayRate = MOCK_RATES[displayCurrency] || 1;
         return totalUSD * displayRate;
-    }, [employees, displayCurrency]);
+    }, [filteredEmployees, displayCurrency]);
 
     const handleSaveEmployee = (employeeData: Omit<Employee, 'id'> & { id?: string }) => {
         if (employeeData.id) {
@@ -158,7 +172,7 @@ const Payroll: React.FC = () => {
                 <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-green-400 mb-2">Payroll Submitted!</h2>
                 <p className="text-gray-light mb-6">
-                    A total of {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} has been processed for {employees.length} employees.
+                    A total of {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} has been processed for {filteredEmployees.length} employees.
                 </p>
                 <button onClick={() => setView('list')} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
                     Back to Payroll
@@ -173,7 +187,7 @@ const Payroll: React.FC = () => {
                 <h2 className="text-2xl font-bold mb-4">Confirm Payroll Run</h2>
                 <p className="text-gray-light mb-6">Review the payment details below. A total of {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} will be deducted from your primary account.</p>
                 <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    {employees.map(emp => (
+                    {filteredEmployees.map(emp => (
                         <div key={emp.id} className="p-3 bg-primary rounded-md flex justify-between items-center">
                             <div>
                                 <p className="font-semibold text-white">{emp.name}</p>
@@ -214,7 +228,7 @@ const Payroll: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {employees.map(emp => (
+                                {filteredEmployees.map(emp => (
                                     <tr key={emp.id} className="bg-primary-light border-b border-primary">
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-white">{emp.name}</div>
@@ -229,6 +243,11 @@ const Payroll: React.FC = () => {
                                         </td>
                                     </tr>
                                 ))}
+                                {filteredEmployees.length === 0 && (
+                                    <tr>
+                                        <td colSpan={3} className="text-center py-8 text-gray-400">No employees found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -239,13 +258,13 @@ const Payroll: React.FC = () => {
                     <h2 className="text-xl font-bold">Payroll Summary</h2>
                     <div>
                         <p className="text-gray-400">Total Employees</p>
-                        <p className="text-2xl font-bold text-white">{employees.length}</p>
+                        <p className="text-2xl font-bold text-white">{filteredEmployees.length}</p>
                     </div>
                     <div>
                         <p className="text-gray-400">Estimated Monthly Payroll</p>
                         <p className="text-3xl font-bold text-accent">{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
                     </div>
-                    <button onClick={() => setView('confirm')} disabled={employees.length === 0} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    <button onClick={() => setView('confirm')} disabled={filteredEmployees.length === 0} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed">
                         Run Payroll
                     </button>
                 </Card>

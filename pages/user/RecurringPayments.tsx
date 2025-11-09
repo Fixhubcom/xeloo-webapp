@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { RecurringPayment } from '../../types';
@@ -122,11 +122,22 @@ const RecurringPaymentForm: React.FC<{ onCancel: () => void; onSave: (payment: O
     );
 };
 
-const RecurringPayments: React.FC = () => {
+interface RecurringPaymentsProps {
+    searchQuery: string;
+}
+
+const RecurringPayments: React.FC<RecurringPaymentsProps> = ({ searchQuery }) => {
     const { user } = useAuth();
     const [payments, setPayments] = useState(mockRecurringPayments);
     const [showForm, setShowForm] = useState(false);
     const displayCurrency = user?.preferredCurrency || 'USD';
+
+    const filteredPayments = useMemo(() => {
+        if (!searchQuery) return payments;
+        return payments.filter(p => 
+            p.recipientName.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [payments, searchQuery]);
 
 
     const handleSave = (newPaymentData: Omit<RecurringPayment, 'id'>) => {
@@ -182,7 +193,7 @@ const RecurringPayments: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {payments.map((p) => (
+                        {filteredPayments.map((p) => (
                             <tr key={p.id} className="bg-primary-light border-b border-primary">
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-white">{p.recipientName}</div>
@@ -202,6 +213,11 @@ const RecurringPayments: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
+                         {filteredPayments.length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="text-center py-8 text-gray-400">No recurring payments found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

@@ -34,20 +34,20 @@ const UserDashboard: React.FC = () => {
         switch (activeView) {
             case 'Dashboard': return <UserAnalytics />;
             case 'Send Payment': return <SendPayment />;
-            case 'Recurring Payments': return <RecurringPayments />;
+            case 'Recurring Payments': return <RecurringPayments searchQuery={searchQuery} />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
             case 'Invoices':
-                return user?.isSubscribed ? <Invoices /> : <UpgradePrompt featureName="Invoicing" />;
+                return user?.isSubscribed ? <Invoices searchQuery={searchQuery} /> : <UpgradePrompt featureName="Invoicing" />;
             case 'Payroll':
-                return user?.isSubscribed ? <Payroll /> : <UpgradePrompt featureName="Payroll" />;
+                return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" />;
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting':
-                return user?.isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
+                return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" />;
             case 'API Management':
                 return <ApiManagement />;
             case 'Subscription': return <SubscriptionPage />;
             case 'Settings': return <Settings />;
-            case 'Reports': return <ReportsManagement userRole={user!.role} />;
+            case 'Reports': return <ReportsManagement userRole={user!.role} searchQuery={searchQuery} />;
             case 'Support': return <SupportManagement />;
             default: return <UserAnalytics />;
         }
@@ -93,7 +93,7 @@ const UserDashboard: React.FC = () => {
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <input 
                             type="text" 
-                            placeholder="Search transactions by recipient..." 
+                            placeholder="Search..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="bg-gray-100 dark:bg-primary-light border border-gray-300 dark:border-gray-medium rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-96"

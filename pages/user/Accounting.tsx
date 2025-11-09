@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { JournalEntry } from '../../types';
@@ -97,11 +98,23 @@ const ReportTable: React.FC<{ title: string, sections: { title: string, items: {
     </div>
 );
 
+interface AccountingProps {
+    searchQuery: string;
+}
 
-const Accounting: React.FC = () => {
+const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
     const [activeView, setActiveView] = useState<AccountingView>('Dashboard');
     const [accounts, setAccounts] = useState(initialAccounts);
     const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(initialJournalEntries);
+
+    const filteredJournalEntries = useMemo(() => {
+        if (!searchQuery) return journalEntries;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return journalEntries.filter(entry => 
+            entry.description.toLowerCase().includes(lowercasedQuery) ||
+            entry.account.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [journalEntries, searchQuery]);
 
     const handleAddEntry = (newEntries: Omit<JournalEntry, 'id'>[]) => {
         const nextId = Math.max(0, ...journalEntries.map(e => e.id)) + 1;
@@ -169,7 +182,14 @@ const Accounting: React.FC = () => {
                     <Card>
                         <table className="w-full text-sm text-left text-gray-400">
                             <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
-                            <tbody>{journalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}</tbody>
+                            <tbody>
+                                {filteredJournalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}
+                                {filteredJournalEntries.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="text-center py-8 text-gray-400">No journal entries found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
                         </table>
                     </Card>
                 );

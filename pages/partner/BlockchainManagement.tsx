@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import { MultiSigTransaction } from '../../types';
@@ -20,9 +20,22 @@ const StatusBadge: React.FC<{ status: MultiSigTransaction['status'] }> = ({ stat
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-const BlockchainManagement: React.FC = () => {
+interface BlockchainManagementProps {
+    searchQuery: string;
+}
+
+const BlockchainManagement: React.FC<BlockchainManagementProps> = ({ searchQuery }) => {
     const { user } = useAuth();
     const [transactions, setTransactions] = useState(mockPendingTransactions);
+
+    const filteredTransactions = useMemo(() => {
+        if (!searchQuery) return transactions;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return transactions.filter(tx => 
+            tx.id.toLowerCase().includes(lowercasedQuery) ||
+            tx.destinationAddress.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [transactions, searchQuery]);
 
     return (
         <div className="space-y-8">
@@ -54,7 +67,7 @@ const BlockchainManagement: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {transactions.map(tx => (
+                            {filteredTransactions.map(tx => (
                                 <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-mono text-white">{tx.id}</td>
                                     <td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td>
@@ -66,6 +79,11 @@ const BlockchainManagement: React.FC = () => {
                                     </td>
                                 </tr>
                             ))}
+                            {filteredTransactions.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="text-center py-8 text-gray-400">No pending transactions found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                  </div>

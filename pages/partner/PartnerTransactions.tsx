@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { Transaction } from '../../types';
 
@@ -22,7 +22,23 @@ const StatusBadge: React.FC<{ status: Transaction['status'] }> = ({ status }) =>
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-const PartnerTransactions: React.FC = () => {
+interface PartnerTransactionsProps {
+    searchQuery: string;
+}
+
+const PartnerTransactions: React.FC<PartnerTransactionsProps> = ({ searchQuery }) => {
+    const [transactions] = useState(mockPartnerTransactions);
+
+    const filteredTransactions = useMemo(() => {
+        if (!searchQuery) return transactions;
+        const lowercasedQuery = searchQuery.toLowerCase();
+        return transactions.filter(tx => 
+            tx.originator.toLowerCase().includes(lowercasedQuery) ||
+            tx.recipient.toLowerCase().includes(lowercasedQuery) ||
+            tx.recipientCountry.toLowerCase().includes(lowercasedQuery)
+        );
+    }, [transactions, searchQuery]);
+
     return (
         <Card>
             <h2 className="text-xl font-bold text-white mb-6">Transaction History</h2>
@@ -38,7 +54,7 @@ const PartnerTransactions: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockPartnerTransactions.map((tx) => (
+                        {filteredTransactions.map((tx) => (
                             <tr key={tx.id} className="bg-primary-light border-b border-primary hover:bg-primary/80">
                                 <td className="px-6 py-4">{tx.date}</td>
                                 <td className="px-6 py-4 font-medium text-white">{tx.originator}</td>
@@ -50,6 +66,11 @@ const PartnerTransactions: React.FC = () => {
                                 <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
                             </tr>
                         ))}
+                        {filteredTransactions.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="text-center py-8 text-gray-400">No transactions found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
