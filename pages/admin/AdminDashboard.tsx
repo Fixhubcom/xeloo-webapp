@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -31,6 +30,8 @@ import MerchantsManagement from './MerchantsManagement';
 import TransactionsManagement from './TransactionsManagement';
 import AdminReports from './AdminReports';
 import AdminApiManagement from './AdminApiManagement';
+import CommissionEarnings from './CommissionEarnings';
+import SubscriptionEarnings from './SubscriptionEarnings';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -54,17 +55,31 @@ type NavItem =
     | 'API'
     | 'Reports'
     | 'Security'
-    | 'Settings';
+    | 'Settings'
+    | 'Commission Earnings'
+    | 'Subscription Earnings';
 
 
 // Placeholder components for each section
-const AdminOverview: React.FC = () => (
+const AdminOverview: React.FC<{ setActiveView: (view: NavItem) => void }> = ({ setActiveView }) => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="text-center"><h3 className="text-lg text-gray-400">Total Users</h3><p className="text-3xl font-bold text-accent">102,495</p></Card>
             <Card className="text-center"><h3 className="text-lg text-gray-400">Volume (24h)</h3><p className="text-3xl font-bold text-accent">$1.2M</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-400">Commission Earned (30d)</h3><p className="text-3xl font-bold text-accent">$75,320</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-400">Subscription Earnings (30d)</h3><p className="text-3xl font-bold text-accent">$12,850</p></Card>
+            <Card 
+                className="text-center cursor-pointer hover:border-accent transition-colors"
+                onClick={() => setActiveView('Commission Earnings')}
+            >
+                <h3 className="text-lg text-gray-400">Commission Earned (30d)</h3>
+                <p className="text-3xl font-bold text-accent">$75,320</p>
+            </Card>
+            <Card 
+                className="text-center cursor-pointer hover:border-accent transition-colors"
+                onClick={() => setActiveView('Subscription Earnings')}
+            >
+                <h3 className="text-lg text-gray-400">Subscription Earnings (30d)</h3>
+                <p className="text-3xl font-bold text-accent">$12,850</p>
+            </Card>
         </div>
         <Card>
             <h2 className="text-xl font-bold mb-4">Top Transaction Corridors by Volume</h2>
@@ -88,7 +103,7 @@ const AdminDashboard: React.FC = () => {
 
     const renderContent = () => {
         switch (activeView) {
-            case 'Dashboard': return <AdminOverview />;
+            case 'Dashboard': return <AdminOverview setActiveView={setActiveView} />;
             case 'Partners': return <PartnersManagement searchQuery={searchQuery} />;
             case 'Merchants': return <MerchantsManagement searchQuery={searchQuery} />;
             case 'Users': return <UserManagement searchQuery={searchQuery} />;
@@ -100,7 +115,9 @@ const AdminDashboard: React.FC = () => {
             case 'Reports': return <AdminReports />;
             case 'Security': return <SecurityManagement />;
             case 'Settings': return <AdminSettings />;
-            default: return <AdminOverview />;
+            case 'Commission Earnings': return <CommissionEarnings searchQuery={searchQuery} />;
+            case 'Subscription Earnings': return <SubscriptionEarnings searchQuery={searchQuery} />;
+            default: return <AdminOverview setActiveView={setActiveView} />;
         }
     };
     
@@ -172,6 +189,12 @@ interface NavItemLinkProps {
 
 const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setItem }) => {
   const isActive = activeItem === label;
+  
+  // Do not render the new detail views in the sidebar
+  if (label === 'Commission Earnings' || label === 'Subscription Earnings') {
+    return null;
+  }
+
   return (
     <a
       href="#"

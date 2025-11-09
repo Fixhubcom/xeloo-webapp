@@ -2,31 +2,82 @@ import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import PasswordStrengthIndicator from '../../components/common/PasswordStrengthIndicator';
+import Spinner from '../../components/common/Spinner';
 
 type SettingsTab = 'Profile' | 'Security' | 'Notifications';
 
 const PartnerSettings: React.FC = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<SettingsTab>('Profile');
+    
+    // Profile State
+    const [companyName, setCompanyName] = useState(user?.companyName || '');
+    const [contactEmail, setContactEmail] = useState(user?.email || '');
+    const [usdtWalletAddress, setUsdtWalletAddress] = useState('T******************************WXYZ'); // Mock saved data
+    const [usdtNetwork, setUsdtNetwork] = useState('TRC20'); // Mock saved data
+    const [isSaving, setIsSaving] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    // Security State
     const [newPassword, setNewPassword] = useState('');
     const [is2FAEnabled, setIs2FAEnabled] = useState(true);
-    const [show2FASetup, setShow2FASetup] = useState(false);
+
+    const handleProfileSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSaving(true);
+        setIsSuccess(false);
+        // Simulate API call
+        setTimeout(() => {
+            console.log("Saving profile & wallet:", { companyName, contactEmail, usdtWalletAddress, usdtNetwork });
+            setIsSaving(false);
+            setIsSuccess(true);
+            setTimeout(() => setIsSuccess(false), 3000);
+        }, 1500);
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Profile':
                 return (
-                    <form className="space-y-4">
+                    <form onSubmit={handleProfileSubmit} className="space-y-6">
                         <div>
-                            <label className="text-sm text-gray-400">Company Name</label>
-                            <input defaultValue={user?.companyName} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                            <h3 className="text-lg font-semibold text-white">Business Profile</h3>
+                            <div className="space-y-4 mt-2">
+                                <div>
+                                    <label className="text-sm text-gray-400">Company Name</label>
+                                    <input value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400">Contact Email</label>
+                                    <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="text-sm text-gray-400">Contact Email</label>
-                            <input type="email" defaultValue={user?.email} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+
+                        <div className="border-t border-primary pt-6">
+                            <h3 className="text-lg font-semibold text-white">USDT Payout Wallet</h3>
+                            <p className="text-sm text-gray-400 mt-1 mb-2">Configure the wallet where you will receive USDT settlements.</p>
+                            <div className="space-y-4 mt-2">
+                                <div>
+                                    <label className="text-sm text-gray-400">USDT Wallet Address</label>
+                                    <input value={usdtWalletAddress} onChange={e => setUsdtWalletAddress(e.target.value)} placeholder="Enter your USDT wallet address" className="w-full bg-primary p-2 rounded border border-primary-light mt-1 font-mono" />
+                                </div>
+                                 <div>
+                                    <label className="text-sm text-gray-400">Base Network</label>
+                                    <select value={usdtNetwork} onChange={e => setUsdtNetwork(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light mt-1">
+                                        <option value="TRC20">TRC20 (Tron)</option>
+                                        <option value="ERC20">ERC20 (Ethereum)</option>
+                                        <option value="BEP20">BEP20 (BNB Smart Chain)</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex justify-end pt-2">
-                            <button type="submit" className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Save Profile</button>
+
+                        <div className="flex justify-end items-center gap-4 pt-2">
+                             {isSuccess && <span className="text-accent text-sm">Profile updated successfully!</span>}
+                            <button type="submit" disabled={isSaving} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 flex items-center justify-center w-36">
+                                {isSaving ? <Spinner /> : 'Save Profile'}
+                            </button>
                         </div>
                     </form>
                 );
@@ -39,7 +90,7 @@ const PartnerSettings: React.FC = () => {
                                 <input type="password" placeholder="Current Password" className="w-full bg-primary p-2 rounded border border-primary-light" />
                                 <input type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" />
                                 <PasswordStrengthIndicator password={newPassword} />
-                                <button className="bg-primary text-white font-bold py-2 px-4 rounded hover:bg-opacity-90 text-sm">Update Password</button>
+                                <button className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90 text-sm">Update Password</button>
                             </div>
                         </div>
                         <div>
