@@ -20,9 +20,9 @@ const Header: React.FC = () => {
             <div className="container mx-auto flex justify-between items-center">
                 <Logo className="text-3xl" />
                 <nav className="hidden md:flex items-center space-x-8 text-white">
-                    <a href="#" className="hover:text-accent transition-colors">Business</a>
-                    <a href="#" className="hover:text-accent transition-colors">Product</a>
-                    <a href="#" className="hover:text-accent transition-colors">API</a>
+                    <button onClick={() => navigate('/business')} className="hover:text-accent transition-colors">Business</button>
+                    <button onClick={() => navigate('/product')} className="hover:text-accent transition-colors">Product</button>
+                    <button onClick={() => navigate('/api')} className="hover:text-accent transition-colors">API</button>
                 </nav>
                 <div className="space-x-2">
                     <button onClick={() => navigate('/login')} className="text-white font-medium py-2 px-4 rounded-md hover:text-accent transition-colors">Log In</button>

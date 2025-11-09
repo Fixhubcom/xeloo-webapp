@@ -14,6 +14,9 @@ import LandingPage from './pages/LandingPage';
 import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import ConfirmEmailPage from './pages/ConfirmEmailPage';
 import TermsPage from './pages/TermsPage';
+import BusinessPage from './pages/BusinessPage';
+import ProductPage from './pages/ProductPage';
+import ApiPage from './pages/ApiPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -58,6 +61,9 @@ const AppRoutes: React.FC = () => {
             <Route path="/2fa" element={<TwoFactorAuthPage />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/business" element={<BusinessPage />} />
+            <Route path="/product" element={<ProductPage />} />
+            <Route path="/api" element={<ApiPage />} />
             
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={[UserRole.USER]}><UserDashboard /></ProtectedRoute>} />
             <Route path="/partner" element={<ProtectedRoute allowedRoles={[UserRole.PARTNER]}><PartnerDashboard /></ProtectedRoute>} />
