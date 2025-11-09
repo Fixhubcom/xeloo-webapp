@@ -163,35 +163,35 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-light">
                     <thead className="text-xs text-gray-700 dark:text-gray-400 uppercase bg-gray-50 dark:bg-primary">
                         <tr>
-                            <th scope="col" className="px-6 py-3">Date</th>
-                            <th scope="col" className="px-6 py-3">Recipient</th>
-                            <th scope="col" className="px-6 py-3">Amount Sent</th>
-                            <th scope="col" className="px-6 py-3">Category</th>
-                            <th scope="col" className="px-6 py-3">Status</th>
+                            <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-left">Date</th>
+                            <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-left">Recipient</th>
+                            <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-left">Amount Sent</th>
+                            <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-left">Category</th>
+                            <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-left">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredTransactions.map((tx) => (
-                            <tr key={tx.id} className="bg-white dark:bg-primary-light border-b border-gray-200 dark:border-gray-medium hover:bg-gray-50 dark:hover:bg-gray-dark">
-                                <td className="px-6 py-4">{tx.date}</td>
-                                <td className="px-6 py-4">
-                                    <div className="font-medium text-gray-900 dark:text-white">{tx.recipient}</div>
-                                    <div className="text-xs">{tx.recipientCountry}</div>
+                            <tr key={tx.id} className="bg-white dark:bg-primary-light border-b border-gray-200 dark:border-gray-medium last:border-b-0 hover:bg-gray-50 dark:hover:bg-primary transition-colors duration-150 ease-in-out">
+                                <td className="px-6 py-4 whitespace-nowrap align-middle text-gray-600 dark:text-gray-400">{tx.date}</td>
+                                <td className="px-6 py-4 align-middle">
+                                    <div className="font-semibold text-gray-900 dark:text-white">{tx.recipient}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-light">{tx.recipientCountry}</div>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-gray-900 dark:text-white">{tx.amountSent.toFixed(2)} {tx.currencySent}</td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 whitespace-nowrap align-middle font-mono font-medium text-gray-900 dark:text-white">{tx.amountSent.toFixed(2)} {tx.currencySent}</td>
+                                <td className="px-6 py-4 align-middle">
                                     {tx.category ? (
-                                        <span className="text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-md">{tx.category}</span>
+                                        <span className="text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full">{tx.category}</span>
                                     ) : categorizingId === tx.id ? (
                                         <Spinner className="w-4 h-4" />
                                     ) : (
-                                        <button onClick={() => handleCategorize(tx.id)} className="bg-purple-500/20 text-purple-400 text-xs font-bold py-1 px-2 rounded hover:bg-purple-500/40 flex items-center">
+                                        <button onClick={() => handleCategorize(tx.id)} className="bg-purple-500/20 text-purple-400 text-xs font-bold py-1 px-2 rounded-full hover:bg-purple-500/40 flex items-center">
                                             <SparklesIcon className="w-3 h-3 mr-1" />
                                             Categorize
                                         </button>
                                     )}
                                 </td>
-                                <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
+                                <td className="px-6 py-4 align-middle"><StatusBadge status={tx.status} /></td>
                             </tr>
                         ))}
                          {filteredTransactions.length === 0 && (
