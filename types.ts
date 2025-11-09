@@ -32,9 +32,9 @@ export interface User {
   bankAccounts?: BankAccount[];
   preferredCurrency?: string;
   avatarInitials: string;
-  // FIX: Corrected typo in property name from avatarBgCcolor to avatarBgColor.
   avatarBgColor: string;
   isSubscribed?: boolean;
+  hederaWalletAddress?: string;
 }
 
 export interface Transaction {
@@ -97,4 +97,14 @@ export interface RecurringPayment {
   nextPaymentDate: string;
   endDate?: string;
   status: 'Active' | 'Paused';
+}
+
+export interface MultiSigTransaction {
+    id: string;
+    partnerId: string;
+    partnerName: string;
+    amount: number;
+    currency: string;
+    destinationAddress: string;
+    status: 'Pending Admin' | 'Pending Partner' | 'Completed' | 'Rejected';
 }

@@ -9,7 +9,6 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-// FIX: Export AuthContext to be used in the useAuth hook.
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -26,10 +25,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let avatarInitials = 'U';
       let avatarBgColor = '#3b82f6';
       let isSubscribed = true; // Subscribed by default for admin/partner/merchant
+      let hederaWalletAddress: string | undefined = undefined;
 
       switch (role) {
         case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; break;
-        case UserRole.PARTNER: name = 'Financial Partner'; companyName = 'Global Bank'; avatarInitials="FP"; avatarBgColor="#10b981"; break;
+        case UserRole.PARTNER: 
+            name = 'Financial Partner'; 
+            companyName = 'Global Bank'; 
+            avatarInitials="FP"; 
+            avatarBgColor="#10b981"; 
+            hederaWalletAddress="0.0.123456";
+            break;
         case UserRole.MERCHANT: name = 'Crypto Merchant'; companyName = 'Digital Assets LLC'; avatarInitials="CM"; avatarBgColor="#8b5cf6"; break;
         case UserRole.USER: 
           name = 'John Doe'; 
@@ -55,6 +61,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         avatarInitials,
         avatarBgColor,
         isSubscribed,
+        hederaWalletAddress,
       };
       setUser(mockUser);
       setIsLoading(false);

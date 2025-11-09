@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -13,11 +14,14 @@ import {
     AnalyticsIcon, 
     SettingsIcon, 
     SupportIcon,
-    UsersIcon
+    UsersIcon,
+    CubeIcon
 } from '../../components/icons/Icons';
 import { User } from '../../types';
 import PartnerSettlements from './PartnerSettlements';
 import TeamManagement from './TeamManagement';
+import ApiManagement from './ApiManagement';
+import BlockchainManagement from './BlockchainManagement';
 
 // Data for the main dashboard chart
 const partnerFundsFlowData = [
@@ -34,6 +38,7 @@ type NavItem =
     | 'Transactions'
     | 'Settlements'
     | 'API Management'
+    | 'Blockchain'
     | 'Team Management'
     | 'Reports'
     | 'Settings'
@@ -94,7 +99,8 @@ const PartnerDashboard: React.FC = () => {
             case 'Dashboard': return <PartnerOverview />;
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
             case 'Settlements': return <PartnerSettlements />;
-            case 'API Management': return <PlaceholderContent title="API Management" />;
+            case 'API Management': return <ApiManagement />;
+            case 'Blockchain': return <BlockchainManagement />;
             case 'Team Management': return <TeamManagement />;
             case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
             case 'Settings': return <PlaceholderContent title="Settings" />;
@@ -118,6 +124,7 @@ const PartnerDashboard: React.FC = () => {
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</p>
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<CubeIcon />} label="Blockchain" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={setActiveView} />

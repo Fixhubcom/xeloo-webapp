@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -19,6 +20,7 @@ import {
 import { User, AssetListing } from '../../types';
 import Spinner from '../../components/common/Spinner';
 import TeamManagement from './TeamManagement';
+import MerchantSettings from './MerchantSettings';
 
 const mockListings: AssetListing[] = [
     { id: 'LST-001', asset: 'USDT', amount: 5000, pricePerUnit: 1450.50, localCurrency: 'NGN', status: 'Active' },
@@ -194,7 +196,7 @@ const MerchantDashboard: React.FC = () => {
             case 'Reports': return <PlaceholderContent title="Reports" />;
             case 'API Management': return <PlaceholderContent title="API Management" />;
             case 'Team Management': return <TeamManagement />;
-            case 'Settings': return <PlaceholderContent title="Settings" />;
+            case 'Settings': return <MerchantSettings />;
             case 'Support': return <PlaceholderContent title="Support" />;
             default: return <MerchantOverview />;
         }

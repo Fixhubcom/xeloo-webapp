@@ -1,13 +1,12 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { OnboardingSuggestions, Transaction } from "../types";
 
-// FIX: Initialize GoogleGenAI with API_KEY from environment variables directly as per guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getOnboardingSuggestions = async (businessDescription: string): Promise<OnboardingSuggestions> => {
   console.log("Calling Gemini API with description:", businessDescription);
 
-  // FIX: Using the actual Gemini API call instead of mock implementation.
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -124,4 +123,23 @@ export const categorizeTransaction = async (recipient: string, amount: number): 
     console.error("Error calling Gemini API for categorization:", error);
     return { category: 'Other' }; // Fallback
   }
+};
+
+export const getSupportResponseSuggestion = async (prompt: string): Promise<string> => {
+    if (!prompt) {
+        return "Please provide the user's message to generate a suggestion.";
+    }
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `The user's support message is: "${prompt}". Generate a concise, empathetic, and professional reply.`,
+            config: {
+              systemInstruction: "You are a helpful customer support agent for Xeloo, a fintech platform. Your responses should be clear and aimed at resolving the user's issue effectively.",
+            }
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Error calling Gemini API for support suggestion:", error);
+        return "Sorry, I couldn't generate a suggestion at this time. Please try again.";
+    }
 };

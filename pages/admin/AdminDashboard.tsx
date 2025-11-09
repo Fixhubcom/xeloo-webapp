@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -21,6 +22,8 @@ import {
 import { User } from '../../types';
 import UserManagement from './UserManagement';
 import SecurityManagement from './SecurityManagement';
+import SupportManagement from './SupportManagement';
+import BlockchainManagement from './BlockchainManagement';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -91,8 +94,8 @@ const AdminDashboard: React.FC = () => {
             case 'Merchants': return <PlaceholderContent title="Merchants" />;
             case 'Users': return <UserManagement />;
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
-            case 'Support': return <PlaceholderContent title="Support Tickets" />;
-            case 'Blockchain': return <PlaceholderContent title="Blockchain & Wallet" />;
+            case 'Support': return <SupportManagement />;
+            case 'Blockchain': return <BlockchainManagement />;
             case 'API': return <PlaceholderContent title="API" />;
             case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
             case 'Security': return <SecurityManagement />;
