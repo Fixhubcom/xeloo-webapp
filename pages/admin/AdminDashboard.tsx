@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -24,6 +25,7 @@ import SecurityManagement from './SecurityManagement';
 import SupportManagement from './SupportManagement';
 import BlockchainManagement from './BlockchainManagement';
 import AdminSettings from './AdminSettings';
+import AdminTeamManagement from './TeamManagement';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -40,6 +42,7 @@ type NavItem =
     | 'Partners'
     | 'Merchants'
     | 'Users'
+    | 'Team Management'
     | 'Transactions'
     | 'Support'
     | 'Blockchain'
@@ -93,6 +96,7 @@ const AdminDashboard: React.FC = () => {
             case 'Partners': return <PlaceholderContent title="Partners" />;
             case 'Merchants': return <PlaceholderContent title="Merchants" />;
             case 'Users': return <UserManagement />;
+            case 'Team Management': return <AdminTeamManagement />;
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
             case 'Support': return <SupportManagement />;
             case 'Blockchain': return <BlockchainManagement />;
@@ -118,6 +122,7 @@ const AdminDashboard: React.FC = () => {
                     <NavItemLink icon={<BriefcaseIcon />} label="Partners" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<ShoppingBagIcon />} label="Merchants" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<UsersIcon />} label="Users" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={setActiveView} />
 
@@ -130,7 +135,7 @@ const AdminDashboard: React.FC = () => {
                 </nav>
                 <div className="px-4 py-4 border-t border-primary-light">
                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
-                        <LogoutIcon className="mr-3"/>
+                        <LogoutIcon className="mr-3 w-5 h-5"/>
                         Logout
                     </button>
                 </div>

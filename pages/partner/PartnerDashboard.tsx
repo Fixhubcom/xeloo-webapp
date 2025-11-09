@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -131,7 +132,7 @@ const PartnerDashboard: React.FC = () => {
                  </nav>
                 <div className="px-4 py-4 border-t border-primary-light">
                      <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
-                        <LogoutIcon className="mr-3"/>
+                        <LogoutIcon className="mr-3 w-5 h-5"/>
                         Logout
                     </button>
                 </div>

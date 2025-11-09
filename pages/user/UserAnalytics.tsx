@@ -54,8 +54,8 @@ const UserAnalytics: React.FC = () => {
             <YAxis stroke="#9ca3af" />
             <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
             <Legend />
-            <Bar dataKey="Received" fill="#4ade80" />
-            <Bar dataKey="Sent" fill="#fdda1a" />
+            <Bar dataKey="Received" fill="#FDDA1A" />
+            <Bar dataKey="Sent" fill="#FDDA1A" />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -69,8 +69,8 @@ const UserAnalytics: React.FC = () => {
             <YAxis stroke="#9ca3af" />
             <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
             <Legend />
-            <Bar dataKey="Received" fill="#4ade80" />
-            <Bar dataKey="Sent" fill="#f87171" />
+            <Bar dataKey="Received" fill="#FDDA1A" />
+            <Bar dataKey="Sent" fill="#FDDA1A" />
           </BarChart>
         </ResponsiveContainer>
       </Card>

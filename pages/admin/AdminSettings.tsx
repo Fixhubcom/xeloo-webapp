@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 
@@ -13,14 +14,18 @@ const AdminSettings: React.FC = () => {
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-lg font-semibold text-white">Fee Structure</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                                 <div>
                                     <label className="text-sm text-gray-400">Cross-Border Transfer Fee (%)</label>
-                                    <input type="number" defaultValue="1.5" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                    <input type="number" defaultValue="1.5" step="0.01" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400">FX Spread (%)</label>
+                                    <input type="number" defaultValue="0.05" step="0.01" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-gray-400">Merchant Listing Fee (fixed USD)</label>
-                                    <input type="number" defaultValue="5.00" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                    <input type="number" defaultValue="5.00" step="0.01" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
                                 </div>
                             </div>
                         </div>

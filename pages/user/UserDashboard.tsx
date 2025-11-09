@@ -78,7 +78,7 @@ const UserDashboard: React.FC = () => {
                 </nav>
                 <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-500 dark:text-gray-light hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white rounded-md transition-colors">
-                        <LogoutIcon className="mr-3"/>
+                        <LogoutIcon className="mr-3 w-5 h-5"/>
                         Logout
                     </button>
                 </div>
