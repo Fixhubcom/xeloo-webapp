@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let bankAccounts: BankAccount[] = [];
       let avatarInitials = 'U';
       let avatarBgColor = '#3b82f6';
+      let isSubscribed = true; // Subscribed by default for admin/partner/merchant
 
       switch (role) {
         case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; break;
@@ -35,6 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           companyName = 'Creative Solutions'; 
           avatarInitials="JD";
           avatarBgColor="#fdda1a";
+          isSubscribed = false; // Regular users are on the free plan
           bankAccounts = [
             { id: 'acc_1', bankName: 'Chase Bank', accountNumber: '**** **** **** 1234', country: 'USA', currency: 'USD', isDefault: true },
             { id: 'acc_2', bankName: 'Access Bank', accountNumber: '**** **** **** 5678', country: 'Nigeria', currency: 'NGN' },
@@ -52,6 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferredCurrency: 'USD',
         avatarInitials,
         avatarBgColor,
+        isSubscribed,
       };
       setUser(mockUser);
       setIsLoading(false);

@@ -34,6 +34,7 @@ export interface User {
   avatarInitials: string;
   // FIX: Corrected typo in property name from avatarBgCcolor to avatarBgColor.
   avatarBgColor: string;
+  isSubscribed?: boolean;
 }
 
 export interface Transaction {

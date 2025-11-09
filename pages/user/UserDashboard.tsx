@@ -6,7 +6,7 @@ import Avatar from '../../components/common/Avatar';
 import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon } from '../../components/icons/Icons';
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -15,6 +15,7 @@ import CurrencyConverter from './CurrencyConverter';
 import Accounting from './Accounting';
 import Settings from './Settings';
 import RecurringPayments from './RecurringPayments';
+import UpgradePrompt from '../../components/common/UpgradePrompt';
 
 // Mock content components
 const Payroll: React.FC = () => <div className="text-gray-900 dark:text-white p-4">Payroll Management Page</div>;
@@ -28,15 +29,20 @@ const UserDashboard: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const renderContent = () => {
+        const isSubscribed = user?.isSubscribed ?? false;
+
         switch (activeView) {
             case 'Dashboard': return <UserAnalytics />;
             case 'Send Payment': return <SendPayment />;
             case 'Recurring Payments': return <RecurringPayments />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
-            case 'Invoices': return <Invoices />;
-            case 'Payroll': return <Payroll />;
+            case 'Invoices': 
+                return isSubscribed ? <Invoices /> : <UpgradePrompt featureName="Invoicing" />;
+            case 'Payroll':
+                 return isSubscribed ? <Payroll /> : <UpgradePrompt featureName="Payroll" />;
             case 'Currency Converter': return <CurrencyConverter />;
-            case 'Accounting': return <Accounting />;
+            case 'Accounting': 
+                return isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
             case 'Settings': return <Settings />;
             default: return <UserAnalytics />;
         }
@@ -55,12 +61,12 @@ const UserDashboard: React.FC = () => {
                     <NavItemLink icon={<SendIcon />} label="Send Payment" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<RefreshIcon />} label="Recurring Payments" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
                 </nav>
                 <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
@@ -112,14 +118,14 @@ const UserDashboard: React.FC = () => {
 }
 
 interface NavItemLinkProps {
-  // FIX: Changed icon prop type from React.ReactNode to a more specific React.ReactElement that accepts a className. This allows React.cloneElement to correctly pass props without a type error.
   icon: React.ReactElement<{ className?: string }>;
   label: NavItem;
   activeItem: NavItem;
   setItem: (item: NavItem) => void;
+  isLocked?: boolean;
 }
 
-const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setItem }) => {
+const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setItem, isLocked }) => {
   const isActive = activeItem === label;
   return (
     <a
@@ -128,14 +134,17 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
         e.preventDefault();
         setItem(label);
       }}
-      className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
+      className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'
           : 'text-gray-500 dark:text-gray-light hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white'
       }`}
     >
-      {React.cloneElement(icon, { className: 'w-5 h-5' })}
-      <span className="ml-3">{label}</span>
+        <div className="flex items-center">
+            {React.cloneElement(icon, { className: 'w-5 h-5' })}
+            <span className="ml-3">{label}</span>
+        </div>
+      {isLocked && <LockIcon className="w-4 h-4 text-yellow-400/70" />}
     </a>
   );
 };
