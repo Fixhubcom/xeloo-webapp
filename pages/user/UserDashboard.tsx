@@ -6,7 +6,7 @@ import Avatar from '../../components/common/Avatar';
 import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon } from '../../components/icons/Icons';
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -16,11 +16,12 @@ import Accounting from './Accounting';
 import Settings from './Settings';
 import RecurringPayments from './RecurringPayments';
 import UpgradePrompt from '../../components/common/UpgradePrompt';
+import ApiManagement from './ApiManagement';
 
 // Mock content components
 const Payroll: React.FC = () => <div className="text-gray-900 dark:text-white p-4">Payroll Management Page</div>;
 
-type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'Settings';
+type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Settings';
 
 const UserDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -43,6 +44,8 @@ const UserDashboard: React.FC = () => {
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting': 
                 return isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
+            case 'API Management':
+                return isSubscribed ? <ApiManagement /> : <UpgradePrompt featureName="API Access" />;
             case 'Settings': return <Settings />;
             default: return <UserAnalytics />;
         }
@@ -67,6 +70,7 @@ const UserDashboard: React.FC = () => {
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
                 </nav>
                 <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
