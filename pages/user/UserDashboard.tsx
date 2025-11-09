@@ -45,7 +45,7 @@ const UserDashboard: React.FC = () => {
             case 'Accounting': 
                 return isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
             case 'API Management':
-                return isSubscribed ? <ApiManagement /> : <UpgradePrompt featureName="API Access" />;
+                return <ApiManagement />;
             case 'Settings': return <Settings />;
             default: return <UserAnalytics />;
         }
@@ -70,7 +70,7 @@ const UserDashboard: React.FC = () => {
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
-                    <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
                 </nav>
                 <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
