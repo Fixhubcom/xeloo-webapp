@@ -98,6 +98,7 @@ export interface RecurringPayment {
   nextPaymentDate: string;
   endDate?: string;
   status: 'Active' | 'Paused';
+  recipientCountry?: string;
 }
 
 export interface MultiSigTransaction {

@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { RecurringPayment } from '../../types';
+import { useAuth } from '../../hooks/useAuth';
 
 const mockRecurringPayments: RecurringPayment[] = [
-    { id: 'rec-001', recipientName: 'Digital Exports', amount: 3500.00, currency: 'USD', frequency: 'Monthly', nextPaymentDate: '2024-08-15', status: 'Active' },
-    { id: 'rec-002', recipientName: 'Innovate UK', amount: 250.00, currency: 'USD', frequency: 'Monthly', nextPaymentDate: '2024-08-20', status: 'Active' },
-    { id: 'rec-003', recipientName: 'Ghana Goods', amount: 750.00, currency: 'USD', frequency: 'Weekly', nextPaymentDate: '2024-07-26', status: 'Paused' },
+    { id: 'rec-001', recipientName: 'Digital Exports', amount: 3500.00, currency: 'USD', recipientCountry: 'USA', frequency: 'Monthly', nextPaymentDate: '2024-08-15', status: 'Active' },
+    { id: 'rec-002', recipientName: 'Innovate UK', amount: 200.50, currency: 'GBP', recipientCountry: 'UK', frequency: 'Monthly', nextPaymentDate: '2024-08-20', status: 'Active' },
+    { id: 'rec-003', recipientName: 'Ghana Goods', amount: 9825.00, currency: 'GHS', recipientCountry: 'Ghana', frequency: 'Weekly', nextPaymentDate: '2024-07-26', status: 'Paused' },
 ];
+
+const countries: string[] = ["USA", "Nigeria", "Ghana", "Kenya", "UK", "Germany", "Canada"];
+const countryToCurrency: { [key: string]: string } = { 'USA': 'USD', 'Nigeria': 'NGN', 'Ghana': 'GHS', 'Kenya': 'KES', 'UK': 'GBP', 'Germany': 'EUR', 'Canada': 'CAD' };
+const MOCK_RATES: { [key: string]: number } = { USD: 1, NGN: 1480.0, GHS: 14.5, KES: 130.0, GBP: 0.79, EUR: 0.92, CAD: 1.37 };
+
 
 const StatusBadge: React.FC<{ status: RecurringPayment['status'] }> = ({ status }) => {
     const baseClasses = "px-2.5 py-0.5 text-xs font-medium rounded-full";
@@ -20,7 +27,27 @@ const StatusBadge: React.FC<{ status: RecurringPayment['status'] }> = ({ status 
 
 
 const RecurringPaymentForm: React.FC<{ onCancel: () => void; onSave: (payment: Omit<RecurringPayment, 'id'>) => void; }> = ({ onCancel, onSave }) => {
+    const { user } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
+    const [recipientCountry, setRecipientCountry] = useState('Nigeria');
+    const [amount, setAmount] = useState('');
+    const [equivalentValue, setEquivalentValue] = useState(0);
+
+    const currency = countryToCurrency[recipientCountry];
+    const displayCurrency = user?.preferredCurrency || 'USD';
+
+    useEffect(() => {
+        const numAmount = parseFloat(amount);
+        const fromRate = MOCK_RATES[currency] || 0;
+        const toRate = MOCK_RATES[displayCurrency] || 0;
+        if (!isNaN(numAmount) && fromRate > 0 && toRate > 0) {
+            const valueInUSD = numAmount / fromRate;
+            setEquivalentValue(valueInUSD * toRate);
+        } else {
+            setEquivalentValue(0);
+        }
+    }, [amount, currency, displayCurrency]);
+
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -29,8 +56,9 @@ const RecurringPaymentForm: React.FC<{ onCancel: () => void; onSave: (payment: O
             const formData = new FormData(e.currentTarget);
             const newPayment = {
                 recipientName: formData.get('recipientName') as string,
-                amount: parseFloat(formData.get('amount') as string),
-                currency: 'USD',
+                amount: parseFloat(amount),
+                currency: currency,
+                recipientCountry: recipientCountry,
                 frequency: formData.get('frequency') as 'Weekly' | 'Monthly' | 'Quarterly',
                 nextPaymentDate: formData.get('startDate') as string,
                 endDate: formData.get('endDate') as string || undefined,
@@ -46,7 +74,25 @@ const RecurringPaymentForm: React.FC<{ onCancel: () => void; onSave: (payment: O
             <h2 className="text-xl font-bold mb-4 text-white">Setup New Recurring Payment</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input name="recipientName" placeholder="Recipient Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                <input name="amount" type="number" placeholder="Amount (USD)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-1">
+                        <label className="text-sm font-medium text-gray-400">Recipient's Country</label>
+                        <select value={recipientCountry} onChange={e => setRecipientCountry(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light">
+                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="text-sm font-medium text-gray-400">Amount (in {currency})</label>
+                        <input name="amount" type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required />
+                    </div>
+                </div>
+                {equivalentValue > 0 && (
+                    <p className="text-sm text-gray-400 text-right -mt-2">
+                        ≈ {equivalentValue.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}
+                    </p>
+                )}
+
                 <div>
                     <label className="text-sm font-medium text-gray-400">Frequency</label>
                     <select name="frequency" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required>
@@ -77,8 +123,11 @@ const RecurringPaymentForm: React.FC<{ onCancel: () => void; onSave: (payment: O
 };
 
 const RecurringPayments: React.FC = () => {
+    const { user } = useAuth();
     const [payments, setPayments] = useState(mockRecurringPayments);
     const [showForm, setShowForm] = useState(false);
+    const displayCurrency = user?.preferredCurrency || 'USD';
+
 
     const handleSave = (newPaymentData: Omit<RecurringPayment, 'id'>) => {
         const newPayment: RecurringPayment = {
@@ -96,6 +145,17 @@ const RecurringPayments: React.FC = () => {
             )
         );
     };
+
+    const getEquivalentValue = (amount: number, currency: string) => {
+        const fromRate = MOCK_RATES[currency] || 0;
+        const toRate = MOCK_RATES[displayCurrency] || 0;
+        if (fromRate > 0 && toRate > 0) {
+            const valueInUSD = amount / fromRate;
+            return (valueInUSD * toRate).toLocaleString('en-US', { style: 'currency', currency: displayCurrency });
+        }
+        return 'N/A';
+    };
+
 
     if (showForm) {
         return <RecurringPaymentForm onCancel={() => setShowForm(false)} onSave={handleSave} />;
@@ -124,8 +184,14 @@ const RecurringPayments: React.FC = () => {
                     <tbody>
                         {payments.map((p) => (
                             <tr key={p.id} className="bg-primary-light border-b border-primary">
-                                <td className="px-6 py-4 font-medium text-white">{p.recipientName}</td>
-                                <td className="px-6 py-4 font-mono">{p.amount.toFixed(2)} {p.currency}</td>
+                                <td className="px-6 py-4">
+                                    <div className="font-medium text-white">{p.recipientName}</div>
+                                    <div className="text-xs">{p.recipientCountry}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="font-mono">{p.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} {p.currency}</div>
+                                    <div className="text-xs font-mono text-gray-500">~ {getEquivalentValue(p.amount, p.currency)}</div>
+                                </td>
                                 <td className="px-6 py-4">{p.frequency}</td>
                                 <td className="px-6 py-4">{p.nextPaymentDate}</td>
                                 <td className="px-6 py-4"><StatusBadge status={p.status} /></td>

@@ -15,7 +15,7 @@ const mockTeam = [
 
 
 const Settings: React.FC = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [formData, setFormData] = useState({
         name: user?.name || '',
         companyName: user?.companyName || '',
@@ -49,6 +49,7 @@ const Settings: React.FC = () => {
         // Simulate API call to save data
         setTimeout(() => {
             console.log("Saving user data:", formData);
+            updateUser(formData);
             setIsSaving(false);
             setIsSuccess(true);
             setTimeout(() => setIsSuccess(false), 3000); // Hide success message after 3s
@@ -99,8 +100,7 @@ const Settings: React.FC = () => {
                 setUsernameError('This username is already taken.');
                 setIsSavingUsername(false);
             } else {
-                // In a real app, you'd update the user object in the context here.
-                // For this mock, we just lock the field.
+                updateUser({ username });
                 setIsUsernameSet(true);
                 setIsSavingUsername(false);
             }
@@ -137,6 +137,27 @@ const Settings: React.FC = () => {
                         {isSuccess && <span className="text-accent">Profile updated successfully!</span>}
                     </div>
                 </form>
+            </Card>
+
+            <Card>
+                <h2 className="text-2xl font-bold mb-6">Preferences</h2>
+                <div>
+                    <label htmlFor="preferredCurrency" className="block text-sm font-medium text-gray-400">Preferred Display Currency</label>
+                    <p className="text-xs text-gray-500 mb-2">This currency will be used to show equivalent values across the app.</p>
+                    <select
+                        id="preferredCurrency"
+                        value={user?.preferredCurrency || 'USD'}
+                        onChange={(e) => updateUser({ preferredCurrency: e.target.value })}
+                        className="mt-1 w-full max-w-xs bg-primary p-2 rounded border border-primary-light"
+                    >
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="NGN">NGN - Nigerian Naira</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                    </select>
+                </div>
             </Card>
 
             <Card>

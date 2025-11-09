@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (email: string, role: UserRole) => void;
   logout: () => void;
   isLoading: boolean;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,9 +86,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = useCallback(() => {
     setUser(null);
   }, []);
+  
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser(currentUser => currentUser ? { ...currentUser, ...updates } : null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

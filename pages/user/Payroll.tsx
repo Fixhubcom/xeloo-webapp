@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { useAuth } from '../../hooks/useAuth';
@@ -14,9 +14,9 @@ interface Employee {
     currency: string;
     salary: number;
 }
-const MOCK_RATES: { [key: string]: number } = {
-    USD: 1, NGN: 1480.0, GHS: 14.5, KES: 130.0, GBP: 0.79, EUR: 0.92,
-};
+const MOCK_RATES: { [key: string]: number } = { USD: 1, NGN: 1480.0, GHS: 14.5, KES: 130.0, GBP: 0.79, EUR: 0.92, CAD: 1.37 };
+const countryToCurrency: { [key: string]: string } = { 'USA': 'USD', 'Nigeria': 'NGN', 'Ghana': 'GHS', 'Kenya': 'KES', 'UK': 'GBP', 'Germany': 'EUR', 'Canada': 'CAD' };
+const countries = Object.keys(countryToCurrency);
 
 const mockEmployees: Employee[] = [
     { id: 'emp_1', name: 'Adebayo Adekunle', email: 'adebayo@example.com', country: 'Nigeria', currency: 'NGN', salary: 750000 },
@@ -25,52 +25,133 @@ const mockEmployees: Employee[] = [
 ];
 // --- END MOCK DATA ---
 
+const EmployeeForm: React.FC<{
+    employee?: Employee | null;
+    onSave: (employee: Omit<Employee, 'id'> & { id?: string }) => void;
+    onCancel: () => void;
+}> = ({ employee, onSave, onCancel }) => {
+    const { user } = useAuth();
+    const [name, setName] = useState(employee?.name || '');
+    const [email, setEmail] = useState(employee?.email || '');
+    const [country, setCountry] = useState(employee?.country || 'Nigeria');
+    const [salary, setSalary] = useState(employee?.salary?.toString() || '');
+    const [equivalentValue, setEquivalentValue] = useState(0);
+
+    const currency = countryToCurrency[country];
+    const displayCurrency = user?.preferredCurrency || 'USD';
+
+    useEffect(() => {
+        const numSalary = parseFloat(salary);
+        const fromRate = MOCK_RATES[currency] || 0;
+        const toRate = MOCK_RATES[displayCurrency] || 0;
+
+        if (!isNaN(numSalary) && fromRate > 0 && toRate > 0) {
+            const valueInUSD = numSalary / fromRate;
+            setEquivalentValue(valueInUSD * toRate);
+        } else {
+            setEquivalentValue(0);
+        }
+    }, [salary, currency, displayCurrency]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave({
+            id: employee?.id,
+            name,
+            email,
+            country,
+            currency,
+            salary: parseFloat(salary),
+        });
+    };
+
+    return (
+        <Card className="max-w-2xl mx-auto">
+            <h2 className="text-xl font-bold mb-4">{employee ? 'Edit Employee' : 'Add New Employee'}</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                <input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="Email Address" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                <div className="flex gap-4">
+                    <div className="w-1/2">
+                        <label className="text-sm text-gray-400">Country</label>
+                        <select value={country} onChange={e => setCountry(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light">
+                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div className="w-1/2">
+                        <label className="text-sm text-gray-400">Salary (in {currency})</label>
+                        <input value={salary} onChange={e => setSalary(e.target.value)} type="number" step="0.01" placeholder="5000" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required />
+                    </div>
+                </div>
+                {equivalentValue > 0 && (
+                    <p className="text-sm text-gray-400 text-right -mt-2">
+                        ≈ {equivalentValue.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}
+                    </p>
+                )}
+                <div className="flex justify-end space-x-3 pt-4">
+                    <button type="button" onClick={onCancel} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
+                    <button type="submit" className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Save Employee</button>
+                </div>
+            </form>
+        </Card>
+    );
+};
+
 const Payroll: React.FC = () => {
     const { user } = useAuth();
     const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
-    const [view, setView] = useState<'list' | 'add_form' | 'confirm' | 'success'>('list');
+    const [view, setView] = useState<'list' | 'form' | 'confirm' | 'success'>('list');
+    const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    
+    const displayCurrency = user?.preferredCurrency || 'USD';
 
-    // Form state
-    const [newName, setNewName] = useState('');
-    const [newEmail, setNewEmail] = useState('');
-    const [newCurrency, setNewCurrency] = useState('NGN');
-    const [newSalary, setNewSalary] = useState('');
-
-    const fromCurrency = user?.preferredCurrency || 'USD';
-
-    const totalPayrollUSD = useMemo(() => {
-        return employees.reduce((total, emp) => {
+    const totalPayrollDisplayCurrency = useMemo(() => {
+        const totalUSD = employees.reduce((total, emp) => {
             const rate = MOCK_RATES[emp.currency] || 0;
-            const salaryInUSD = rate > 0 ? emp.salary / rate : 0;
-            return total + salaryInUSD;
+            return total + (rate > 0 ? emp.salary / rate : 0);
         }, 0);
-    }, [employees]);
+        const displayRate = MOCK_RATES[displayCurrency] || 1;
+        return totalUSD * displayRate;
+    }, [employees, displayCurrency]);
 
-    const handleAddEmployee = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newEmployee: Employee = {
-            id: `emp_${Date.now()}`,
-            name: newName,
-            email: newEmail,
-            country: 'Unknown', // Could be improved with a country selector
-            currency: newCurrency,
-            salary: parseFloat(newSalary),
-        };
-        setEmployees(prev => [...prev, newEmployee]);
+    const handleSaveEmployee = (employeeData: Omit<Employee, 'id'> & { id?: string }) => {
+        if (employeeData.id) {
+            // Editing existing employee
+            setEmployees(emps => emps.map(e => e.id === employeeData.id ? { ...e, ...employeeData } as Employee : e));
+        } else {
+            // Adding new employee
+            const newEmployee: Employee = {
+                id: `emp_${Date.now()}`,
+                ...employeeData
+            } as Employee;
+            setEmployees(prev => [...prev, newEmployee]);
+        }
         setView('list');
-        // Reset form
-        setNewName(''); setNewEmail(''); setNewCurrency('NGN'); setNewSalary('');
+        setEditingEmployee(null);
     };
 
     const handleRunPayroll = () => {
         setIsProcessing(true);
-        // Simulate API call
         setTimeout(() => {
             setIsProcessing(false);
             setView('success');
         }, 2000);
     };
+    
+    const getEquivalentValue = (amount: number, currency: string) => {
+        const fromRate = MOCK_RATES[currency] || 0;
+        const toRate = MOCK_RATES[displayCurrency] || 0;
+        if (fromRate > 0 && toRate > 0) {
+            const valueInUSD = amount / fromRate;
+            return (valueInUSD * toRate).toLocaleString('en-US', { style: 'currency', currency: displayCurrency });
+        }
+        return 'N/A';
+    };
+
+    if (view === 'form') {
+        return <EmployeeForm onSave={handleSaveEmployee} onCancel={() => setView('list')} employee={editingEmployee} />;
+    }
 
     if (view === 'success') {
         return (
@@ -78,7 +159,7 @@ const Payroll: React.FC = () => {
                 <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-green-400 mb-2">Payroll Submitted!</h2>
                 <p className="text-gray-light mb-6">
-                    A total of {totalPayrollUSD.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} has been processed for {employees.length} employees.
+                    A total of {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} has been processed for {employees.length} employees.
                 </p>
                 <button onClick={() => setView('list')} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
                     Back to Payroll
@@ -91,24 +172,20 @@ const Payroll: React.FC = () => {
         return (
             <Card className="max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold mb-4">Confirm Payroll Run</h2>
-                <p className="text-gray-light mb-6">Review the payment details below. A total of {totalPayrollUSD.toLocaleString('en-US', { style: 'currency', currency: fromCurrency })} will be deducted from your primary account.</p>
+                <p className="text-gray-light mb-6">Review the payment details below. A total of {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} will be deducted from your primary account.</p>
                 <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
-                    {employees.map(emp => {
-                        const rate = MOCK_RATES[emp.currency] || 0;
-                        const salaryInUSD = rate > 0 ? emp.salary / rate : 0;
-                        return (
-                            <div key={emp.id} className="p-3 bg-primary rounded-md flex justify-between items-center">
-                                <div>
-                                    <p className="font-semibold text-white">{emp.name}</p>
-                                    <p className="text-sm text-gray-400">{emp.email}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-mono text-accent">{emp.salary.toLocaleString('en-US', { style: 'currency', currency: emp.currency })}</p>
-                                    <p className="text-xs font-mono text-gray-400">~ {salaryInUSD.toLocaleString('en-US', { style: 'currency', currency: fromCurrency })}</p>
-                                </div>
+                    {employees.map(emp => (
+                        <div key={emp.id} className="p-3 bg-primary rounded-md flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-white">{emp.name}</p>
+                                <p className="text-sm text-gray-400">{emp.email}</p>
                             </div>
-                        )
-                    })}
+                            <div className="text-right">
+                                <p className="font-mono text-accent">{emp.salary.toLocaleString('en-US', { style: 'currency', currency: emp.currency })}</p>
+                                <p className="text-xs font-mono text-gray-400">~ {getEquivalentValue(emp.salary, emp.currency)}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <div className="flex justify-end space-x-4 mt-6 pt-4 border-t border-primary-light">
                     <button onClick={() => setView('list')} disabled={isProcessing} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
@@ -119,34 +196,6 @@ const Payroll: React.FC = () => {
             </Card>
         );
     }
-    
-    if (view === 'add_form') {
-         return (
-            <Card className="max-w-2xl mx-auto">
-                <h2 className="text-xl font-bold mb-4">Add New Employee</h2>
-                <form onSubmit={handleAddEmployee} className="space-y-4">
-                    <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Full Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                    <input value={newEmail} onChange={e => setNewEmail(e.target.value)} type="email" placeholder="Email Address" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                    <div className="flex gap-4">
-                        <div className="w-1/3">
-                            <label className="text-sm text-gray-400">Currency</label>
-                            <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light">
-                                {Object.keys(MOCK_RATES).map(curr => <option key={curr} value={curr}>{curr}</option>)}
-                            </select>
-                        </div>
-                        <div className="w-2/3">
-                             <label className="text-sm text-gray-400">Salary (in their currency)</label>
-                             <input value={newSalary} onChange={e => setNewSalary(e.target.value)} type="number" step="0.01" placeholder="5000" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required />
-                        </div>
-                    </div>
-                    <div className="flex justify-end space-x-3 pt-4">
-                        <button type="button" onClick={() => setView('list')} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
-                        <button type="submit" className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
-                    </div>
-                </form>
-            </Card>
-        );
-    }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -154,7 +203,7 @@ const Payroll: React.FC = () => {
                 <Card>
                      <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-white">Manage Employees</h2>
-                        <button onClick={() => setView('add_form')} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
+                        <button onClick={() => { setEditingEmployee(null); setView('form'); }} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
                     </div>
                      <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-gray-400">
@@ -172,9 +221,12 @@ const Payroll: React.FC = () => {
                                             <div className="font-medium text-white">{emp.name}</div>
                                             <div className="text-xs">{emp.email}</div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono">{emp.salary.toLocaleString(undefined, { maximumFractionDigits: 2 })} {emp.currency}</td>
                                         <td className="px-6 py-4">
-                                            <button className="font-medium text-accent hover:underline text-xs">Edit</button>
+                                            <div className="font-mono">{emp.salary.toLocaleString(undefined, { maximumFractionDigits: 2 })} {emp.currency}</div>
+                                            <div className="text-xs font-mono text-gray-500">~ {getEquivalentValue(emp.salary, emp.currency)}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button onClick={() => { setEditingEmployee(emp); setView('form'); }} className="font-medium text-accent hover:underline text-xs">Edit</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -192,7 +244,7 @@ const Payroll: React.FC = () => {
                     </div>
                     <div>
                         <p className="text-gray-400">Estimated Monthly Payroll</p>
-                        <p className="text-3xl font-bold text-accent">{totalPayrollUSD.toLocaleString('en-US', { style: 'currency', currency: fromCurrency })}</p>
+                        <p className="text-3xl font-bold text-accent">{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
                     </div>
                     <button onClick={() => setView('confirm')} disabled={employees.length === 0} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed">
                         Run Payroll
