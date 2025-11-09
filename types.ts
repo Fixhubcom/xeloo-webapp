@@ -26,6 +26,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  username?: string;
   subRole?: UserSubRole;
   companyName?: string;
   bankAccounts?: BankAccount[];

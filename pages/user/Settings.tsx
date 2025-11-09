@@ -30,6 +30,12 @@ const Settings: React.FC = () => {
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [show2FASetup, setShow2FASetup] = useState(false);
 
+    // State for username management
+    const [username, setUsername] = useState(user?.username || '');
+    const [isUsernameSet, setIsUsernameSet] = useState(!!user?.username);
+    const [isSavingUsername, setIsSavingUsername] = useState(false);
+    const [usernameError, setUsernameError] = useState('');
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -79,6 +85,29 @@ const Settings: React.FC = () => {
         setApiKey(newKey);
     };
 
+    const handleSetUsername = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!username || username.length < 3) {
+            setUsernameError('Username must be at least 3 characters long and contain only letters, numbers, and underscores.');
+            return;
+        }
+        // Mock check for availability
+        setIsSavingUsername(true);
+        setUsernameError('');
+        setTimeout(() => {
+            if (username === 'taken' || username === 'admin') {
+                setUsernameError('This username is already taken.');
+                setIsSavingUsername(false);
+            } else {
+                // In a real app, you'd update the user object in the context here.
+                // For this mock, we just lock the field.
+                setIsUsernameSet(true);
+                setIsSavingUsername(false);
+            }
+        }, 1000);
+    };
+
+
     return (
         <div className="space-y-8">
             <Card>
@@ -108,6 +137,47 @@ const Settings: React.FC = () => {
                         {isSuccess && <span className="text-accent">Profile updated successfully!</span>}
                     </div>
                 </form>
+            </Card>
+
+            <Card>
+                <h2 className="text-2xl font-bold mb-6">Username & Profile URL</h2>
+                <p className="text-sm text-gray-400 mb-4">Your username is unique and can be used for instant Xeloo-to-Xeloo transfers. It can only be set once.</p>
+                {isUsernameSet ? (
+                    <div>
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-400">Your Username</label>
+                        <div className="mt-1 flex items-center">
+                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-primary-light bg-primary text-gray-400 sm:text-sm">
+                                xeloo.app/u/
+                            </span>
+                            <input id="username" name="username" value={username} readOnly className="flex-1 block w-full min-w-0 rounded-none rounded-r-md bg-primary-light p-2 border border-primary-light text-gray-400 cursor-not-allowed" />
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSetUsername} className="space-y-2">
+                        <div className="flex items-end space-x-3">
+                            <div className="flex-grow">
+                                <label htmlFor="new_username" className="block text-sm font-medium text-gray-400">Set Your Username</label>
+                                <div className="mt-1 flex items-center">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-primary-light bg-primary text-gray-400 sm:text-sm">
+                                        xeloo.app/u/
+                                    </span>
+                                    <input 
+                                        id="new_username" 
+                                        name="new_username" 
+                                        value={username}
+                                        onChange={(e) => { setUsername(e.target.value); setUsernameError(''); }}
+                                        pattern="^[a-zA-Z0-9_]{3,15}$"
+                                        className="flex-1 block w-full min-w-0 rounded-none rounded-r-md bg-primary p-2 border border-primary-light" 
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" disabled={isSavingUsername} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center w-28">
+                                 {isSavingUsername ? <Spinner /> : 'Save'}
+                            </button>
+                        </div>
+                        {usernameError && <p className="text-yellow-400 text-xs mt-1">{usernameError}</p>}
+                    </form>
+                )}
             </Card>
 
             <Card>

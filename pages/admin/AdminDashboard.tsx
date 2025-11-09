@@ -26,6 +26,9 @@ import SupportManagement from './SupportManagement';
 import BlockchainManagement from './BlockchainManagement';
 import AdminSettings from './AdminSettings';
 import AdminTeamManagement from './TeamManagement';
+import PartnersManagement from './PartnersManagement';
+import MerchantsManagement from './MerchantsManagement';
+import TransactionsManagement from './TransactionsManagement';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -93,11 +96,11 @@ const AdminDashboard: React.FC = () => {
     const renderContent = () => {
         switch (activeView) {
             case 'Dashboard': return <AdminOverview />;
-            case 'Partners': return <PlaceholderContent title="Partners" />;
-            case 'Merchants': return <PlaceholderContent title="Merchants" />;
+            case 'Partners': return <PartnersManagement />;
+            case 'Merchants': return <MerchantsManagement />;
             case 'Users': return <UserManagement />;
             case 'Team Management': return <AdminTeamManagement />;
-            case 'Transactions': return <PlaceholderContent title="Transactions" />;
+            case 'Transactions': return <TransactionsManagement />;
             case 'Support': return <SupportManagement />;
             case 'Blockchain': return <BlockchainManagement />;
             case 'API': return <PlaceholderContent title="API" />;

@@ -27,9 +27,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let isSubscribed = true; // Subscribed by default for admin/partner/merchant
       let hederaWalletAddress: string | undefined = undefined;
       let accountOfficerId: string | undefined = undefined;
+      let username: string | undefined = undefined;
 
       switch (role) {
-        case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; break;
+        case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; username = 'superadmin'; break;
         case UserRole.PARTNER: 
             name = 'Financial Partner'; 
             companyName = 'Global Bank'; 
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarBgColor="#10b981"; 
             hederaWalletAddress="0.0.123456";
             accountOfficerId = '5';
+            username = 'globalbank';
             break;
         case UserRole.MERCHANT: 
             name = 'Crypto Merchant'; 
@@ -44,6 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarInitials="CM"; 
             avatarBgColor="#8b5cf6"; 
             accountOfficerId = '5';
+            username = 'digitalassets';
             break;
         case UserRole.USER: 
           name = 'John Doe'; 
@@ -63,6 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         email, 
         role, 
         name, 
+        username,
         companyName,
         subRole: role === UserRole.USER ? UserSubRole.ADMINISTRATOR : undefined,
         bankAccounts,
