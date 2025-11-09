@@ -140,6 +140,17 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
         window.print();
     };
 
+    const handleMarkAsPaid = (invoiceId: string) => {
+        setInvoices(currentInvoices =>
+            currentInvoices.map(inv =>
+                inv.id === invoiceId ? { ...inv, status: 'Paid' } : inv
+            )
+        );
+        if (selectedInvoice && selectedInvoice.id === invoiceId) {
+            setSelectedInvoice(prev => prev ? { ...prev, status: 'Paid' } : null);
+        }
+    };
+
     // --- RENDER FUNCTIONS ---
 
     const renderListView = () => (
@@ -236,7 +247,14 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
         <div>
             <div className="flex justify-between items-center mb-6 no-print">
                 <button onClick={() => setView('list')} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90">&larr; Back to Invoices</button>
-                <button onClick={handlePrint} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Print / Download PDF</button>
+                <div className="flex items-center space-x-2">
+                    {selectedInvoice && selectedInvoice.status !== 'Paid' && (
+                        <button onClick={() => handleMarkAsPaid(selectedInvoice.id)} className="bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
+                            Mark as Paid
+                        </button>
+                    )}
+                    <button onClick={handlePrint} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Print / Download PDF</button>
+                </div>
             </div>
             
             <style>{`
