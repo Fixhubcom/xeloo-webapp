@@ -119,3 +119,18 @@ export interface JournalEntry {
   debit: number;
   credit: number;
 }
+
+export type EscrowStatus = 'Awaiting Funding' | 'In Escrow' | 'Awaiting Release' | 'Completed' | 'Disputed' | 'Canceled';
+
+export interface EscrowTransaction {
+  id: string;
+  buyerUsername: string;
+  sellerUsername: string;
+  amount: number;
+  fee: number;
+  description: string;
+  status: EscrowStatus;
+  createdAt: string;
+  fundedAt?: string;
+  releasedAt?: string;
+}

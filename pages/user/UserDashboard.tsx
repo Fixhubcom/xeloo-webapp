@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -6,7 +5,7 @@ import Avatar from '../../components/common/Avatar';
 import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User, UserRole } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon } from '../../components/icons/Icons';
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon, ShieldCheckIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -21,8 +20,9 @@ import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
 import Payroll from './Payroll';
 import UpgradePrompt from '../../components/common/UpgradePrompt';
+import Escrow from './Escrow';
 
-type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support';
+type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Escrow' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support';
 
 const UserDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -40,6 +40,7 @@ const UserDashboard: React.FC = () => {
                 return user?.isSubscribed ? <Invoices searchQuery={searchQuery} /> : <UpgradePrompt featureName="Invoicing" />;
             case 'Payroll':
                 return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" />;
+            case 'Escrow': return <Escrow searchQuery={searchQuery} />;
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting':
                 return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" />;
@@ -68,6 +69,7 @@ const UserDashboard: React.FC = () => {
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<ShieldCheckIcon />} label="Escrow" activeItem={activeView} setItem={setActiveView} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
