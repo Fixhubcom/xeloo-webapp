@@ -91,7 +91,8 @@ const UserDashboard: React.FC = () => {
 }
 
 interface NavItemLinkProps {
-  icon: React.ReactNode;
+  // FIX: Changed icon prop type from React.ReactNode to a more specific React.ReactElement that accepts a className. This allows React.cloneElement to correctly pass props without a type error.
+  icon: React.ReactElement<{ className?: string }>;
   label: NavItem;
   activeItem: NavItem;
   setItem: (item: NavItem) => void;
@@ -112,7 +113,7 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
           : 'text-gray-light hover:bg-primary-light hover:text-white'
       }`}
     >
-      {React.cloneElement(icon as React.ReactElement, { className: 'w-5 h-5' })}
+      {React.cloneElement(icon, { className: 'w-5 h-5' })}
       <span className="ml-3">{label}</span>
     </a>
   );
