@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -14,10 +13,12 @@ import {
     AnalyticsIcon, 
     CodeIcon, 
     SettingsIcon, 
-    SupportIcon 
+    SupportIcon,
+    UsersIcon
 } from '../../components/icons/Icons';
 import { User, AssetListing } from '../../types';
 import Spinner from '../../components/common/Spinner';
+import TeamManagement from './TeamManagement';
 
 const mockListings: AssetListing[] = [
     { id: 'LST-001', asset: 'USDT', amount: 5000, pricePerUnit: 1450.50, localCurrency: 'NGN', status: 'Active' },
@@ -39,6 +40,7 @@ type NavItem =
     | 'Settlements'
     | 'Reports'
     | 'API Management'
+    | 'Team Management'
     | 'Settings'
     | 'Support';
 
@@ -191,6 +193,7 @@ const MerchantDashboard: React.FC = () => {
             case 'Settlements': return <PlaceholderContent title="Settlements" />;
             case 'Reports': return <PlaceholderContent title="Reports" />;
             case 'API Management': return <PlaceholderContent title="API Management" />;
+            case 'Team Management': return <TeamManagement />;
             case 'Settings': return <PlaceholderContent title="Settings" />;
             case 'Support': return <PlaceholderContent title="Support" />;
             default: return <MerchantOverview />;
@@ -209,6 +212,7 @@ const MerchantDashboard: React.FC = () => {
                     <NavItemLink icon={<ShoppingBagIcon />} label="Listings" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<BriefcaseIcon />} label="Settlements" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={setActiveView} />
 
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</p>
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={setActiveView} />

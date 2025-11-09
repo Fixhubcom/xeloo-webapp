@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -13,10 +12,12 @@ import {
     CodeIcon, 
     AnalyticsIcon, 
     SettingsIcon, 
-    SupportIcon 
+    SupportIcon,
+    UsersIcon
 } from '../../components/icons/Icons';
 import { User } from '../../types';
 import PartnerSettlements from './PartnerSettlements';
+import TeamManagement from './TeamManagement';
 
 // Data for the main dashboard chart
 const partnerFundsFlowData = [
@@ -33,6 +34,7 @@ type NavItem =
     | 'Transactions'
     | 'Settlements'
     | 'API Management'
+    | 'Team Management'
     | 'Reports'
     | 'Settings'
     | 'Support';
@@ -93,6 +95,7 @@ const PartnerDashboard: React.FC = () => {
             case 'Transactions': return <PlaceholderContent title="Transactions" />;
             case 'Settlements': return <PartnerSettlements />;
             case 'API Management': return <PlaceholderContent title="API Management" />;
+            case 'Team Management': return <TeamManagement />;
             case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
             case 'Settings': return <PlaceholderContent title="Settings" />;
             case 'Support': return <PlaceholderContent title="Support" />;
@@ -111,6 +114,7 @@ const PartnerDashboard: React.FC = () => {
                     <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<BriefcaseIcon />} label="Settlements" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={setActiveView} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</p>
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} />
