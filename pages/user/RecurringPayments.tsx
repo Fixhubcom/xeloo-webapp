@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -174,9 +173,9 @@ const RecurringPayments: React.FC<RecurringPaymentsProps> = ({ searchQuery }) =>
 
     return (
         <Card>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                  <h2 className="text-xl font-bold text-white">Manage Recurring Payments</h2>
-                 <button onClick={() => setShowForm(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">
+                 <button onClick={() => setShowForm(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 w-full sm:w-auto">
                      Setup New
                 </button>
             </div>

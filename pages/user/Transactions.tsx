@@ -158,7 +158,8 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                       <button onClick={handleExport} className="bg-accent text-primary font-bold py-1.5 px-4 rounded hover:bg-yellow-400">Export</button>
                  </div>
             </div>
-            <div className="overflow-x-auto">
+            {/* Table for medium screens and up */}
+            <div className="overflow-x-auto hidden md:block">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-light">
                     <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-primary">
                         <tr>
@@ -210,32 +211,59 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                     </tbody>
                 </table>
             </div>
-        </Card>
 
+             {/* Cards for small screens */}
+            <div className="space-y-4 md:hidden">
+                {filteredTransactions.map(tx => (
+                    <div key={tx.id} className="bg-primary-light p-4 rounded-lg">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <div className="font-semibold text-white">{tx.recipient}</div>
+                                <div className="text-xs text-gray-light">{tx.recipientCountry}</div>
+                                <div className="text-xs text-gray-light mt-1">{tx.date}</div>
+                            </div>
+                            <StatusBadge status={tx.status} />
+                        </div>
+                        <div className="mt-4 flex justify-between items-end">
+                            <div>
+                                <div className="font-mono text-gray-200">{tx.amountSent.toLocaleString('en-US', { style: 'currency', currency: tx.currencySent })}</div>
+                                <div className="text-xs font-mono text-green-400">
+                                    &rarr; {tx.amountReceived.toLocaleString('en-US', { style: 'currency', currency: tx.currencyReceived, minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
+                            </div>
+                            {tx.category ? (
+                                <span className="text-xs font-medium bg-gray-700 text-gray-300 px-2 py-1 rounded-full">{tx.category}</span>
+                            ) : categorizingId === tx.id ? (
+                                <Spinner className="w-4 h-4" />
+                            ) : (
+                                <button onClick={() => handleCategorize(tx.id)} className="bg-purple-500/20 text-purple-400 text-xs font-bold py-1 px-2 rounded-full hover:bg-purple-500/40">
+                                    Categorize
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </Card>
         {showAnalysis && (
-            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowAnalysis(false)}>
-                <Card className="max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-                    <h2 className="text-2xl font-bold mb-4 flex items-center"><SparklesIcon className="w-6 h-6 mr-2 text-purple-500" /> AI Analysis</h2>
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={() => setShowAnalysis(false)}>
+                <Card className="max-w-xl w-full" onClick={e => e.stopPropagation()}>
+                    <h2 className="text-2xl font-bold mb-4 flex items-center"><SparklesIcon className="w-6 h-6 mr-2 text-purple-400"/> AI Analysis of Transactions</h2>
                     {isAnalyzing ? (
-                        <div className="flex items-center justify-center py-8">
-                           <Spinner />
-                           <p className="ml-4">Analyzing your transactions...</p>
+                         <div className="flex items-center justify-center py-8">
+                            <Spinner className="w-8 h-8"/>
+                            <p className="ml-4 text-gray-300">Analyzing your transactions...</p>
                         </div>
                     ) : (
-                        <div className="space-y-4 text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
-                            <p>{analysisResult}</p>
+                        <div className="prose prose-invert max-w-none">
+                           <p className="whitespace-pre-wrap">{analysisResult}</p>
                         </div>
                     )}
-                     <div className="flex justify-end mt-6">
-                        <button onClick={() => setShowAnalysis(false)} className="bg-gray-500 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
-                            Close
-                        </button>
-                    </div>
                 </Card>
             </div>
         )}
         </>
-    )
-}
+    );
+};
 
 export default Transactions;

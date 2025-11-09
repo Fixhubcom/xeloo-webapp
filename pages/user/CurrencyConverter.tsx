@@ -51,7 +51,7 @@ const CurrencyConverter: React.FC = () => {
     return (
         <Card className="max-w-xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center">Currency Conversion Tool</h2>
-            <div className="flex items-center justify-between space-x-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 {/* From */}
                 <div className="w-full">
                     <label className="block text-sm font-medium text-gray-400">You send</label>
@@ -63,8 +63,8 @@ const CurrencyConverter: React.FC = () => {
                     </div>
                 </div>
                 
-                <div className="pt-6">
-                    <ConverterIcon className="w-8 h-8 text-accent"/>
+                <div className="py-2 md:pt-6">
+                    <ConverterIcon className="w-8 h-8 text-accent transform md:transform-none rotate-90"/>
                 </div>
 
                 {/* To */}

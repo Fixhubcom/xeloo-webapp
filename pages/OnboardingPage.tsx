@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingSuggestions } from '../types';
@@ -20,9 +19,9 @@ const StepIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) => {
                         <span className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${currentStep > index ? 'bg-accent text-primary' : currentStep === index ? 'bg-accent text-primary' : 'bg-gray-300 dark:bg-primary-light text-gray-600 dark:text-gray-300'}`}>
                             {currentStep > index ? <CheckCircleIcon className="w-5 h-5" /> : index + 1}
                         </span>
-                        <span className={`ml-3 font-medium ${currentStep >= index ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>{step}</span>
+                        <span className={`ml-2 sm:ml-3 font-medium hidden sm:inline ${currentStep >= index ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>{step}</span>
                     </div>
-                    {index < steps.length - 1 && <div className="w-8 mx-2 h-0.5 bg-gray-300 dark:bg-primary-light" />}
+                    {index < steps.length - 1 && <div className="w-4 sm:w-8 mx-1 sm:mx-2 h-0.5 bg-gray-300 dark:bg-primary-light" />}
                 </React.Fragment>
             ))}
         </nav>
@@ -152,7 +151,7 @@ const OnboardingPage: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-primary p-4">
              <div className="text-center mb-8">
-                <Logo className="text-5xl" />
+                <Logo className="text-4xl sm:text-5xl" />
                 <p className="mt-2 text-gray-500 dark:text-gray-400">Join the Future of Global Payments</p>
             </div>
 

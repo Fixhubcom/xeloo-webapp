@@ -297,7 +297,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                                 )}
                             </fieldset>
                             
-                            <div className="flex items-center space-x-4">
+                            <div className="flex flex-wrap items-center gap-4">
                                 <div className="flex items-center">
                                     <input id="schedule-payment" type="checkbox" checked={isScheduled} onChange={e => setIsScheduled(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent" />
                                     <label htmlFor="schedule-payment" className="ml-2 block text-sm text-gray-400">Schedule for later?</label>
@@ -336,7 +336,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                     </Card>
 
                     {isConfirming && (
-                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4">
                             <Card className="max-w-md w-full">
                                 <h2 className="text-2xl font-bold mb-4">{isScheduled ? 'Confirm Schedule' : 'Confirm Payment'}</h2>
                                 <div className="space-y-2 text-gray-300 mb-6">

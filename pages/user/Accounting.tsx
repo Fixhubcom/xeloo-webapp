@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -50,12 +49,12 @@ const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view:
         { name: 'Reports' }
     ];
     return (
-        <div className="mb-6 flex space-x-2 p-1 bg-primary rounded-lg">
+        <div className="mb-6 flex flex-wrap justify-center gap-2 p-1 bg-primary rounded-lg">
             {views.map(view => (
                 <button
                     key={view.name}
                     onClick={() => setActiveView(view.name)}
-                    className={`w-full flex items-center justify-center text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view.name ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
+                    className={`flex-grow sm:flex-grow-0 flex items-center justify-center text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view.name ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
                 >
                     {view.icon}
                     {view.name}
@@ -66,35 +65,37 @@ const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view:
 };
 
 const ReportTable: React.FC<{ title: string, sections: { title: string, items: { name: string, value: number }[], total: number }[], grandTotal?: { label: string, value: number } }> = ({ title, sections, grandTotal }) => (
-    <div className="bg-primary-light p-6 rounded-lg">
+    <div className="bg-primary-light p-4 sm:p-6 rounded-lg">
         <h3 className="text-xl font-bold text-center mb-4">{title}</h3>
-        <table className="w-full">
-            <tbody>
-                {sections.map(section => (
-                    <React.Fragment key={section.title}>
-                        <tr>
-                            <td colSpan={2} className="font-bold pt-4 pb-2 text-accent">{section.title}</td>
-                        </tr>
-                        {section.items.map(item => (
-                            <tr key={item.name}>
-                                <td className="pl-4 py-1">{item.name}</td>
-                                <td className="text-right font-mono">{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+        <div className="overflow-x-auto">
+            <table className="w-full">
+                <tbody>
+                    {sections.map(section => (
+                        <React.Fragment key={section.title}>
+                            <tr>
+                                <td colSpan={2} className="font-bold pt-4 pb-2 text-accent">{section.title}</td>
                             </tr>
-                        ))}
-                        <tr className="border-t border-primary">
-                            <td className="font-semibold pt-2">Total {section.title}</td>
-                            <td className="text-right font-mono font-semibold pt-2">{section.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                            {section.items.map(item => (
+                                <tr key={item.name}>
+                                    <td className="pl-4 py-1">{item.name}</td>
+                                    <td className="text-right font-mono">{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                                </tr>
+                            ))}
+                            <tr className="border-t border-primary">
+                                <td className="font-semibold pt-2">Total {section.title}</td>
+                                <td className="text-right font-mono font-semibold pt-2">{section.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                            </tr>
+                        </React.Fragment>
+                    ))}
+                    {grandTotal && (
+                        <tr className="border-t-2 border-accent mt-4">
+                            <td className="font-bold pt-4 text-lg text-accent">{grandTotal.label}</td>
+                            <td className="text-right font-mono font-bold pt-4 text-lg text-accent">{grandTotal.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
-                    </React.Fragment>
-                ))}
-                {grandTotal && (
-                    <tr className="border-t-2 border-accent mt-4">
-                        <td className="font-bold pt-4 text-lg text-accent">{grandTotal.label}</td>
-                        <td className="text-right font-mono font-bold pt-4 text-lg text-accent">{grandTotal.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
+                    )}
+                </tbody>
+            </table>
+        </div>
     </div>
 );
 
@@ -171,26 +172,30 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
             case 'Chart of Accounts':
                 return (
                     <Card>
-                        <table className="w-full text-sm text-left text-gray-400">
-                            <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Code</th><th className="px-6 py-3">Account Name</th><th className="px-6 py-3">Type</th><th className="px-6 py-3 text-right">Balance</th></tr></thead>
-                            <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
-                        </table>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-400">
+                                <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Code</th><th className="px-6 py-3">Account Name</th><th className="px-6 py-3">Type</th><th className="px-6 py-3 text-right">Balance</th></tr></thead>
+                                <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
+                            </table>
+                        </div>
                     </Card>
                 );
             case 'Journal':
                  return (
                     <Card>
-                        <table className="w-full text-sm text-left text-gray-400">
-                            <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
-                            <tbody>
-                                {filteredJournalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}
-                                {filteredJournalEntries.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="text-center py-8 text-gray-400">No journal entries found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-400">
+                                <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
+                                <tbody>
+                                    {filteredJournalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}
+                                    {filteredJournalEntries.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="text-center py-8 text-gray-400">No journal entries found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </Card>
                 );
             case 'Reports': {

@@ -5,7 +5,7 @@ import Avatar from '../../components/common/Avatar';
 import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User, UserRole } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon, ShieldCheckIcon, BriefcaseIcon, UsersIcon } from '../../components/icons/Icons';
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon, ShieldCheckIcon, BriefcaseIcon, UsersIcon, MenuIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -22,17 +22,20 @@ import Payroll from './Payroll';
 import UpgradePrompt from '../../components/common/UpgradePrompt';
 import Escrow from './Escrow';
 import Directory from './Directory';
+import TaxPayments from './TaxPayments';
 
-type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Escrow' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support' | 'Directory';
+type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Escrow' | 'Tax Payments' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support' | 'Directory';
 
 const UserDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [pageState, setPageState] = useState<{ view: NavItem, props?: any }>({ view: 'Dashboard' });
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const navigateTo = (view: NavItem, props: any = {}) => {
         setPageState({ view, props });
+        setIsSidebarOpen(false); // Close sidebar on navigation
     };
 
     const renderContent = () => {
@@ -47,6 +50,7 @@ const UserDashboard: React.FC = () => {
             case 'Payroll':
                 return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" />;
             case 'Escrow': return <Escrow searchQuery={searchQuery} {...props} />;
+            case 'Tax Payments': return <TaxPayments />;
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting':
                 return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" />;
@@ -62,13 +66,21 @@ const UserDashboard: React.FC = () => {
     };
     
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-dark">
+        <div className="flex h-screen bg-gray-100 dark:bg-dark-green overflow-hidden">
+            {/* Overlay for mobile */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+
             {/* Sidebar */}
-            <aside className="w-64 bg-white dark:bg-primary flex flex-col shadow-lg">
+            <aside className={`w-64 bg-white dark:bg-primary flex flex-col shadow-lg fixed z-30 inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}>
                 <div className="h-20 flex items-center justify-center border-b border-gray-200 dark:border-primary-light">
                     <Logo className="text-3xl" />
                 </div>
-                <nav className="flex-1 px-4 py-6 space-y-1">
+                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
                     <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<SendIcon />} label="Send Payment" activeItem={pageState.view} navigateTo={navigateTo} />
@@ -81,6 +93,7 @@ const UserDashboard: React.FC = () => {
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<UsersIcon />} label="Directory" activeItem={pageState.view} navigateTo={navigateTo} />
+                    <NavItemLink icon={<BriefcaseIcon />} label="Tax Payments" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={pageState.view} navigateTo={navigateTo} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={pageState.view} navigateTo={navigateTo} />
@@ -98,18 +111,26 @@ const UserDashboard: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
-                <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-8 border-b border-gray-200 dark:border-primary-light">
-                    <div className="relative">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Search..." 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-gray-100 dark:bg-primary-light border border-gray-300 dark:border-gray-medium rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-96"
-                        />
+                <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-gray-200 dark:border-primary-light flex-shrink-0">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-500 dark:text-gray-400 focus:outline-none">
+                            <MenuIcon className="w-6 h-6" />
+                        </button>
+                        <div className="relative hidden md:block">
+                            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-gray-100 dark:bg-primary-light border border-gray-300 dark:border-gray-medium rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4">
+                        <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-dark md:hidden">
+                            <SearchIcon className="w-6 h-6" />
+                        </button>
                         <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-dark">
                             {theme === 'dark' ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-700" />}
                         </button>
@@ -119,15 +140,15 @@ const UserDashboard: React.FC = () => {
                                 bgColor={user?.avatarBgColor || '#ccc'}
                                 className="w-10 h-10 text-lg"
                             />
-                            <div className="text-right">
-                                <p className="font-semibold text-gray-900 dark:text-white">{(user as User)?.name}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-light">{(user as User)?.companyName}</p>
+                            <div className="text-right hidden sm:block">
+                                <p className="font-semibold text-gray-900 dark:text-white truncate">{(user as User)?.name}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-light truncate">{(user as User)?.companyName}</p>
                             </div>
                         </div>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-dark-green">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">{pageState.view}</h1>
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-100 dark:bg-dark-green">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8">{pageState.view}</h1>
                     {renderContent()}
                 </div>
                 <HelpWidget />

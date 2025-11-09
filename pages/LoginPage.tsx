@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -38,11 +37,11 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-primary p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Logo className="text-5xl" />
+          <Logo className="text-4xl sm:text-5xl" />
           <p className="mt-2 text-gray-500 dark:text-gray-400">Global Payments, Simplified.</p>
         </div>
         
-        <div className="bg-white dark:bg-primary-light border border-gray-200 dark:border-primary rounded-lg shadow-xl p-8">
+        <div className="bg-white dark:bg-primary-light border border-gray-200 dark:border-primary rounded-lg shadow-xl p-6 sm:p-8">
           <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">Welcome Back</h2>
           
           <form onSubmit={handleLogin} className="space-y-6">

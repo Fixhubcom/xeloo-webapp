@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -155,9 +154,9 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
 
     const renderListView = () => (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                  <h2 className="text-xl font-bold text-white">Invoice Management</h2>
-                 <button onClick={() => setView('form')} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Create New Invoice</button>
+                 <button onClick={() => setView('form')} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 w-full sm:w-auto">Create New Invoice</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredInvoices.map(invoice => (
@@ -210,10 +209,12 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
                 <fieldset className="border border-primary-light p-4 rounded-lg">
                     <legend className="px-2 font-semibold">Invoice Items</legend>
                     {items.map((item, index) => (
-                        <div key={index} className="flex items-center gap-3 mb-3">
-                            <input value={item.description} onChange={e => handleItemChange(index, 'description', e.target.value)} placeholder="Item Description" className="flex-grow bg-primary p-2 rounded border border-primary-light" />
-                            <input value={item.quantity} onChange={e => handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)} type="number" placeholder="Qty" className="w-20 bg-primary p-2 rounded border border-primary-light" />
-                            <input value={item.price} onChange={e => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)} type="number" step="0.01" placeholder="Price" className="w-24 bg-primary p-2 rounded border border-primary-light" />
+                        <div key={index} className="flex flex-col sm:flex-row items-center gap-3 mb-3">
+                            <input value={item.description} onChange={e => handleItemChange(index, 'description', e.target.value)} placeholder="Item Description" className="w-full sm:flex-grow bg-primary p-2 rounded border border-primary-light" />
+                            <div className="flex w-full sm:w-auto gap-3">
+                                <input value={item.quantity} onChange={e => handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)} type="number" placeholder="Qty" className="w-1/2 sm:w-20 bg-primary p-2 rounded border border-primary-light" />
+                                <input value={item.price} onChange={e => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)} type="number" step="0.01" placeholder="Price" className="w-1/2 sm:w-24 bg-primary p-2 rounded border border-primary-light" />
+                            </div>
                             <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 font-bold text-xl">&times;</button>
                         </div>
                     ))}
@@ -221,7 +222,7 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
                 </fieldset>
 
                 {/* Details & Total */}
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-400">Due Date</label>
                         <input value={dueDate} onChange={e => setDueDate(e.target.value)} type="date" className="mt-1 bg-primary p-2 rounded border border-primary-light" />
@@ -245,15 +246,15 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
 
     const renderDetailView = () => (
         <div>
-            <div className="flex justify-between items-center mb-6 no-print">
-                <button onClick={() => setView('list')} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90">&larr; Back to Invoices</button>
-                <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 no-print gap-2">
+                <button onClick={() => setView('list')} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90 w-full sm:w-auto">&larr; Back to Invoices</button>
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
                     {selectedInvoice && selectedInvoice.status !== 'Paid' && (
-                        <button onClick={() => handleMarkAsPaid(selectedInvoice.id)} className="bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
+                        <button onClick={() => handleMarkAsPaid(selectedInvoice.id)} className="flex-1 bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
                             Mark as Paid
                         </button>
                     )}
-                    <button onClick={handlePrint} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Print / Download PDF</button>
+                    <button onClick={handlePrint} className="flex-1 bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Print / PDF</button>
                 </div>
             </div>
             
@@ -266,30 +267,30 @@ const Invoices: React.FC<InvoicesProps> = ({ searchQuery }) => {
                 }
             `}</style>
             
-            <Card id="invoice-printable" className="max-w-4xl mx-auto p-12 printable-area">
-                <header className="flex justify-between items-start pb-8 border-b border-primary">
+            <Card id="invoice-printable" className="max-w-4xl mx-auto p-6 sm:p-12 printable-area">
+                <header className="flex flex-col sm:flex-row justify-between items-start pb-8 border-b border-primary">
                     <div>
                         <h1 className="text-4xl font-bold text-white">INVOICE</h1>
                         <p className="text-gray-400 mt-2">Invoice #: {selectedInvoice?.id}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right mt-4 sm:mt-0">
                         <h2 className="text-2xl font-semibold">{user?.companyName}</h2>
                         <p className="text-gray-400">{user?.email}</p>
                     </div>
                 </header>
-                <section className="flex justify-between my-8">
+                <section className="flex flex-col sm:flex-row justify-between my-8">
                     <div>
                         <p className="font-semibold text-gray-400 mb-1">BILLED TO</p>
                         <h3 className="text-xl font-bold text-white">{selectedInvoice?.client.name}</h3>
                         <p className="text-gray-300">{selectedInvoice?.client.address}</p>
                         <p className="text-gray-300">{selectedInvoice?.client.email}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right mt-4 sm:mt-0">
                         <p className="font-semibold text-gray-400">Issue Date: <span className="text-white font-normal">{selectedInvoice?.issueDate}</span></p>
                         <p className="font-semibold text-gray-400">Due Date: <span className="text-white font-normal">{selectedInvoice?.dueDate}</span></p>
                     </div>
                 </section>
-                <section>
+                <section className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-primary">
                             <tr>

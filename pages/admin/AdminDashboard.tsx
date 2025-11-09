@@ -16,7 +16,8 @@ import {
     CodeIcon,
     AnalyticsIcon,
     ShieldCheckIcon,
-    SettingsIcon
+    SettingsIcon,
+    MenuIcon,
 } from '../../components/icons/Icons';
 import { User } from '../../types';
 import UserManagement from './UserManagement';
@@ -63,7 +64,7 @@ type NavItem =
 // Placeholder components for each section
 const AdminOverview: React.FC<{ setActiveView: (view: NavItem) => void }> = ({ setActiveView }) => (
     <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="text-center"><h3 className="text-lg text-gray-400">Total Users</h3><p className="text-3xl font-bold text-accent">102,495</p></Card>
             <Card className="text-center"><h3 className="text-lg text-gray-400">Volume (24h)</h3><p className="text-3xl font-bold text-accent">$1.2M</p></Card>
             <Card 
@@ -100,10 +101,16 @@ const AdminDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState<NavItem>('Dashboard');
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    
+    const navigateTo = (view: NavItem) => {
+        setActiveView(view);
+        setIsSidebarOpen(false);
+    }
 
     const renderContent = () => {
         switch (activeView) {
-            case 'Dashboard': return <AdminOverview setActiveView={setActiveView} />;
+            case 'Dashboard': return <AdminOverview setActiveView={navigateTo} />;
             case 'Partners': return <PartnersManagement searchQuery={searchQuery} />;
             case 'Merchants': return <MerchantsManagement searchQuery={searchQuery} />;
             case 'Users': return <UserManagement searchQuery={searchQuery} />;
@@ -117,34 +124,40 @@ const AdminDashboard: React.FC = () => {
             case 'Settings': return <AdminSettings />;
             case 'Commission Earnings': return <CommissionEarnings searchQuery={searchQuery} />;
             case 'Subscription Earnings': return <SubscriptionEarnings searchQuery={searchQuery} />;
-            default: return <AdminOverview setActiveView={setActiveView} />;
+            default: return <AdminOverview setActiveView={navigateTo} />;
         }
     };
     
     return (
-        <div className="flex h-screen bg-primary">
-            <aside className="w-64 bg-primary flex flex-col shadow-lg">
+        <div className="flex h-screen bg-primary overflow-hidden">
+             {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+            <aside className={`w-64 bg-primary flex flex-col shadow-lg fixed z-30 inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}>
                 <div className="h-20 flex items-center justify-center border-b border-primary-light">
                     <Logo className="text-3xl" />
                 </div>
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
-                    <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={navigateTo} />
 
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Management</p>
-                    <NavItemLink icon={<BriefcaseIcon />} label="Partners" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<ShoppingBagIcon />} label="Merchants" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<UsersIcon />} label="Users" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<BriefcaseIcon />} label="Partners" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<ShoppingBagIcon />} label="Merchants" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<UsersIcon />} label="Users" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={navigateTo} />
 
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</p>
-                    <NavItemLink icon={<CubeIcon />} label="Blockchain" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<CodeIcon />} label="API" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<ShieldCheckIcon />} label="Security" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<CubeIcon />} label="Blockchain" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<CodeIcon />} label="API" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<ShieldCheckIcon />} label="Security" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={navigateTo} />
                 </nav>
                 <div className="px-4 py-4 border-t border-primary-light">
                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
@@ -155,24 +168,34 @@ const AdminDashboard: React.FC = () => {
             </aside>
 
              <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
-                    <div className="relative">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"
-                        />
+                <header className="h-20 bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-primary-light flex-shrink-0">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-400 focus:outline-none">
+                            <MenuIcon className="w-6 h-6" />
+                        </button>
+                        <div className="relative hidden md:block">
+                            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
+                            />
+                        </div>
                     </div>
-                     <div className="text-right">
-                        <p className="font-semibold text-white">{(user as User)?.name}</p>
-                        <p className="text-sm text-gray-400">{(user as User)?.companyName}</p>
+                     <div className="flex items-center space-x-2 sm:space-x-4">
+                        <button className="p-2 rounded-full text-gray-400 hover:bg-primary-light md:hidden">
+                            <SearchIcon className="w-6 h-6" />
+                        </button>
+                        <div className="text-right">
+                            <p className="font-semibold text-white truncate">{(user as User)?.name}</p>
+                            <p className="text-sm text-gray-400 hidden sm:block truncate">{(user as User)?.companyName}</p>
+                        </div>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-8 bg-primary">
-                    <h1 className="text-3xl font-bold text-white mb-8">{activeView}</h1>
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-primary">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
             </main>
