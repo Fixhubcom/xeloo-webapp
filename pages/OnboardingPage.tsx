@@ -37,19 +37,20 @@ const OnboardingPage: React.FC = () => {
     
     const [formData, setFormData] = useState(() => {
         const savedData = localStorage.getItem('onboardingData');
-        return savedData ? JSON.parse(savedData) : {
+        const defaultData = {
             fullName: '',
             email: '',
             password: '',
             companyName: '',
             businessDescription: '',
+            suggestions: null as OnboardingSuggestions | null,
         };
+        return savedData ? { ...defaultData, ...JSON.parse(savedData) } : defaultData;
     });
     
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isCheckingEmail, setIsCheckingEmail] = useState(false);
     const emailCheckTimeout = useRef<number | null>(null);
-    const [suggestions, setSuggestions] = useState<OnboardingSuggestions | null>(null);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const navigate = useNavigate();
 
@@ -97,7 +98,7 @@ const OnboardingPage: React.FC = () => {
             setIsLoadingAI(true);
             try {
                 const result = await getOnboardingSuggestions(formData.businessDescription);
-                setSuggestions(result);
+                setFormData(prev => ({ ...prev, suggestions: result }));
             } catch (error) {
                 console.error("Failed to fetch suggestions:", error);
             } finally {
@@ -197,15 +198,15 @@ const OnboardingPage: React.FC = () => {
                                 
                                 {isLoadingAI && <div className="flex items-center text-gray-500 dark:text-gray-light"><Spinner className="mr-2" /> AI is analyzing your business...</div>}
 
-                                {suggestions && (
+                                {formData.suggestions && (
                                     <div className="bg-gray-50 dark:bg-primary p-4 rounded-lg border border-accent/30 space-y-3 animate-fade-in">
                                         <h3 className="text-lg font-semibold text-accent flex items-center"><LightbulbIcon className="mr-2"/> AI-Powered Insights</h3>
-                                        <p><strong>Category:</strong> {suggestions.businessCategory}</p>
-                                        <p><strong>KYB Risk Level:</strong> <span className={suggestions.kybRiskLevel === 'High' ? 'text-red-500' : 'text-green-500'}>{suggestions.kybRiskLevel}</span></p>
+                                        <p><strong>Category:</strong> {formData.suggestions.businessCategory}</p>
+                                        <p><strong>KYB Risk Level:</strong> <span className={formData.suggestions.kybRiskLevel === 'High' ? 'text-red-500' : 'text-green-500'}>{formData.suggestions.kybRiskLevel}</span></p>
                                         <div>
                                             <strong>Compliance Notes:</strong>
                                             <ul className="list-disc list-inside text-gray-600 dark:text-gray-light mt-1">
-                                                {suggestions.complianceNotes.map((note, i) => <li key={i}>{note}</li>)}
+                                                {formData.suggestions.complianceNotes.map((note, i) => <li key={i}>{note}</li>)}
                                             </ul>
                                         </div>
                                     </div>
@@ -221,7 +222,7 @@ const OnboardingPage: React.FC = () => {
                     )}
                     {step === 2 && (
                          <div>
-                            <KYCForm />
+                            <KYCForm suggestions={formData.suggestions} />
                             <div className="flex justify-between mt-6">
                                 <button onClick={prevStep} className="bg-gray-600 dark:bg-gray-medium text-white font-bold py-2 px-4 rounded hover:bg-gray-500">Back</button>
                                 <button onClick={nextStep} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center">

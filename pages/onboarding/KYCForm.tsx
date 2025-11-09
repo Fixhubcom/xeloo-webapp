@@ -1,11 +1,41 @@
 
 import React from 'react';
+import { OnboardingSuggestions } from '../../types';
+import { LightbulbIcon } from '../../components/icons/Icons';
 
-const KYCForm: React.FC = () => {
+interface KYCFormProps {
+    suggestions: OnboardingSuggestions | null;
+}
+
+const KYCForm: React.FC<KYCFormProps> = ({ suggestions }) => {
     return (
         <div className="space-y-6">
             <h2 className="text-xl font-bold text-white mb-4">Compliance Information (KYB/AML)</h2>
-            <p className="text-sm text-gray-light mb-4">To comply with financial regulations, please provide the following details about your business.</p>
+
+            {suggestions && (
+                <div className="bg-primary p-4 rounded-lg border border-accent/30 space-y-3 mb-6 animate-fade-in">
+                    <h3 className="text-lg font-semibold text-accent flex items-center"><LightbulbIcon className="mr-2"/> AI Onboarding Tool</h3>
+                    <p className="text-sm text-gray-light">Based on your business description, our AI has prepared the following compliance overview to guide you.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-2">
+                        <div>
+                            <p className="font-semibold text-gray-400">Identified Business Category:</p>
+                            <p className="text-white">{suggestions.businessCategory}</p>
+                        </div>
+                         <div>
+                            <p className="font-semibold text-gray-400">Estimated KYB Risk Level:</p>
+                            <p className={`font-bold ${suggestions.kybRiskLevel === 'High' ? 'text-red-400' : suggestions.kybRiskLevel === 'Medium' ? 'text-yellow-400' : 'text-green-400'}`}>{suggestions.kybRiskLevel}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-gray-400 text-sm">Key Compliance Considerations:</p>
+                        <ul className="list-disc list-inside text-gray-light mt-1 text-sm space-y-1">
+                            {suggestions.complianceNotes.map((note, i) => <li key={i}>{note}</li>)}
+                        </ul>
+                    </div>
+                </div>
+            )}
+            
+            <p className="text-sm text-gray-light -mt-2">To comply with financial regulations, please provide the following details about your business.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
