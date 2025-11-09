@@ -20,6 +20,7 @@ import SubscriptionPage from './SubscriptionPage';
 import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
 import Payroll from './Payroll';
+import UpgradePrompt from '../../components/common/UpgradePrompt';
 
 type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support';
 
@@ -35,10 +36,13 @@ const UserDashboard: React.FC = () => {
             case 'Send Payment': return <SendPayment />;
             case 'Recurring Payments': return <RecurringPayments />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
-            case 'Invoices': return <Invoices />;
-            case 'Payroll': return <Payroll />;
+            case 'Invoices':
+                return user?.isSubscribed ? <Invoices /> : <UpgradePrompt featureName="Invoicing" />;
+            case 'Payroll':
+                return user?.isSubscribed ? <Payroll /> : <UpgradePrompt featureName="Payroll" />;
             case 'Currency Converter': return <CurrencyConverter />;
-            case 'Accounting': return <Accounting />;
+            case 'Accounting':
+                return user?.isSubscribed ? <Accounting /> : <UpgradePrompt featureName="Accounting" />;
             case 'API Management':
                 return <ApiManagement />;
             case 'Subscription': return <SubscriptionPage />;
@@ -62,12 +66,12 @@ const UserDashboard: React.FC = () => {
                     <NavItemLink icon={<SendIcon />} label="Send Payment" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<RefreshIcon />} label="Recurring Payments" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<InvoiceIcon />} label="Invoices" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
+                    <NavItemLink icon={<PayrollIcon />} label="Payroll" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={activeView} setItem={setActiveView} />
-                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} />
+                    <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={activeView} setItem={setActiveView} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={setActiveView} />
                     <NavItemLink icon={<SubscriptionIcon />} label="Subscription" activeItem={activeView} setItem={setActiveView} />
@@ -132,13 +136,16 @@ interface NavItemLinkProps {
 
 const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setItem, isLocked }) => {
   const isActive = activeItem === label;
+  
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      e.preventDefault();
+      setItem(label);
+  }
+
   return (
     <a
       href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        setItem(label);
-      }}
+      onClick={handleClick}
       className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'

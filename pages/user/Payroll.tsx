@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -203,7 +202,7 @@ const Payroll: React.FC = () => {
                 <Card>
                      <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-white">Manage Employees</h2>
-                        <button onClick={() => { setEditingEmployee(null); setView('form'); }} className="bg-primary-light text-white font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
+                        <button onClick={() => { setEditingEmployee(null); setView('form'); }} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
                     </div>
                      <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-gray-400">
