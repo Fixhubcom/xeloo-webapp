@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import { ConverterIcon } from '../../components/icons/Icons';
@@ -55,12 +54,12 @@ const CurrencyConverter: React.FC = () => {
             <div className="flex items-center justify-between space-x-4">
                 {/* From */}
                 <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-light">You send</label>
+                    <label className="block text-sm font-medium text-gray-400">You send</label>
                     <div className="flex mt-1">
-                        <select value={fromCurrency} onChange={e => setFromCurrency(e.target.value)} className="bg-gray-dark p-3 rounded-l-md border border-gray-medium appearance-none">
+                        <select value={fromCurrency} onChange={e => setFromCurrency(e.target.value)} className="bg-primary p-3 rounded-l-md border border-primary-light appearance-none">
                             {Object.keys(rates).map(curr => <option key={curr}>{curr}</option>)}
                         </select>
-                        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-gray-medium text-right font-mono text-xl" />
+                        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-primary-light text-right font-mono text-xl" />
                     </div>
                 </div>
                 
@@ -70,16 +69,16 @@ const CurrencyConverter: React.FC = () => {
 
                 {/* To */}
                 <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-light">They receive</label>
+                    <label className="block text-sm font-medium text-gray-400">They receive</label>
                      <div className="flex mt-1">
-                        <select value={toCurrency} onChange={e => setToCurrency(e.target.value)} className="bg-gray-dark p-3 rounded-l-md border border-gray-medium appearance-none">
+                        <select value={toCurrency} onChange={e => setToCurrency(e.target.value)} className="bg-primary p-3 rounded-l-md border border-primary-light appearance-none">
                             {Object.keys(rates).map(curr => <option key={curr}>{curr}</option>)}
                         </select>
-                        <input type="text" value={result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} readOnly className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-gray-medium text-right font-mono text-xl text-green-400" />
+                        <input type="text" value={result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} readOnly className="w-full bg-primary-light p-3 rounded-r-md border-t border-b border-r border-primary-light text-right font-mono text-xl text-accent" />
                     </div>
                 </div>
             </div>
-            <div className="text-center mt-6 text-gray-light">
+            <div className="text-center mt-6 text-gray-400">
                 1 {fromCurrency} ≈ {(rates[toCurrency] / rates[fromCurrency]).toFixed(4)} {toCurrency}
             </div>
         </Card>

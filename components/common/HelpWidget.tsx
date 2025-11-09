@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SupportIcon } from '../icons/Icons';
 import Spinner from './Spinner';
@@ -21,12 +20,12 @@ const faqs = [
 const FAQItem: React.FC<{ q: string, a: string }> = ({ q, a }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-gray-200 dark:border-gray-medium py-3">
+        <div className="border-b border-primary py-3">
             <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left text-gray-800 dark:text-white font-semibold">
                 <span>{q}</span>
                 <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
             </button>
-            {isOpen && <p className="mt-2 text-gray-600 dark:text-gray-light">{a}</p>}
+            {isOpen && <p className="mt-2 text-gray-600 dark:text-gray-300">{a}</p>}
         </div>
     )
 }
@@ -52,7 +51,7 @@ const HelpWidget: React.FC = () => {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-8 right-8 bg-accent text-primary w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-yellow-400 transition-transform transform hover:scale-110"
+                className="fixed bottom-8 right-8 bg-accent text-primary w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-transform transform hover:scale-110"
                 aria-label="Open Help and Support"
             >
                 <SupportIcon className="w-8 h-8" />
@@ -61,7 +60,7 @@ const HelpWidget: React.FC = () => {
             {isOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-fade-in" onClick={() => setIsOpen(false)}>
                     <div className="bg-white dark:bg-primary-light rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <header className="p-4 border-b border-gray-200 dark:border-gray-medium">
+                        <header className="p-4 border-b border-gray-200 dark:border-primary">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Help & Support</h2>
                         </header>
                         <main className="p-6 overflow-y-auto space-y-6">
@@ -69,25 +68,25 @@ const HelpWidget: React.FC = () => {
                                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Frequently Asked Questions</h3>
                                 {faqs.map(faq => <FAQItem key={faq.question} q={faq.question} a={faq.answer} />)}
                             </div>
-                            <div className="border-t border-gray-200 dark:border-gray-medium pt-6">
+                            <div className="border-t border-gray-200 dark:border-primary pt-6">
                                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Contact Support</h3>
                                 {isSuccess ? (
-                                    <div className="text-center p-4 bg-green-500/10 text-green-700 dark:text-green-300 rounded-md">
+                                    <div className="text-center p-4 bg-accent/10 text-accent rounded-md">
                                         <p className="font-semibold">Your message has been sent!</p>
                                         <p className="text-sm">Our support team will get back to you shortly.</p>
                                     </div>
                                 ) : (
                                     <form onSubmit={handleSubmit} className="space-y-4">
-                                        <input type="text" placeholder="Subject" required className="w-full bg-gray-100 dark:bg-gray-dark p-2 rounded border border-gray-300 dark:border-gray-medium" />
-                                        <textarea rows={4} placeholder="How can we help?" required className="w-full bg-gray-100 dark:bg-gray-dark p-2 rounded border border-gray-300 dark:border-gray-medium"></textarea>
-                                        <button type="submit" disabled={isSubmitting} className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center disabled:bg-gray-500">
+                                        <input type="text" placeholder="Subject" required className="w-full bg-gray-100 dark:bg-primary p-2 rounded border border-gray-300 dark:border-primary" />
+                                        <textarea rows={4} placeholder="How can we help?" required className="w-full bg-gray-100 dark:bg-primary p-2 rounded border border-gray-300 dark:border-primary"></textarea>
+                                        <button type="submit" disabled={isSubmitting} className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center disabled:bg-gray-500">
                                             {isSubmitting ? <Spinner /> : 'Send Message'}
                                         </button>
                                     </form>
                                 )}
                             </div>
                         </main>
-                        <footer className="p-4 border-t border-gray-200 dark:border-gray-medium flex justify-end">
+                        <footer className="p-4 border-t border-gray-200 dark:border-primary flex justify-end">
                             <button onClick={() => setIsOpen(false)} className="bg-gray-500 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
                                 Close
                             </button>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
@@ -28,7 +27,7 @@ const Header: React.FC = () => {
                 </nav>
                 <div className="space-x-4">
                     <button onClick={() => navigate('/login')} className="text-white font-medium hover:text-accent transition-colors">Log In</button>
-                    <button onClick={() => navigate('/onboarding')} className="bg-accent text-primary font-bold py-2 px-4 rounded-md hover:bg-yellow-400 transition-colors">
+                    <button onClick={() => navigate('/onboarding')} className="bg-accent text-primary font-bold py-2 px-4 rounded-md hover:opacity-90 transition-colors">
                         Sign Up
                     </button>
                 </div>
@@ -50,18 +49,18 @@ const Hero: React.FC = () => {
                     Seamless Cross-Border Payments <br />
                     for <span className="text-accent">Africa</span>
                 </h1>
-                <p className="text-lg md:text-xl text-gray-light max-w-3xl mx-auto mb-8">
+                <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
                     Send and receive money from anywhere in the world to Africa. We offer the best exchange rates with zero transfer fees.
                 </p>
                 <button
                     onClick={() => navigate('/onboarding')}
-                    className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:bg-yellow-400 transition-transform transform hover:scale-105"
+                    className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-transform transform hover:scale-105"
                 >
                     Get Started Free
                 </button>
                 <div className="mt-12">
-                    <p className="text-sm text-gray-light uppercase tracking-widest">Trusted by over 100,000 users</p>
-                    <div className="flex justify-center items-center space-x-8 mt-4 text-gray-500">
+                    <p className="text-sm text-gray-400 uppercase tracking-widest">Trusted by over 100,000 users</p>
+                    <div className="flex justify-center items-center space-x-8 mt-4 text-gray-400">
                         {/* Placeholder logos */}
                         <span className="font-semibold text-xl">Stripe</span>
                         <span className="font-semibold text-xl">Flutterwave</span>
@@ -85,7 +84,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) =
             {icon}
         </div>
         <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="text-gray-light">{description}</p>
+        <p className="text-gray-300">{description}</p>
     </div>
 );
 
@@ -94,7 +93,7 @@ const Features: React.FC = () => (
     <section className="py-20 bg-primary">
         <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Xeloo</h2>
-            <p className="text-gray-light max-w-2xl mx-auto mb-12">We are the best at what we do when it comes to cross-border payments.</p>
+            <p className="text-gray-300 max-w-2xl mx-auto mb-12">We are the best at what we do when it comes to cross-border payments.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <FeatureCard icon={<RocketIcon className="w-8 h-8"/>} title="Fast & Secure" description="Our blockchain-backed operations ensure your transactions are fast and secure." />
                 <FeatureCard icon={<PercentIcon className="w-8 h-8"/>} title="Best Rates" description="We provide the most competitive exchange rates on the market." />
@@ -114,22 +113,22 @@ const HowItWorks: React.FC = () => (
             <h2 className="text-3xl md:text-4xl font-bold mb-12">Send Money in 3 Easy Steps</h2>
             <div className="relative flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
                  {/* Dotted line for desktop */}
-                 <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 border-t-2 border-dashed border-gray-medium transform -translate-y-1/2"></div>
+                 <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 border-t-2 border-dashed border-primary-light transform -translate-y-1/2"></div>
 
                 <div className="relative z-10 text-center">
                     <div className="w-20 h-20 bg-primary-light border-2 border-accent text-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">1</div>
                     <h3 className="text-xl font-bold">Create Account</h3>
-                    <p className="text-gray-light max-w-xs">Sign up for a free account in minutes with our AI-powered onboarding.</p>
+                    <p className="text-gray-300 max-w-xs">Sign up for a free account in minutes with our AI-powered onboarding.</p>
                 </div>
                 <div className="relative z-10 text-center">
                     <div className="w-20 h-20 bg-primary-light border-2 border-accent text-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">2</div>
                     <h3 className="text-xl font-bold">Add Recipient</h3>
-                    <p className="text-gray-light max-w-xs">Enter your recipient's details and the amount you want to send.</p>
+                    <p className="text-gray-300 max-w-xs">Enter your recipient's details and the amount you want to send.</p>
                 </div>
                 <div className="relative z-10 text-center">
                     <div className="w-20 h-20 bg-primary-light border-2 border-accent text-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">3</div>
                     <h3 className="text-xl font-bold">Send Money</h3>
-                    <p className="text-gray-light max-w-xs">Confirm your transaction and your money is on its way, instantly.</p>
+                    <p className="text-gray-300 max-w-xs">Confirm your transaction and your money is on its way, instantly.</p>
                 </div>
             </div>
         </div>
@@ -143,10 +142,10 @@ const CTA: React.FC = () => {
         <section className="py-20 bg-primary-light">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Get Started With Xeloo Today</h2>
-                <p className="text-gray-light max-w-2xl mx-auto mb-8">Create an account with us and start sending and receiving money from anywhere in the world.</p>
+                <p className="text-gray-300 max-w-2xl mx-auto mb-8">Create an account with us and start sending and receiving money from anywhere in the world.</p>
                 <button
                     onClick={() => navigate('/onboarding')}
-                    className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:bg-yellow-400 transition-transform transform hover:scale-105"
+                    className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-transform transform hover:scale-105"
                 >
                     Create a Free Account
                 </button>
@@ -163,7 +162,7 @@ const Footer: React.FC = () => (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                 <div>
                     <h3 className="font-bold mb-4">Product</h3>
-                    <ul className="space-y-2 text-gray-light">
+                    <ul className="space-y-2 text-gray-300">
                         <li><a href="#" className="hover:text-accent">Send Money</a></li>
                         <li><a href="#" className="hover:text-accent">Receive Money</a></li>
                         <li><a href="#" className="hover:text-accent">Payroll</a></li>
@@ -172,7 +171,7 @@ const Footer: React.FC = () => (
                 </div>
                 <div>
                     <h3 className="font-bold mb-4">Company</h3>
-                    <ul className="space-y-2 text-gray-light">
+                    <ul className="space-y-2 text-gray-300">
                         <li><a href="#" className="hover:text-accent">About Us</a></li>
                         <li><a href="#" className="hover:text-accent">Careers</a></li>
                         <li><a href="#" className="hover:text-accent">Press</a></li>
@@ -181,7 +180,7 @@ const Footer: React.FC = () => (
                 </div>
                 <div>
                     <h3 className="font-bold mb-4">Legal</h3>
-                    <ul className="space-y-2 text-gray-light">
+                    <ul className="space-y-2 text-gray-300">
                         <li><a href="#/terms" className="hover:text-accent">Terms & Conditions</a></li>
                         <li><a href="#" className="hover:text-accent">Privacy Policy</a></li>
                         <li><a href="#" className="hover:text-accent">Cookie Policy</a></li>
@@ -190,13 +189,13 @@ const Footer: React.FC = () => (
                  <div>
                     <h3 className="font-bold mb-4">Follow Us</h3>
                     <div className="flex space-x-4">
-                        <a href="#" className="text-gray-light hover:text-accent"><TwitterIcon /></a>
-                        <a href="#" className="text-gray-light hover:text-accent"><LinkedInIcon /></a>
-                        <a href="#" className="text-gray-light hover:text-accent"><InstagramIcon /></a>
+                        <a href="#" className="text-gray-300 hover:text-accent"><TwitterIcon /></a>
+                        <a href="#" className="text-gray-300 hover:text-accent"><LinkedInIcon /></a>
+                        <a href="#" className="text-gray-300 hover:text-accent"><InstagramIcon /></a>
                     </div>
                 </div>
             </div>
-            <div className="border-t border-primary-light pt-6 text-center text-gray-light text-sm">
+            <div className="border-t border-primary-light pt-6 text-center text-gray-400 text-sm">
                 <p>&copy; {new Date().getFullYear()} Xeloo. All rights reserved.</p>
             </div>
         </div>

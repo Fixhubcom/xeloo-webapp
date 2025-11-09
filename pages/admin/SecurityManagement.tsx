@@ -6,7 +6,7 @@ const SecurityManagement: React.FC = () => {
         <div className="space-y-8">
             <Card>
                 <h2 className="text-xl font-bold mb-4">Roles & Permissions</h2>
-                <p className="text-gray-light mb-6">Define roles and manage fine-grained permissions for each user type on the platform.</p>
+                <p className="text-gray-400 mb-6">Define roles and manage fine-grained permissions for each user type on the platform.</p>
                 <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-primary rounded-md">
                         <div>
@@ -44,15 +44,15 @@ const SecurityManagement: React.FC = () => {
                 <div className="space-y-6">
                     <div>
                         <h3 className="font-semibold text-white">Password Policy</h3>
-                        <p className="text-gray-light text-sm mt-1">Enforce password complexity and expiration rules. (e.g., minimum 8 characters, one uppercase, one number, etc.)</p>
+                        <p className="text-gray-400 text-sm mt-1">Enforce password complexity and expiration rules. (e.g., minimum 8 characters, one uppercase, one number, etc.)</p>
                     </div>
                     <div>
                         <h3 className="font-semibold text-white">Account Lockout Policy</h3>
-                        <p className="text-gray-light text-sm mt-1">Set thresholds for failed login attempts to prevent brute-force attacks.</p>
+                        <p className="text-gray-400 text-sm mt-1">Set thresholds for failed login attempts to prevent brute-force attacks.</p>
                     </div>
                      <div>
                         <h3 className="font-semibold text-white">Security Logs & Auditing</h3>
-                        <p className="text-gray-light text-sm mt-1">Review a detailed audit trail of all administrative actions and security events.</p>
+                        <p className="text-gray-400 text-sm mt-1">Review a detailed audit trail of all administrative actions and security events.</p>
                     </div>
                 </div>
             </Card>

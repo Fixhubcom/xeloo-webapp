@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -50,8 +51,8 @@ type NavItem =
 const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
     <Card>
         <h2 className="text-xl font-bold mb-4">{title} Management</h2>
-        <p className="text-gray-light">This is the dedicated section for managing {title.toLowerCase()}.</p>
-        <div className="mt-6 p-8 border-2 border-dashed border-gray-medium rounded-lg text-center text-gray-500">
+        <p className="text-gray-400">This is the dedicated section for managing {title.toLowerCase()}.</p>
+        <div className="mt-6 p-8 border-2 border-dashed border-primary rounded-lg text-center text-gray-500">
             [Feature component for {title} will be displayed here.]
         </div>
     </Card>
@@ -61,23 +62,23 @@ const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
 const MerchantOverview: React.FC = () => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Sales (30d)</h3><p className="text-3xl font-bold text-accent">$18,500</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Active Listings</h3><p className="text-3xl font-bold text-accent">2</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Pending Payout</h3><p className="text-3xl font-bold text-yellow-400">$5,250</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Sales (30d)</h3><p className="text-3xl font-bold text-accent">$18,500</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Active Listings</h3><p className="text-3xl font-bold text-accent">2</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Pending Payout</h3><p className="text-3xl font-bold text-accent">$5,250</p></Card>
         </div>
         <Card>
             <h2 className="text-xl font-bold mb-4">Sales Volume by Currency</h2>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={merchantFundsFlowData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis type="number" stroke="#9ca3af" tickFormatter={(value) => `${Number(value / 1000).toLocaleString()}k`} />
-                    <YAxis type="category" dataKey="currency" stroke="#9ca3af" width={40} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#294A21" />
+                    <XAxis type="number" stroke="#a8a29e" tickFormatter={(value) => `${Number(value / 1000).toLocaleString()}k`} />
+                    <YAxis type="category" dataKey="currency" stroke="#a8a29e" width={40} />
                     <Tooltip 
-                        contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }}
+                        contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }}
                         formatter={(value: number, name: string, props) => [`${value.toLocaleString()} ${props.payload.currency}`, 'Volume']}
                         labelFormatter={() => ''}
                     />
-                    <Bar dataKey="volume" fill="#4ade80" />
+                    <Bar dataKey="volume" fill="#FDDA1A" />
                 </BarChart>
             </ResponsiveContainer>
         </Card>
@@ -89,7 +90,7 @@ const MerchantOverview: React.FC = () => (
 const StatusBadge: React.FC<{ status: AssetListing['status'] }> = ({ status }) => {
     const baseClasses = "px-2.5 py-0.5 text-xs font-medium rounded-full";
     const statusClasses = {
-        Active: "bg-green-500/20 text-green-300",
+        Active: "bg-accent/20 text-accent",
         Sold: "bg-gray-500/20 text-gray-300",
     };
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
@@ -125,27 +126,27 @@ const ListingManagement: React.FC = () => {
                     <h2 className="text-xl font-bold mb-4">Create New Listing</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
                          <div>
-                            <label className="text-sm text-gray-light">Asset</label>
-                            <input value="USDT" readOnly className="w-full bg-gray-dark p-2 rounded border border-gray-medium text-gray-400 cursor-not-allowed" />
+                            <label className="text-sm text-gray-400">Asset</label>
+                            <input value="USDT" readOnly className="w-full bg-primary p-2 rounded border border-primary-light text-gray-400 cursor-not-allowed" />
                          </div>
                          <div>
-                            <label className="text-sm text-gray-light">Amount</label>
-                            <input name="amount" type="number" step="0.01" required placeholder="5000.00" className="w-full bg-primary-light p-2 rounded border border-gray-medium" />
+                            <label className="text-sm text-gray-400">Amount</label>
+                            <input name="amount" type="number" step="0.01" required placeholder="5000.00" className="w-full bg-primary p-2 rounded border border-primary-light" />
                          </div>
                          <div>
-                            <label className="text-sm text-gray-light">Price Per Unit</label>
-                            <input name="pricePerUnit" type="number" step="0.01" required placeholder="1450.50" className="w-full bg-primary-light p-2 rounded border border-gray-medium" />
+                            <label className="text-sm text-gray-400">Price Per Unit</label>
+                            <input name="pricePerUnit" type="number" step="0.01" required placeholder="1450.50" className="w-full bg-primary p-2 rounded border border-primary-light" />
                          </div>
                           <div>
-                            <label className="text-sm text-gray-light">Local Currency</label>
-                            <select name="localCurrency" required className="w-full bg-primary-light p-2 rounded border border-gray-medium">
+                            <label className="text-sm text-gray-400">Local Currency</label>
+                            <select name="localCurrency" required className="w-full bg-primary p-2 rounded border border-primary-light">
                                 <option>NGN</option>
                                 <option>GHS</option>
                                 <option>KES</option>
                                 <option>USD</option>
                             </select>
                          </div>
-                         <button type="submit" disabled={isSubmitting} className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center disabled:bg-gray-500">
+                         <button type="submit" disabled={isSubmitting} className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center disabled:bg-gray-500">
                              {isSubmitting ? <Spinner /> : 'Create Listing'}
                          </button>
                     </form>
@@ -155,7 +156,7 @@ const ListingManagement: React.FC = () => {
                 <Card>
                     <h2 className="text-xl font-bold mb-4">Your Listings</h2>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-light">
+                        <table className="w-full text-sm text-left text-gray-400">
                             <thead className="text-xs text-gray-400 uppercase bg-primary">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Asset</th>
@@ -166,7 +167,7 @@ const ListingManagement: React.FC = () => {
                             </thead>
                             <tbody>
                                 {listings.map(listing => (
-                                    <tr key={listing.id} className="bg-primary-light border-b border-gray-medium">
+                                    <tr key={listing.id} className="bg-primary-light border-b border-primary">
                                         <td className="px-4 py-3 font-medium text-white">{listing.asset}</td>
                                         <td className="px-4 py-3 font-mono">{listing.amount.toFixed(2)}</td>
                                         <td className="px-4 py-3 font-mono">{listing.pricePerUnit.toFixed(2)} {listing.localCurrency}</td>
@@ -203,7 +204,7 @@ const MerchantDashboard: React.FC = () => {
     };
 
     return (
-        <div className="flex h-screen bg-gray-dark">
+        <div className="flex h-screen bg-primary">
             <aside className="w-64 bg-primary flex flex-col shadow-lg">
                 <div className="h-20 flex items-center justify-center border-b border-primary-light">
                     <Logo className="text-3xl" />
@@ -223,7 +224,7 @@ const MerchantDashboard: React.FC = () => {
                     <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={setActiveView} />
                  </nav>
                 <div className="px-4 py-4 border-t border-primary-light">
-                    <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-light hover:bg-primary-light hover:text-white rounded-md transition-colors">
+                    <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
                         <LogoutIcon className="mr-3"/>
                         Logout
                     </button>
@@ -233,14 +234,14 @@ const MerchantDashboard: React.FC = () => {
                 <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input type="text" placeholder="Search listings, transactions..." className="bg-primary-light border border-gray-medium rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
+                        <input type="text" placeholder="Search listings, transactions..." className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
                     </div>
                     <div className="text-right">
                         <p className="font-semibold text-white">{(user as User)?.name}</p>
-                        <p className="text-sm text-gray-light">{(user as User)?.companyName}</p>
+                        <p className="text-sm text-gray-400">{(user as User)?.companyName}</p>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-dark">
+                <div className="flex-1 overflow-y-auto p-8 bg-primary">
                     <h1 className="text-3xl font-bold text-white mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
@@ -268,7 +269,7 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'
-          : 'text-gray-light hover:bg-primary-light hover:text-white'
+          : 'text-gray-400 hover:bg-primary-light hover:text-white'
       }`}
     >
         {React.cloneElement(icon, { className: 'w-5 h-5' })}

@@ -12,7 +12,7 @@ const mockInvoices: Invoice[] = [
 const StatusBadge: React.FC<{ status: Invoice['status'] }> = ({ status }) => {
     const baseClasses = "px-2.5 py-0.5 text-xs font-medium rounded-full";
     const statusClasses = {
-        Paid: "bg-green-500/20 text-green-300",
+        Paid: "bg-accent/20 text-accent",
         Unpaid: "bg-blue-500/20 text-blue-300",
         Overdue: "bg-red-500/20 text-red-300",
     };
@@ -46,15 +46,15 @@ const InvoiceForm: React.FC<{ onCancel: () => void, onSave: (invoice: Omit<Invoi
         <Card className="max-w-2xl mx-auto">
              <h2 className="text-xl font-bold mb-4">Create New Invoice</h2>
              <form onSubmit={handleSubmit} className="space-y-4">
-                 <input name="clientName" placeholder="Client Name" className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
-                 <input name="amount" type="number" placeholder="Amount (USD)" className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
+                 <input name="clientName" placeholder="Client Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                 <input name="amount" type="number" placeholder="Amount (USD)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                  <div>
-                     <label className="text-sm text-gray-light">Due Date</label>
-                     <input name="dueDate" type="date" className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
+                     <label className="text-sm text-gray-400">Due Date</label>
+                     <input name="dueDate" type="date" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                  </div>
                  <div className="flex justify-end space-x-3 mt-4">
-                     <button type="button" onClick={onCancel} className="bg-gray-medium text-white font-bold py-2 px-4 rounded hover:bg-gray-500">Cancel</button>
-                     <button type="submit" disabled={isSaving} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400 flex items-center justify-center disabled:bg-gray-500">
+                     <button type="button" onClick={onCancel} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
+                     <button type="submit" disabled={isSaving} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center disabled:bg-gray-500">
                          {isSaving ? <Spinner /> : 'Save Invoice'}
                      </button>
                  </div>
@@ -84,7 +84,7 @@ const Invoices: React.FC = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                  <h2 className="text-xl font-bold text-white">Invoice Management</h2>
-                 <button onClick={() => setShowForm(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400">Create New Invoice</button>
+                 <button onClick={() => setShowForm(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Create New Invoice</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {invoices.map(invoice => (
@@ -95,9 +95,9 @@ const Invoices: React.FC = () => {
                                 <StatusBadge status={invoice.status} />
                             </div>
                             <p className="text-2xl font-mono text-accent mb-4">{invoice.amount.toLocaleString('en-US', { style: 'currency', currency: invoice.currency })}</p>
-                            <p className="text-sm text-gray-light">Invoice ID: {invoice.id}</p>
+                            <p className="text-sm text-gray-400">Invoice ID: {invoice.id}</p>
                         </div>
-                        <div className="text-xs text-gray-light mt-4 pt-4 border-t border-gray-medium">
+                        <div className="text-xs text-gray-400 mt-4 pt-4 border-t border-primary">
                             <span>Issued: {invoice.issueDate}</span>
                             <span className="float-right">Due: {invoice.dueDate}</span>
                         </div>

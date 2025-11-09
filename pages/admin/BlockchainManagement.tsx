@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { MultiSigTransaction } from '../../types';
@@ -18,7 +17,7 @@ const StatusBadge: React.FC<{ status: MultiSigTransaction['status'] }> = ({ stat
     const statusClasses = {
         'Pending Partner': "bg-yellow-500/20 text-yellow-300",
         'Pending Admin': "bg-blue-500/20 text-blue-300",
-        Completed: "bg-green-500/20 text-green-300",
+        Completed: "bg-accent/20 text-accent",
         Rejected: "bg-red-500/20 text-red-300",
     };
     return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
@@ -31,7 +30,7 @@ const BlockchainManagement: React.FC = () => {
             <Card>
                 <h2 className="text-xl font-bold mb-4">Partner Wallet Overview</h2>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-gray-light">
+                    <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-400 uppercase bg-primary">
                             <tr>
                                 <th className="px-6 py-3">Partner</th>
@@ -41,7 +40,7 @@ const BlockchainManagement: React.FC = () => {
                         </thead>
                         <tbody>
                             {mockPartnerWallets.map(wallet => (
-                                <tr key={wallet.partnerId} className="bg-primary-light border-b border-gray-medium">
+                                <tr key={wallet.partnerId} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-medium text-white">{wallet.partnerName}</td>
                                     <td className="px-6 py-4 font-mono">{wallet.hederaWalletAddress}</td>
                                     <td className="px-6 py-4 font-mono text-right">${wallet.balance.toLocaleString('en-US')}</td>
@@ -53,10 +52,10 @@ const BlockchainManagement: React.FC = () => {
             </Card>
 
             <Card>
-                <h2 className="text-xl font-bold mb-4 text-yellow-400">Action Required: Pending Co-Signatures</h2>
-                <p className="text-gray-light mb-6">The following transactions have been signed by the partner and require a co-signature from Xeloo admin to be executed on the Hedera network.</p>
+                <h2 className="text-xl font-bold mb-4 text-accent">Action Required: Pending Co-Signatures</h2>
+                <p className="text-gray-400 mb-6">The following transactions have been signed by the partner and require a co-signature from Xeloo admin to be executed on the Hedera network.</p>
                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-gray-light">
+                    <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-400 uppercase bg-primary">
                             <tr>
                                 <th className="px-6 py-3">Transaction ID</th>
@@ -69,14 +68,14 @@ const BlockchainManagement: React.FC = () => {
                         </thead>
                         <tbody>
                             {mockPendingAdminTransactions.map(tx => (
-                                <tr key={tx.id} className="bg-primary-light border-b border-gray-medium">
+                                <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-mono text-white">{tx.id}</td>
                                     <td className="px-6 py-4">{tx.partnerName}</td>
                                     <td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td>
                                     <td className="px-6 py-4 font-mono">{tx.destinationAddress}</td>
                                     <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
                                     <td className="px-6 py-4 space-x-2 text-center">
-                                        <button className="text-xs font-bold py-1 px-3 rounded bg-green-500/20 text-green-300 hover:bg-green-500/40">Co-Sign & Approve</button>
+                                        <button className="text-xs font-bold py-1 px-3 rounded bg-accent/20 text-accent hover:bg-accent/40">Co-Sign & Approve</button>
                                         <button className="text-xs font-bold py-1 px-3 rounded bg-red-500/20 text-red-300 hover:bg-red-500/40">Reject</button>
                                     </td>
                                 </tr>

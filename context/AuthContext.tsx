@@ -26,6 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let avatarBgColor = '#3b82f6';
       let isSubscribed = true; // Subscribed by default for admin/partner/merchant
       let hederaWalletAddress: string | undefined = undefined;
+      let accountOfficerId: string | undefined = undefined;
 
       switch (role) {
         case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; break;
@@ -35,8 +36,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarInitials="FP"; 
             avatarBgColor="#10b981"; 
             hederaWalletAddress="0.0.123456";
+            accountOfficerId = '5';
             break;
-        case UserRole.MERCHANT: name = 'Crypto Merchant'; companyName = 'Digital Assets LLC'; avatarInitials="CM"; avatarBgColor="#8b5cf6"; break;
+        case UserRole.MERCHANT: 
+            name = 'Crypto Merchant'; 
+            companyName = 'Digital Assets LLC'; 
+            avatarInitials="CM"; 
+            avatarBgColor="#8b5cf6"; 
+            accountOfficerId = '5';
+            break;
         case UserRole.USER: 
           name = 'John Doe'; 
           companyName = 'Creative Solutions'; 
@@ -47,6 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             { id: 'acc_1', bankName: 'Chase Bank', accountNumber: '**** **** **** 1234', country: 'USA', currency: 'USD', isDefault: true },
             { id: 'acc_2', bankName: 'Access Bank', accountNumber: '**** **** **** 5678', country: 'Nigeria', currency: 'NGN' },
           ];
+          accountOfficerId = '7';
           break;
       }
       const mockUser: User = { 
@@ -62,6 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         avatarBgColor,
         isSubscribed,
         hederaWalletAddress,
+        accountOfficerId,
       };
       setUser(mockUser);
       setIsLoading(false);

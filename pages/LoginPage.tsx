@@ -35,26 +35,26 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-primary p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-primary p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Logo className="text-5xl" />
-          <p className="mt-2 text-gray-500 dark:text-gray-light">Global Payments, Simplified.</p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Global Payments, Simplified.</p>
         </div>
         
-        <div className="bg-white dark:bg-primary-light border border-gray-200 dark:border-gray-medium rounded-lg shadow-xl p-8">
+        <div className="bg-white dark:bg-primary-light border border-gray-200 dark:border-primary rounded-lg shadow-xl p-8">
           <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">Welcome Back</h2>
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-600 dark:text-gray-light">
+              <label htmlFor="role" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                 I am a...
               </label>
               <select
                 id="role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as UserRole)}
-                className="mt-1 block w-full bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
               >
                 <option value={UserRole.USER}>User (Business/Freelancer)</option>
                 <option value={UserRole.PARTNER}>Financial Partner</option>
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-600 dark:text-gray-light">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                 Email Address
               </label>
               <input
@@ -73,13 +73,13 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="mt-1 block w-full bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-600 dark:text-gray-light">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                 Password
               </label>
               <input
@@ -88,7 +88,7 @@ const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="mt-1 block w-full bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                 placeholder="••••••••"
               />
             </div>
@@ -97,21 +97,21 @@ const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-primary bg-accent hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent focus:ring-offset-primary-light disabled:bg-gray-400 dark:disabled:bg-gray-medium disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-primary bg-accent hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent focus:ring-offset-primary-light disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? <Spinner className="w-5 h-5 text-primary" /> : 'Log In'}
               </button>
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-light">
+          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
             <p className="mb-2">
                 Don't have an account?{' '}
-                <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:text-yellow-400 cursor-pointer">
+                <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:opacity-80 cursor-pointer">
                 Sign up
                 </a>
             </p>
-            <a onClick={() => navigate('/')} className="font-medium text-gray-500 dark:text-gray-light hover:text-gray-900 dark:hover:text-white cursor-pointer">
+            <a onClick={() => navigate('/')} className="font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer">
               &larr; Back to Home
             </a>
           </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
@@ -15,12 +14,12 @@ const ConfirmEmailPage: React.FC = () => {
                     <Logo className="text-5xl" />
                 </div>
                 <Card>
-                    <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                    <CheckCircleIcon className="w-16 h-16 text-accent mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-white mb-2">Registration Successful!</h1>
-                    <p className="text-gray-light mb-6">We've sent a confirmation link to your email address. Please check your inbox to activate your account.</p>
+                    <p className="text-gray-300 mb-6">We've sent a confirmation link to your email address. Please check your inbox to activate your account.</p>
                     <button 
                         onClick={() => navigate('/login')} 
-                        className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:bg-yellow-400"
+                        className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90"
                     >
                         Go to Login
                     </button>

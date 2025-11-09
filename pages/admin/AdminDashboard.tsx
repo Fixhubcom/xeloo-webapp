@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../../components/common/Card';
@@ -24,6 +23,7 @@ import UserManagement from './UserManagement';
 import SecurityManagement from './SecurityManagement';
 import SupportManagement from './SupportManagement';
 import BlockchainManagement from './BlockchainManagement';
+import AdminSettings from './AdminSettings';
 
 // Data for the main dashboard chart
 const adminFundsFlowData = [
@@ -53,20 +53,20 @@ type NavItem =
 const AdminOverview: React.FC = () => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Users</h3><p className="text-3xl font-bold text-accent">102,495</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Partners</h3><p className="text-3xl font-bold text-accent">15</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Merchants</h3><p className="text-3xl font-bold text-accent">350</p></Card>
-            <Card className="text-center"><h3 className="text-lg text-gray-light">Volume (24h)</h3><p className="text-3xl font-bold text-accent">$1.2M</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Users</h3><p className="text-3xl font-bold text-accent">102,495</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Partners</h3><p className="text-3xl font-bold text-accent">15</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Merchants</h3><p className="text-3xl font-bold text-accent">350</p></Card>
+            <Card className="text-center"><h3 className="text-lg text-gray-400">Volume (24h)</h3><p className="text-3xl font-bold text-accent">$1.2M</p></Card>
         </div>
         <Card>
             <h2 className="text-xl font-bold mb-4">Top Transaction Corridors by Volume</h2>
             <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={adminFundsFlowData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="corridor" stroke="#9ca3af" />
-                    <YAxis stroke="#9ca3af" tickFormatter={(value) => `$${Number(value / 1000000)}M`} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']} />
-                    <Bar dataKey="volume" fill="#8b5cf6" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#294A21" />
+                    <XAxis dataKey="corridor" stroke="#a8a29e" />
+                    <YAxis stroke="#a8a29e" tickFormatter={(value) => `$${Number(value / 1000000)}M`} />
+                    <Tooltip contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']} />
+                    <Bar dataKey="volume" fill="#FDDA1A" />
                 </BarChart>
             </ResponsiveContainer>
         </Card>
@@ -76,8 +76,8 @@ const AdminOverview: React.FC = () => (
 const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
     <Card>
         <h2 className="text-xl font-bold mb-4">{title} Management</h2>
-        <p className="text-gray-light">This is the central control panel for managing all {title.toLowerCase()}. You can view, add, edit, and approve records from this section.</p>
-        <div className="mt-6 p-8 border-2 border-dashed border-gray-medium rounded-lg text-center text-gray-500">
+        <p className="text-gray-400">This is the central control panel for managing all {title.toLowerCase()}. You can view, add, edit, and approve records from this section.</p>
+        <div className="mt-6 p-8 border-2 border-dashed border-primary rounded-lg text-center text-gray-500">
             [Management table and controls for {title} will be displayed here.]
         </div>
     </Card>
@@ -99,13 +99,13 @@ const AdminDashboard: React.FC = () => {
             case 'API': return <PlaceholderContent title="API" />;
             case 'Reports': return <PlaceholderContent title="Reports & Analytics" />;
             case 'Security': return <SecurityManagement />;
-            case 'Settings': return <PlaceholderContent title="Platform Settings" />;
+            case 'Settings': return <AdminSettings />;
             default: return <AdminOverview />;
         }
     };
     
     return (
-        <div className="flex h-screen bg-gray-dark">
+        <div className="flex h-screen bg-primary">
             <aside className="w-64 bg-primary flex flex-col shadow-lg">
                 <div className="h-20 flex items-center justify-center border-b border-primary-light">
                     <Logo className="text-3xl" />
@@ -129,7 +129,7 @@ const AdminDashboard: React.FC = () => {
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={setActiveView} />
                 </nav>
                 <div className="px-4 py-4 border-t border-primary-light">
-                    <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-light hover:bg-primary-light hover:text-white rounded-md transition-colors">
+                    <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
                         <LogoutIcon className="mr-3"/>
                         Logout
                     </button>
@@ -140,14 +140,14 @@ const AdminDashboard: React.FC = () => {
                 <header className="h-20 bg-primary flex items-center justify-between px-8 border-b border-primary-light">
                     <div className="relative">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input type="text" placeholder="Search users, txns, partners..." className="bg-primary-light border border-gray-medium rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
+                        <input type="text" placeholder="Search users, txns, partners..." className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-96"/>
                     </div>
                      <div className="text-right">
                         <p className="font-semibold text-white">{(user as User)?.name}</p>
-                        <p className="text-sm text-gray-light">{(user as User)?.companyName}</p>
+                        <p className="text-sm text-gray-400">{(user as User)?.companyName}</p>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-dark">
+                <div className="flex-1 overflow-y-auto p-8 bg-primary">
                     <h1 className="text-3xl font-bold text-white mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
@@ -175,7 +175,7 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'
-          : 'text-gray-light hover:bg-primary-light hover:text-white'
+          : 'text-gray-400 hover:bg-primary-light hover:text-white'
       }`}
     >
         {React.cloneElement(icon, { className: 'w-5 h-5' })}

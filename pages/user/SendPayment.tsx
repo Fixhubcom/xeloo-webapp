@@ -211,9 +211,9 @@ const SendPayment: React.FC = () => {
     if (isSuccess) {
         return (
             <Card className="max-w-lg mx-auto text-center">
-                <h2 className="text-2xl font-bold text-green-400 mb-4">{successMessage}</h2>
-                <p className="text-gray-light mb-6">The transaction details have been recorded.</p>
-                <button onClick={resetForm} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:bg-yellow-400">
+                <h2 className="text-2xl font-bold text-accent mb-4">{successMessage}</h2>
+                <p className="text-gray-300 mb-6">The transaction details have been recorded.</p>
+                <button onClick={resetForm} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
                     Make Another Payment
                 </button>
             </Card>
@@ -223,16 +223,16 @@ const SendPayment: React.FC = () => {
     return (
         <>
             <div className="max-w-2xl mx-auto mb-6">
-                <div className="flex space-x-2 p-1 bg-primary-light rounded-lg">
+                <div className="flex space-x-2 p-1 bg-primary rounded-lg">
                     <button
                         onClick={() => setActiveTab('bank')}
-                        className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'bank' ? 'bg-accent text-primary' : 'text-gray-light hover:bg-gray-dark'}`}
+                        className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'bank' ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
                     >
                         Bank Transfer
                     </button>
                     <button
                         onClick={() => setActiveTab('xeloo')}
-                        className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'xeloo' ? 'bg-accent text-primary' : 'text-gray-light hover:bg-gray-dark'}`}
+                        className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'xeloo' ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
                     >
                         Xeloo Transfer (Free & Instant)
                     </button>
@@ -247,8 +247,8 @@ const SendPayment: React.FC = () => {
                         <h2 className="text-2xl font-bold mb-6">Send Payment Globally</h2>
                         <form onSubmit={handleInitiatePayment} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-light">Send From</label>
-                                <select value={fromAccountId} onChange={e => setFromAccountId(e.target.value)} className="mt-1 w-full bg-gray-dark p-2 rounded border border-gray-medium">
+                                <label className="block text-sm font-medium text-gray-400">Send From</label>
+                                <select value={fromAccountId} onChange={e => setFromAccountId(e.target.value)} className="mt-1 w-full bg-primary p-2 rounded border border-primary-light">
                                     {user?.bankAccounts?.map(acc => (
                                         <option key={acc.id} value={acc.id}>
                                             {acc.bankName} ({acc.currency}) - {acc.accountNumber}
@@ -257,15 +257,15 @@ const SendPayment: React.FC = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-light">Amount to Send ({fromCurrency})</label>
-                                <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
+                                <label className="block text-sm font-medium text-gray-400">Amount to Send ({fromCurrency})</label>
+                                <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full bg-primary p-2 rounded border border-primary-light" required />
                             </div>
 
-                            <fieldset className="border border-gray-medium rounded p-4 space-y-4">
+                            <fieldset className="border border-primary-light rounded p-4 space-y-4">
                                 <legend className="text-lg font-semibold px-2">Recipient</legend>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-light">Saved Recipient</label>
-                                    <select value={selectedRecipientId} onChange={e => setSelectedRecipientId(e.target.value)} className="mt-1 w-full bg-gray-dark p-2 rounded border border-gray-medium">
+                                    <label className="block text-sm font-medium text-gray-400">Saved Recipient</label>
+                                    <select value={selectedRecipientId} onChange={e => setSelectedRecipientId(e.target.value)} className="mt-1 w-full bg-primary p-2 rounded border border-primary-light">
                                         <option value="">Select a recipient</option>
                                         {recipients.map(r => <option key={r.id} value={r.id}>{r.name} - {r.country}</option>)}
                                         <option value="new">-- Add New Recipient --</option>
@@ -274,20 +274,20 @@ const SendPayment: React.FC = () => {
 
                                 {(selectedRecipientId === 'new' || !selectedRecipientId) && (
                                     <>
-                                        <input type="text" placeholder="Recipient's Full Name or Company" value={recipientName} onChange={e => setRecipientName(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
-                                        <select value={recipientCountry} onChange={e => setRecipientCountry(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium">
+                                        <input type="text" placeholder="Recipient's Full Name or Company" value={recipientName} onChange={e => setRecipientName(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                                        <select value={recipientCountry} onChange={e => setRecipientCountry(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light">
                                             {countries.map(country => (
                                                 <option key={country} value={country}>{country}</option>
                                             ))}
                                         </select>
-                                        <input type="text" placeholder="Account Number" value={recipientAccountNumber} onChange={e => setRecipientAccountNumber(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
-                                        <input type="text" placeholder="Routing Number (if applicable)" value={recipientRoutingNumber} onChange={e => setRecipientRoutingNumber(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" />
-                                        <input type="text" placeholder="Bank Name" value={recipientBankName} onChange={e => setRecipientBankName(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
-                                        <input type="email" placeholder="Recipient's Email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} className="w-full bg-gray-dark p-2 rounded border border-gray-medium" required />
+                                        <input type="text" placeholder="Account Number" value={recipientAccountNumber} onChange={e => setRecipientAccountNumber(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                                        <input type="text" placeholder="Routing Number (if applicable)" value={recipientRoutingNumber} onChange={e => setRecipientRoutingNumber(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" />
+                                        <input type="text" placeholder="Bank Name" value={recipientBankName} onChange={e => setRecipientBankName(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                                        <input type="email" placeholder="Recipient's Email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light" required />
                                         {selectedRecipientId === 'new' && (
                                             <div className="flex items-center">
                                                 <input id="save-recipient" type="checkbox" checked={saveRecipient} onChange={e => setSaveRecipient(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent" />
-                                                <label htmlFor="save-recipient" className="ml-2 block text-sm text-gray-light">Save recipient for future payments</label>
+                                                <label htmlFor="save-recipient" className="ml-2 block text-sm text-gray-400">Save recipient for future payments</label>
                                             </div>
                                         )}
                                     </>
@@ -297,25 +297,25 @@ const SendPayment: React.FC = () => {
                             <div className="flex items-center space-x-4">
                                 <div className="flex items-center">
                                     <input id="schedule-payment" type="checkbox" checked={isScheduled} onChange={e => setIsScheduled(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent" />
-                                    <label htmlFor="schedule-payment" className="ml-2 block text-sm text-gray-light">Schedule for later?</label>
+                                    <label htmlFor="schedule-payment" className="ml-2 block text-sm text-gray-400">Schedule for later?</label>
                                 </div>
                                 {isScheduled && (
-                                    <input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} required={isScheduled} min={new Date().toISOString().split("T")[0]} className="bg-gray-dark p-2 rounded border border-gray-medium" />
+                                    <input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} required={isScheduled} min={new Date().toISOString().split("T")[0]} className="bg-primary p-2 rounded border border-primary-light" />
                                 )}
                             </div>
 
                             {total > 0 && (
                             <div className="bg-primary p-4 rounded-lg space-y-3">
-                                <div className={`flex justify-between items-center text-gray-light transition-colors duration-500 ${rateJustUpdated ? 'text-green-300' : ''}`}>
+                                <div className={`flex justify-between items-center text-gray-400 transition-colors duration-500 ${rateJustUpdated ? 'text-accent' : ''}`}>
                                     <span>Exchange Rate:</span>
                                     <span className="font-mono text-white">1 {fromCurrency} ≈ {(rates[toCurrency] / rates[fromCurrency]).toFixed(4)} {toCurrency}</span>
                                 </div>
-                                <div className="flex justify-between items-center text-gray-light">
+                                <div className="flex justify-between items-center text-gray-400">
                                     <span>Recipient Gets:</span>
-                                    <span className="font-mono text-green-400 font-bold">{receivedAmount.toLocaleString('en-US', { style: 'currency', currency: toCurrency, minimumFractionDigits: 2 })}</span>
+                                    <span className="font-mono text-accent font-bold">{receivedAmount.toLocaleString('en-US', { style: 'currency', currency: toCurrency, minimumFractionDigits: 2 })}</span>
                                 </div>
-                                <hr className="border-gray-medium" />
-                                <div className="flex justify-between items-center text-gray-light">
+                                <hr className="border-primary" />
+                                <div className="flex justify-between items-center text-gray-400">
                                     <span>Commission (1.5%):</span>
                                     <span className="font-mono text-white">{commission.toLocaleString('en-US', { style: 'currency', currency: fromCurrency })}</span>
                                 </div>
@@ -326,7 +326,7 @@ const SendPayment: React.FC = () => {
                             </div>
                             )}
                             
-                            <button type="submit" disabled={!amount} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:bg-yellow-400 disabled:bg-gray-500 disabled:cursor-not-allowed flex justify-center items-center">
+                            <button type="submit" disabled={!amount} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed flex justify-center items-center">
                                 {isScheduled ? 'Schedule Payment' : 'Confirm & Send'}
                             </button>
                         </form>
@@ -336,20 +336,20 @@ const SendPayment: React.FC = () => {
                         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
                             <Card className="max-w-md w-full">
                                 <h2 className="text-2xl font-bold mb-4">{isScheduled ? 'Confirm Schedule' : 'Confirm Payment'}</h2>
-                                <div className="space-y-2 text-gray-light mb-6">
+                                <div className="space-y-2 text-gray-300 mb-6">
                                     <p><strong>Sending:</strong> <span className="font-mono text-accent">{total.toLocaleString('en-US', { style: 'currency', currency: fromCurrency })}</span></p>
                                     <p><strong>To:</strong> <span className="text-white">{recipientName}</span></p>
-                                    <p><strong>Recipient Gets:</strong> <span className="font-mono text-green-400">{receivedAmount.toLocaleString('en-US', { style: 'currency', currency: toCurrency })}</span></p>
+                                    <p><strong>Recipient Gets:</strong> <span className="font-mono text-accent">{receivedAmount.toLocaleString('en-US', { style: 'currency', currency: toCurrency })}</span></p>
                                     {isScheduled && <p><strong>Scheduled for:</strong> <span className="text-white">{scheduleDate}</span></p>}
                                 </div>
 
-                                {paymentError && <p className="text-red-400 text-center mb-4">{paymentError}</p>}
+                                {paymentError && <p className="text-yellow-400 text-center mb-4">{paymentError}</p>}
                                 
                                 <div className="flex justify-end space-x-4">
-                                    <button onClick={() => setIsConfirming(false)} disabled={isProcessing} className="bg-gray-medium text-white font-bold py-2 px-6 rounded hover:bg-gray-500 disabled:opacity-50">
+                                    <button onClick={() => setIsConfirming(false)} disabled={isProcessing} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600 disabled:opacity-50">
                                         Cancel
                                     </button>
-                                    <button onClick={handleConfirmPayment} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:bg-yellow-400 disabled:bg-gray-500 flex items-center justify-center w-40">
+                                    <button onClick={handleConfirmPayment} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 disabled:bg-gray-500 flex items-center justify-center w-40">
                                         {isProcessing ? <Spinner /> : isScheduled ? 'Confirm Schedule' : 'Confirm & Send'}
                                     </button>
                                 </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -36,17 +35,17 @@ const expenseBreakdown = [
     { name: 'Marketing', value: 5000 },
     { name: 'Rent', value: 12000 },
 ]
-const COLORS = ['#4ade80', '#f87171', '#fdda1a'];
+const COLORS = ['#FDDA1A', '#FFFFFF', '#a8a29e'];
 
 const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view: AccountingView) => void }> = ({ activeView, setActiveView }) => {
     const views: AccountingView[] = ['Dashboard', 'Chart of Accounts', 'Journal', 'Reports'];
     return (
-        <div className="mb-6 flex space-x-2 p-1 bg-primary-light rounded-lg">
+        <div className="mb-6 flex space-x-2 p-1 bg-primary rounded-lg">
             {views.map(view => (
                 <button
                     key={view}
                     onClick={() => setActiveView(view)}
-                    className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view ? 'bg-accent text-primary' : 'text-gray-light hover:bg-gray-dark'}`}
+                    className={`w-full text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
                 >
                     {view}
                 </button>
@@ -71,7 +70,7 @@ const ReportTable: React.FC<{ title: string, sections: { title: string, items: {
                                 <td className="text-right font-mono">{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                             </tr>
                         ))}
-                        <tr className="border-t border-gray-medium">
+                        <tr className="border-t border-primary">
                             <td className="font-semibold pt-2">Total {section.title}</td>
                             <td className="text-right font-mono font-semibold pt-2">{section.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
@@ -101,18 +100,18 @@ const Accounting: React.FC = () => {
                 return (
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Revenue</h3><p className="text-3xl font-bold text-green-400">${totalRevenue.toLocaleString()}</p></Card>
-                            <Card className="text-center"><h3 className="text-lg text-gray-light">Total Expenses</h3><p className="text-3xl font-bold text-red-400">${totalExpenses.toLocaleString()}</p></Card>
-                            <Card className="text-center"><h3 className="text-lg text-gray-light">Net Income</h3><p className="text-3xl font-bold text-accent">${netIncome.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Revenue</h3><p className="text-3xl font-bold text-accent">${totalRevenue.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Expenses</h3><p className="text-3xl font-bold text-yellow-400">${totalExpenses.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-400">Net Income</h3><p className="text-3xl font-bold text-accent">${netIncome.toLocaleString()}</p></Card>
                         </div>
                         <Card>
                             <h3 className="text-xl font-bold mb-4">Income vs Expense</h3>
                              <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={pnlData}>
-                                    <XAxis dataKey="name" stroke="#9ca3af" />
-                                    <YAxis stroke="#9ca3af" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
-                                    <Bar dataKey="value" fill="#fdda1a" />
+                                    <XAxis dataKey="name" stroke="#a8a29e" />
+                                    <YAxis stroke="#a8a29e" />
+                                    <Tooltip contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} />
+                                    <Bar dataKey="value" fill="#FDDA1A" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Card>
@@ -123,7 +122,7 @@ const Accounting: React.FC = () => {
                                      <Pie data={expenseBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
                                         {expenseBreakdown.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                      </Pie>
-                                     <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+                                     <Tooltip contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} />
                                  </PieChart>
                             </ResponsiveContainer>
                         </Card>
@@ -133,18 +132,18 @@ const Accounting: React.FC = () => {
             case 'Chart of Accounts':
                 return (
                     <Card>
-                        <table className="w-full text-sm text-left text-gray-light">
+                        <table className="w-full text-sm text-left text-gray-400">
                             <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Code</th><th className="px-6 py-3">Account Name</th><th className="px-6 py-3">Type</th><th className="px-6 py-3 text-right">Balance</th></tr></thead>
-                            <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-primary-light border-b border-gray-medium"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
+                            <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
                         </table>
                     </Card>
                 );
             case 'Journal':
                  return (
                     <Card>
-                        <table className="w-full text-sm text-left text-gray-light">
+                        <table className="w-full text-sm text-left text-gray-400">
                             <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
-                            <tbody>{journalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-gray-medium"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-red-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-green-400 text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}</tbody>
+                            <tbody>{journalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}</tbody>
                         </table>
                     </Card>
                 );

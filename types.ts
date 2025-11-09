@@ -35,6 +35,7 @@ export interface User {
   avatarBgColor: string;
   isSubscribed?: boolean;
   hederaWalletAddress?: string;
+  accountOfficerId?: string;
 }
 
 export interface Transaction {
