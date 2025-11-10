@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
@@ -88,15 +89,29 @@ const Hero: React.FC = () => {
 const TrustedBy: React.FC = () => (
     <div className="py-8 bg-primary">
         <div className="container mx-auto text-center">
-            <p className="text-sm text-gray-400 uppercase tracking-widest">Trusted by industry leaders:</p>
-            <div className="flex justify-center items-center space-x-12 mt-4 text-gray-400 text-2xl font-bold">
-                <span>Stripe</span>
-                <span>Flutterwave</span>
-                <span>Paystack</span>
+            <p className="text-sm text-gray-400 uppercase tracking-widest mb-6">Trusted by industry leaders:</p>
+            <div
+                className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-200px),transparent_100%)]"
+            >
+                <ul className="flex items-center justify-center md:justify-start [&>li]:mx-8 animate-infinite-scroll">
+                    <li className="text-gray-400 text-2xl font-bold">Stripe</li>
+                    <li className="text-gray-400 text-2xl font-bold">Flutterwave</li>
+                    <li className="text-gray-400 text-2xl font-bold">Paystack</li>
+                    <li className="text-gray-400 text-2xl font-bold">Wise</li>
+                    <li className="text-gray-400 text-2xl font-bold">Chipper Cash</li>
+                </ul>
+                <ul className="flex items-center justify-center md:justify-start [&>li]:mx-8 animate-infinite-scroll" aria-hidden="true">
+                    <li className="text-gray-400 text-2xl font-bold">Stripe</li>
+                    <li className="text-gray-400 text-2xl font-bold">Flutterwave</li>
+                    <li className="text-gray-400 text-2xl font-bold">Paystack</li>
+                    <li className="text-gray-400 text-2xl font-bold">Wise</li>
+                    <li className="text-gray-400 text-2xl font-bold">Chipper Cash</li>
+                </ul>
             </div>
         </div>
     </div>
 );
+
 
 interface FeatureCardProps { icon: React.ReactNode; title: string; description: string; }
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => (
@@ -242,13 +257,22 @@ const FAQ: React.FC = () => {
 
 const CTA: React.FC = () => {
     const navigate = useNavigate();
+    const calendlyUrl = 'https://calendly.com/d/cn3-j2g-c5g/xeloo-demo-session';
+
     return (
         <section className="py-20 bg-primary-light">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the platform customers love.</h2>
                 <p className="text-gray-300 max-w-2xl mx-auto mb-8">Trust your business with the world’s leading payment gateway.</p>
                 <div className="flex justify-center space-x-4">
-                    <button onClick={() => navigate('/contact-us')} className="border border-accent text-accent font-bold py-3 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors">Book A Demo</button>
+                    <a
+                        href={calendlyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-accent text-accent font-bold py-3 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors"
+                    >
+                        Book A Demo
+                    </a>
                     <button onClick={() => navigate('/onboarding')} className="bg-accent text-primary font-bold py-3 px-6 rounded-lg hover:opacity-90">Create free account</button>
                 </div>
             </div>

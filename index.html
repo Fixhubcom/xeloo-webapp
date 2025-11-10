@@ -38,6 +38,10 @@
         50% { transform: translateY(-12px) rotate(-1deg); }
         100% { transform: translateY(0) rotate(3deg); }
       }
+      @keyframes infinite-scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+      }
       .animate-float-left {
         animation: float-left 6s ease-in-out infinite;
       }
@@ -46,6 +50,9 @@
       }
       .animate-float-right {
         animation: float-right 8s ease-in-out infinite 0.2s;
+      }
+      .animate-infinite-scroll {
+        animation: infinite-scroll 25s linear infinite;
       }
     </style>
   <script type="importmap">
