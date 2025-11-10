@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
 import {
@@ -12,6 +12,52 @@ import {
     InstagramIcon,
     YouTubeIcon
 } from '../components/icons/Icons';
+
+interface AnimatedStatProps {
+  end: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+  startInView: boolean;
+  useCommas?: boolean;
+}
+
+const AnimatedStat: React.FC<AnimatedStatProps> = ({ end, duration = 2000, prefix = '', suffix = '', startInView, useCommas = false }) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    if (!startInView) return;
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const currentVal = Math.floor(progress * end);
+      
+      setCount(currentVal);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [end, duration, startInView]);
+
+  return (
+    <p className="text-4xl font-bold text-accent">
+      {prefix}
+      {useCommas ? count.toLocaleString() : count}
+      {suffix}
+    </p>
+  );
+};
+
 
 const Header: React.FC = () => {
     const navigate = useNavigate();
@@ -142,14 +188,15 @@ const Features: React.FC = () => (
     </section>
 );
 
-
 const ValueProp: React.FC = () => (
-    <section className="py-20 bg-primary-light">
+    <section className="py-20 bg-primary">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-                <h2 className="text-3xl font-bold mb-4">Pay suppliers and receive payment through the smarter way</h2>
-                <p className="text-gray-300 mb-6">Receive customer payment through our API, pay your remote workforce or freelances and pay suppliers in munities, saving you time to doing other things you enjoy.</p>
-                <button className="border border-accent text-accent font-bold py-2 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors">Watch Demo</button>
+                <div className="bg-primary-light p-8 rounded-lg">
+                    <h2 className="text-3xl font-bold mb-4">Pay suppliers and receive payment through the smarter way</h2>
+                    <p className="text-gray-300 mb-6">Receive customer payment through our API, pay your remote workforce or freelances and pay suppliers in munities, saving you time to doing other things you enjoy.</p>
+                    <button className="border border-accent text-accent font-bold py-2 px-6 rounded-lg hover:bg-accent hover:text-primary transition-colors">Watch Demo</button>
+                </div>
             </div>
             <div className="md:w-1/2">
                 {/* Placeholder for an image or graphic */}
@@ -162,16 +209,56 @@ const ValueProp: React.FC = () => (
 );
 
 
-const Stats: React.FC = () => (
-    <section className="py-20">
-        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div><p className="text-4xl font-bold text-accent">+$50M</p><p className="text-gray-400">Annual profit</p></div>
-            <div><p className="text-4xl font-bold text-accent">5000+</p><p className="text-gray-400">5 star review</p></div>
-            <div><p className="text-4xl font-bold text-accent">1M+</p><p className="text-gray-400">Transaction</p></div>
-            <div><p className="text-4xl font-bold text-accent">10K+</p><p className="text-gray-400">Happy businesses</p></div>
-        </div>
-    </section>
-);
+const Stats: React.FC = () => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [inView, setInView] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setInView(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
+
+        return () => {
+            if (ref.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                observer.unobserve(ref.current);
+            }
+        };
+    }, []);
+
+    return (
+        <section ref={ref} className="py-20">
+            <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <AnimatedStat end={50} prefix="+$" suffix="M" startInView={inView} />
+                    <p className="text-gray-400">Annual profit</p>
+                </div>
+                <div>
+                    <AnimatedStat end={5000} suffix="+" startInView={inView} useCommas />
+                    <p className="text-gray-400">5 star review</p>
+                </div>
+                <div>
+                    <AnimatedStat end={1} suffix="M+" startInView={inView} />
+                    <p className="text-gray-400">Transaction</p>
+                </div>
+                <div>
+                    <AnimatedStat end={10} suffix="K+" startInView={inView} />
+                    <p className="text-gray-400">Happy businesses</p>
+                </div>
+            </div>
+        </section>
+    );
+};
 
 const Testimonials: React.FC = () => {
     const testimonialData = [
