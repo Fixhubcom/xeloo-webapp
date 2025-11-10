@@ -4,11 +4,13 @@ import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../types';
 import Logo from '../components/common/Logo';
 import Spinner from '../components/common/Spinner';
+import { EyeIcon, EyeSlashIcon } from '../components/icons/Icons';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole>(UserRole.USER);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const { login, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
@@ -81,15 +83,25 @@ const LoginPage: React.FC = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
-                placeholder="••••••••"
-              />
+              <div className="relative mt-1">
+                <input
+                  id="password"
+                  type={passwordVisible ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                  aria-label={passwordVisible ? "Hide password" : "Show password"}
+                >
+                  {passwordVisible ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
 
             <div>

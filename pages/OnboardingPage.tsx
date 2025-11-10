@@ -10,7 +10,7 @@ import PasswordStrengthIndicator from '../components/common/PasswordStrengthIndi
 import KYCForm from './onboarding/KYCForm';
 
 const StepIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) => {
-    const steps = ["Account Info", "Business Details", "Compliance", "Verification"];
+    const steps = ["Account Info", "Verification", "Business Details", "Compliance", "Submit"];
     return (
         <nav className="flex items-center justify-center mb-8" aria-label="Progress">
             {steps.map((step, index) => (
@@ -39,7 +39,10 @@ const OnboardingPage: React.FC = () => {
         const defaultData = {
             fullName: '',
             email: '',
+            phoneNumber: '',
             password: '',
+            emailCode: '',
+            phoneCode: '',
             companyName: '',
             businessDescription: '',
             suggestions: null as OnboardingSuggestions | null,
@@ -112,6 +115,7 @@ const OnboardingPage: React.FC = () => {
             if (!formData.fullName) newErrors.fullName = 'Full name is required.';
             if (!formData.email) newErrors.email = 'Email is required.';
             else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid.';
+            if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required.';
             if (!formData.password) newErrors.password = 'Password is required.';
             else {
                 const passwordErrors = [];
@@ -124,7 +128,10 @@ const OnboardingPage: React.FC = () => {
                     newErrors.password = `Password must contain ${passwordErrors.join(', ')}.`;
                 }
             }
-        } else if (step === 1) {
+        } else if (step === 1) { // Verification step
+            if (!formData.emailCode || formData.emailCode.length < 6) newErrors.emailCode = 'Enter the 6-digit code sent to your email.';
+            if (!formData.phoneCode || formData.phoneCode.length < 6) newErrors.phoneCode = 'Enter the 6-digit code sent to your phone.';
+        } else if (step === 2) { // Business Details
             if (!formData.companyName) newErrors.companyName = 'Company name is required.';
             if (!formData.businessDescription) newErrors.businessDescription = 'Business description is required.';
         }
@@ -162,15 +169,18 @@ const OnboardingPage: React.FC = () => {
                         <div>
                             <h2 className="text-xl font-bold mb-4">Create Your Account</h2>
                             <div className="space-y-4">
-                                <div>
-                                    <input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.fullName ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
-                                    {errors.fullName && <p className="text-accent text-xs mt-1">{errors.fullName}</p>}
-                                </div>
+                                <input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.fullName ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
+                                {errors.fullName && <p className="text-accent text-xs mt-1">{errors.fullName}</p>}
+                                
                                 <div className="relative">
                                     <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.email ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
                                     {isCheckingEmail && <Spinner className="absolute right-3 top-2.5" />}
                                     {errors.email && <p className="text-accent text-xs mt-1">{errors.email}</p>}
                                 </div>
+
+                                <input name="phoneNumber" type="tel" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.phoneNumber ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
+                                {errors.phoneNumber && <p className="text-accent text-xs mt-1">{errors.phoneNumber}</p>}
+                                
                                 <div>
                                     <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.password ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
                                     <PasswordStrengthIndicator password={formData.password} />
@@ -182,7 +192,33 @@ const OnboardingPage: React.FC = () => {
                             </button>
                         </div>
                     )}
+
                     {step === 1 && (
+                        <div>
+                            <h2 className="text-xl font-bold mb-2">Verify Your Identity</h2>
+                            <p className="text-sm text-gray-400 mb-4">We've sent verification codes to your email and phone number.</p>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Email Verification Code</label>
+                                    <input name="emailCode" placeholder="Enter 6-digit code" maxLength={6} value={formData.emailCode} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.emailCode ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
+                                    {errors.emailCode && <p className="text-accent text-xs mt-1">{errors.emailCode}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Phone Verification Code</label>
+                                    <input name="phoneCode" placeholder="Enter 6-digit code" maxLength={6} value={formData.phoneCode} onChange={handleInputChange} className={`w-full bg-gray-100 dark:bg-primary p-2 rounded border ${errors.phoneCode ? 'border-accent' : 'border-gray-300 dark:border-primary-light'}`} />
+                                    {errors.phoneCode && <p className="text-accent text-xs mt-1">{errors.phoneCode}</p>}
+                                </div>
+                            </div>
+                            <div className="flex justify-between mt-6">
+                                <button onClick={prevStep} className="bg-gray-600 text-white font-bold py-2 px-4 rounded hover:bg-gray-500">Back</button>
+                                <button onClick={nextStep} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center">
+                                    Verify & Continue <ArrowRightIcon className="ml-2 w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 2 && (
                          <div>
                             <h2 className="text-xl font-bold mb-4">Tell Us About Your Business</h2>
                             <div className="space-y-4">
@@ -219,7 +255,7 @@ const OnboardingPage: React.FC = () => {
                             </div>
                         </div>
                     )}
-                    {step === 2 && (
+                    {step === 3 && (
                          <div>
                             <KYCForm suggestions={formData.suggestions} />
                             <div className="flex justify-between mt-6">
@@ -230,10 +266,10 @@ const OnboardingPage: React.FC = () => {
                             </div>
                         </div>
                     )}
-                    {step === 3 && (
+                    {step === 4 && (
                          <div className="text-center">
-                            <h2 className="text-xl font-bold mb-4">Final Verification</h2>
-                            <p className="text-gray-400 mb-4">Please upload a government-issued ID and a proof of address. In a real application, this would involve a KYC/KYB provider integration.</p>
+                            <h2 className="text-xl font-bold mb-4">Final Document Submission</h2>
+                            <p className="text-gray-400 mb-4">Please upload any final required documents. In a real application, this would involve a KYC/KYB provider integration.</p>
                             <div className="p-4 border-2 border-dashed border-primary-light rounded-lg text-gray-500 mb-6">
                                 [KYC/KYB Document Upload Component Here]
                             </div>

@@ -25,6 +25,7 @@ import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
 import MerchantSettlements from './MerchantSettlements';
 import ApiManagement from '../user/ApiManagement';
+import MerchantTransactions from './MerchantTransactions';
 
 const mockListings: AssetListing[] = [
     { id: 'LST-001', asset: 'USDT', amount: 5000, pricePerUnit: 1450.50, localCurrency: 'NGN', status: 'Active' },
@@ -49,17 +50,6 @@ type NavItem =
     | 'Team Management'
     | 'Settings'
     | 'Support';
-
-// Placeholder Component
-const PlaceholderContent: React.FC<{ title: string }> = ({ title }) => (
-    <Card>
-        <h2 className="text-xl font-bold mb-4">{title} Management</h2>
-        <p className="text-gray-400">This is the dedicated section for managing {title.toLowerCase()}.</p>
-        <div className="mt-6 p-8 border-2 border-dashed border-primary rounded-lg text-center text-gray-500">
-            [Feature component for {title} will be displayed here.]
-        </div>
-    </Card>
-);
 
 // Dashboard Overview Component
 const MerchantOverview: React.FC = () => (
@@ -218,7 +208,7 @@ const MerchantDashboard: React.FC = () => {
         switch (activeView) {
             case 'Dashboard': return <MerchantOverview />;
             case 'Listings': return <ListingManagement searchQuery={searchQuery} />;
-            case 'Transactions': return <PlaceholderContent title="Transactions" />;
+            case 'Transactions': return <MerchantTransactions searchQuery={searchQuery} />;
             case 'Settlements': return <MerchantSettlements searchQuery={searchQuery} />;
             case 'Reports': return <ReportsManagement userRole={UserRole.MERCHANT} searchQuery={searchQuery} />;
             case 'API Management': return <ApiManagement />;

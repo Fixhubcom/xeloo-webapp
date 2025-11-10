@@ -127,6 +127,11 @@ const KYCForm: React.FC<KYCFormProps> = ({ suggestions }) => {
                 </div>
             </div>
 
+            <div>
+                <label className="block text-sm font-medium text-gray-light">Registered Office Address</label>
+                <textarea name="officeAddress" rows={3} className="mt-1 w-full bg-primary p-2 rounded border border-primary-light"></textarea>
+            </div>
+
             <fieldset className="border border-primary-light rounded p-4">
                 <legend className="text-lg font-semibold px-2 text-white">Directors & Key Persons</legend>
                 <div className="space-y-6">
@@ -160,6 +165,7 @@ const KYCForm: React.FC<KYCFormProps> = ({ suggestions }) => {
                     <FileUploadField label="Proof of Address of Company's Offices" name="company_address_proof" />
                     <FileUploadField label="Company Certificate of Incorporation" name="company_certificate" />
                     <FileUploadField label="Company's Memorandum of Article" name="company_memorandum" />
+                    <FileUploadField label="Business/Operating License" name="business_license" />
                     <FileUploadField label="Organization Chart" name="org_chart" />
                     <FileUploadField label="AML Policy Document" name="aml_policy" />
                     <FileUploadField label="Sanction Policies and Procedures" name="sanction_policy" />
