@@ -16,6 +16,7 @@ const mockSales: SaleTransaction[] = [
     { id: 'SALE-001', listingId: 'LST-002', date: '2024-07-10', saleAmount: 10000, currency: 'USD', fee: 300, netAmount: 9700, status: 'Paid Out' },
     { id: 'SALE-002', listingId: 'LST-001', date: '2024-07-20', saleAmount: 725250, currency: 'NGN', fee: 21757.5, netAmount: 703492.5, status: 'Paid Out' },
     { id: 'SALE-003', listingId: 'LST-003', date: '2024-07-22', saleAmount: 32750, currency: 'GHS', fee: 982.5, netAmount: 31767.5, status: 'Processing' },
+    { id: 'SALE-004', listingId: 'LST-005', date: new Date().toISOString().split('T')[0], saleAmount: 985000, currency: 'NGN', fee: 0, netAmount: 985000, status: 'Processing' },
 ];
 
 const StatusBadge: React.FC<{ status: SaleTransaction['status'] }> = ({ status }) => {

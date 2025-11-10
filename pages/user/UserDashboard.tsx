@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -93,7 +94,9 @@ const UserDashboard: React.FC = () => {
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tools</p>
                     <NavItemLink icon={<ConverterIcon />} label="Currency Converter" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<UsersIcon />} label="Directory" activeItem={pageState.view} navigateTo={navigateTo} />
-                    <NavItemLink icon={<BriefcaseIcon />} label="Tax Payments" activeItem={pageState.view} navigateTo={navigateTo} />
+                    {user?.bankAccounts?.some(acc => acc.currency === 'NGN') && (
+                        <NavItemLink icon={<BriefcaseIcon />} label="Tax Payments" activeItem={pageState.view} navigateTo={navigateTo} />
+                    )}
                     <NavItemLink icon={<AccountingIcon />} label="Accounting" activeItem={pageState.view} navigateTo={navigateTo} isLocked={!user?.isSubscribed} />
                     <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={pageState.view} navigateTo={navigateTo} />
                     <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={pageState.view} navigateTo={navigateTo} />

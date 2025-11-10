@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
@@ -7,6 +6,7 @@ import Spinner from '../../components/common/Spinner';
 
 const mockPendingAdminTransactions: MultiSigTransaction[] = [
     { id: 'TXN-HEDERA-003', partnerId: '2', partnerName: 'Africa Payouts Ltd', amount: 100000, currency: 'USDT', destinationAddress: '0.0.445566', status: 'Pending Admin' },
+    { id: 'TXN-HEDERA-004', partnerId: '12', partnerName: 'ChinaPay', amount: 665.54, currency: 'USDT', destinationAddress: '0.0.654321', status: 'Pending Admin' },
 ];
 const mockHistoryTransactions: MultiSigTransaction[] = [
     { id: 'TXN-HEDERA-001', partnerId: '1', partnerName: 'Global Bank', amount: 50000, currency: 'USDT', destinationAddress: '0.0.987654', status: 'Completed' },

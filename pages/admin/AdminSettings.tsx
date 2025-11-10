@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 
@@ -21,7 +20,7 @@ const AdminSettings: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="text-sm text-gray-400">FX Spread (%)</label>
-                                    <input type="number" defaultValue="0.05" step="0.01" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
+                                    <input type="number" defaultValue="0.09" step="0.01" className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-gray-400">Merchant Listing Fee (fixed USD)</label>

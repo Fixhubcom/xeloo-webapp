@@ -1,3 +1,4 @@
+
 export enum UserRole {
   USER = 'USER',
   PARTNER = 'PARTNER',
@@ -89,6 +90,20 @@ export interface OnboardingSuggestions {
   complianceNotes: string[];
 }
 
+export interface Employee {
+    id: string;
+    name: string;
+    email: string;
+    country: string;
+    currency: string;
+    salary: number;
+    paymentMethod: 'bank' | 'xeloo';
+    bankName?: string;
+    accountNumber?: string;
+    routingNumber?: string;
+    xelooUsername?: string;
+}
+
 export interface RecurringPayment {
   id: string;
   recipientName: string;
@@ -142,4 +157,14 @@ export interface PublicUserProfile {
   companyName: string;
   avatarInitials: string;
   avatarBgColor: string;
+}
+
+export interface Bill {
+  id: string;
+  vendorName: string;
+  issueDate: string;
+  dueDate: string;
+  amount: number;
+  currency: string;
+  status: 'Paid' | 'Unpaid' | 'Overdue';
 }

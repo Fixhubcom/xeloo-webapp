@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import { ConverterIcon } from '../../components/icons/Icons';
@@ -10,6 +11,7 @@ const INITIAL_MOCK_RATES: { [key: string]: number } = {
     GBP: 0.79,
     EUR: 0.92,
 };
+const FX_SPREAD_PERCENT = 0.09;
 
 const CurrencyConverter: React.FC = () => {
     const [amount, setAmount] = useState('100');
@@ -17,6 +19,7 @@ const CurrencyConverter: React.FC = () => {
     const [toCurrency, setToCurrency] = useState('NGN');
     const [result, setResult] = useState(0);
     const [rates, setRates] = useState(INITIAL_MOCK_RATES);
+    const [effectiveRate, setEffectiveRate] = useState(0);
 
     // Simulate real-time rate fluctuation
     useEffect(() => {
@@ -40,11 +43,15 @@ const CurrencyConverter: React.FC = () => {
     useEffect(() => {
         const numAmount = parseFloat(amount);
         if (!isNaN(numAmount) && rates[fromCurrency] && rates[toCurrency]) {
-            const baseAmount = numAmount / rates[fromCurrency]; // Convert to USD base
-            const convertedAmount = baseAmount * rates[toCurrency];
+            const baseRate = rates[toCurrency] / rates[fromCurrency];
+            const rateWithSpread = baseRate * (1 - FX_SPREAD_PERCENT / 100);
+            setEffectiveRate(rateWithSpread);
+
+            const convertedAmount = numAmount * rateWithSpread;
             setResult(convertedAmount);
         } else {
             setResult(0);
+            setEffectiveRate(0);
         }
     }, [amount, fromCurrency, toCurrency, rates]);
 
@@ -69,7 +76,7 @@ const CurrencyConverter: React.FC = () => {
 
                 {/* To */}
                 <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-400">They receive</label>
+                    <label className="block text-sm font-medium text-gray-400">They receive (approx.)</label>
                      <div className="flex mt-1">
                         <select value={toCurrency} onChange={e => setToCurrency(e.target.value)} className="bg-primary p-3 rounded-l-md border border-primary-light appearance-none">
                             {Object.keys(rates).map(curr => <option key={curr}>{curr}</option>)}
@@ -79,7 +86,7 @@ const CurrencyConverter: React.FC = () => {
                 </div>
             </div>
             <div className="text-center mt-6 text-gray-400">
-                1 {fromCurrency} ≈ {(rates[toCurrency] / rates[fromCurrency]).toFixed(4)} {toCurrency}
+                1 {fromCurrency} ≈ {effectiveRate.toFixed(4)} {toCurrency}
             </div>
         </Card>
     );

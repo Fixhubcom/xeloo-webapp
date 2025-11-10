@@ -168,3 +168,7 @@ export const EyeIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
 export const EyeSlashIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a10.05 10.05 0 015.393-6.218M15.536 7.464A10.052 10.052 0 0121.543 12c-1.274 4.057-5.064 7-9.543 7a10.05 10.05 0 01-2.46-.316m-2.733-2.733A10.038 10.038 0 012.458 12M12 15a3 3 0 110-6 3 3 0 010 6z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3l18 18"></path></svg>
 );
+
+export const SwitchVerticalIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 12l-4-4m4 4l4-4m6 8v-12m0 12l-4-4m4 4l4-4"></path></svg>
+);

@@ -112,14 +112,14 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                         type="date" 
                         value={dateFilter.start}
                         onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value}))}
-                        className="bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                        className="bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                      />
                       <span className="text-gray-500 dark:text-gray-light">to</span>
                      <input 
                         type="date" 
                         value={dateFilter.end}
                         onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value}))}
-                        className="bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                        className="bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                      />
                     <div className="flex items-center gap-1">
                         <input
@@ -127,27 +127,27 @@ const Transactions: React.FC<TransactionsProps> = ({ searchQuery }) => {
                             placeholder="Min Amount"
                             value={amountFilter.min}
                             onChange={(e) => setAmountFilter(prev => ({ ...prev, min: e.target.value }))}
-                            className="w-28 bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                            className="w-28 bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                         />
                         <input
                             type="number"
                             placeholder="Max Amount"
                             value={amountFilter.max}
                             onChange={(e) => setAmountFilter(prev => ({ ...prev, max: e.target.value }))}
-                            className="w-28 bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                            className="w-28 bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                         />
                     </div>
                       <select 
                          value={countryFilter}
                          onChange={(e) => setCountryFilter(e.target.value)}
-                         className="bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                         className="bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                      >
                          {uniqueCountries.map(country => <option key={country}>{country}</option>)}
                      </select>
                      <select 
                          value={statusFilter}
                          onChange={(e) => setStatusFilter(e.target.value)}
-                         className="bg-gray-100 dark:bg-gray-dark border border-gray-300 dark:border-gray-medium rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                         className="bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md py-1.5 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
                      >
                          <option>All Status</option>
                          <option>Completed</option>

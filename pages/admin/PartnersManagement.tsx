@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
@@ -16,6 +15,7 @@ const mockPartners: MockPartner[] = [
     { id: '9', name: 'Africa Payouts Ltd', contactEmail: 'ops@africapayouts.com', status: 'Approved', joinedDate: '2022-11-05', totalVolume: 25000000 },
     { id: '10', name: 'SA Financials', contactEmail: 'admin@safin.co.za', status: 'Pending KYB', joinedDate: '2024-06-20', totalVolume: 0 },
     { id: '11', name: 'EU Payments Corp', contactEmail: 'compliance@eupay.com', status: 'Rejected', joinedDate: '2024-05-01', totalVolume: 0 },
+    { id: '12', name: 'ChinaPay', contactEmail: 'ops@chinapay.com', status: 'Approved', joinedDate: '2023-10-01', totalVolume: 15000000 },
 ];
 
 const StatusBadge: React.FC<{ status: MockPartner['status'] }> = ({ status }) => {

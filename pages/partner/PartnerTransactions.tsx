@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { Transaction } from '../../types';
@@ -10,6 +9,7 @@ const mockPartnerTransactions: PartnerTransaction[] = [
     { id: '2', date: '2024-07-21', originator: 'Creative Solutions', recipient: 'Lagos Ventures', recipientCountry: 'Nigeria', amountSent: 1480000.00, currencySent: 'NGN', amountReceived: 985.00, currencyReceived: 'USD', commission: 15.00, status: 'Completed', amountSentUSD: 1000.00, amountReceivedUSD: 985.00 },
     { id: '4', date: '2024-07-19', originator: 'NewBiz Co', recipient: 'Ghana Goods', recipientCountry: 'Ghana', amountSent: 750.00, currencySent: 'USD', amountReceived: 9825.00, currencyReceived: 'GHS', commission: 11.25, status: 'Completed', amountSentUSD: 750.00, amountReceivedUSD: 677.59 },
     { id: '6', date: '2024-06-15', originator: 'Creative Solutions', recipient: 'Digital Exports', recipientCountry: 'USA', amountSent: 3500.00, currencySent: 'USD', amountReceived: 3482.50, currencyReceived: 'USD', commission: 52.50, status: 'Completed', amountSentUSD: 3500.00, amountReceivedUSD: 3482.50 },
+    { id: '7', date: new Date().toISOString().split('T')[0], originator: 'John Doe', recipient: 'Recipient in China', recipientCountry: 'China', amountSent: 1000000, currencySent: 'NGN', amountReceived: 4826.55, currencyReceived: 'CNY', commission: 15000, status: 'Completed', amountSentUSD: 675.68, amountReceivedUSD: 665.54 },
 ];
 
 const StatusBadge: React.FC<{ status: Transaction['status'] }> = ({ status }) => {
@@ -61,7 +61,7 @@ const PartnerTransactions: React.FC<PartnerTransactionsProps> = ({ searchQuery }
                                 <td className="px-6 py-4">{tx.recipient} ({tx.recipientCountry})</td>
                                 <td className="px-6 py-4">
                                     <div className="font-mono text-white">{tx.amountSent.toLocaleString('en-US', { style: 'currency', currency: tx.currencySent })}</div>
-                                    <div className="text-xs font-mono text-gray-500">~ ${(tx.amountSentUSD ?? tx.amountSent).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</div>
+                                    <div className="text-xs font-mono text-gray-500">~ {tx.amountSentUSD?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</div>
                                 </td>
                                 <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
                             </tr>
