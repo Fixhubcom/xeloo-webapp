@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { UserRole, UserSubRole } from '../../types';
@@ -10,7 +9,7 @@ interface MockUser {
     companyName: string;
     role: UserRole;
     subRole?: UserSubRole;
-    status: 'Active' | 'Pending' | 'Deactivated';
+    status: 'Active' | 'Pending' | 'Deactivated' | 'Rejected';
     accountOfficerId?: string;
 }
 
@@ -32,6 +31,7 @@ const StatusBadge: React.FC<{ status: MockUser['status'] }> = ({ status }) => {
         Active: "bg-accent/20 text-accent",
         Pending: "bg-yellow-500/20 text-yellow-300",
         Deactivated: "bg-gray-500/20 text-gray-300",
+        Rejected: "bg-red-500/20 text-red-300",
     };
     return <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${statusClasses[status]}`}>{status}</span>;
 };
@@ -66,20 +66,6 @@ const EditUserModal: React.FC<{
                         <label className="text-sm text-gray-400">Company Name</label>
                         <input name="companyName" value={formData.companyName} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-sm text-gray-400">Role</label>
-                            <select name="role" value={formData.role} onChange={handleInputChange} className="w-full bg-primary p-2 rounded border border-primary-light mt-1">
-                                {Object.values(UserRole).map(role => <option key={role} value={role}>{role}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm text-gray-400">Sub-Role</label>
-                            <select name="subRole" value={formData.subRole} onChange={handleInputChange} disabled={formData.role === UserRole.ADMIN} className="w-full bg-primary p-2 rounded border border-primary-light mt-1 disabled:opacity-50">
-                                {Object.values(UserSubRole).map(subRole => <option key={subRole} value={subRole}>{subRole}</option>)}
-                            </select>
-                        </div>
-                    </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-sm text-gray-400">Status</label>
@@ -87,11 +73,12 @@ const EditUserModal: React.FC<{
                                 <option value="Active">Active</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Deactivated">Deactivated</option>
+                                <option value="Rejected">Rejected</option>
                             </select>
                         </div>
                         <div>
                             <label className="text-sm text-gray-400">Account Officer</label>
-                            <select name="accountOfficerId" value={formData.accountOfficerId} onChange={handleInputChange} disabled={formData.role === UserRole.ADMIN} className="w-full bg-primary p-2 rounded border border-primary-light mt-1 disabled:opacity-50">
+                            <select name="accountOfficerId" value={formData.accountOfficerId || ''} onChange={handleInputChange} disabled={formData.role === UserRole.ADMIN} className="w-full bg-primary p-2 rounded border border-primary-light mt-1 disabled:opacity-50">
                                 <option value="">Unassigned</option>
                                 {accountOfficers.map(officer => <option key={officer.id} value={officer.id}>{officer.name}</option>)}
                             </select>
@@ -101,6 +88,39 @@ const EditUserModal: React.FC<{
                 <div className="flex justify-end space-x-4 mt-6">
                     <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
                     <button onClick={handleSave} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Save Changes</button>
+                </div>
+            </Card>
+        </div>
+    );
+};
+
+const UserDetailsModal: React.FC<{ user: MockUser; onClose: () => void; }> = ({ user, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <Card className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h2 className="text-2xl font-bold mb-2">User Details</h2>
+                        <p className="font-mono text-sm text-gray-400">ID: {user.id}</p>
+                    </div>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+                </div>
+                
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div className="bg-primary p-4 rounded-lg space-y-3">
+                        <div><p className="text-gray-400">Name</p><p className="font-semibold text-white">{user.name}</p></div>
+                        <div><p className="text-gray-400">Email</p><p className="font-semibold text-white">{user.email}</p></div>
+                        <div><p className="text-gray-400">Company</p><p className="font-semibold text-white">{user.companyName}</p></div>
+                    </div>
+                    <div className="bg-primary p-4 rounded-lg space-y-3">
+                        <div><p className="text-gray-400">Role</p><p className="font-semibold text-white">{user.role}</p></div>
+                        <div><p className="text-gray-400">Sub-Role</p><p className="font-semibold text-white">{user.subRole || 'N/A'}</p></div>
+                        <div><p className="text-gray-400">Account Officer</p><p className="font-semibold text-white">{accountOfficers.find(ao => ao.id === user.accountOfficerId)?.name || 'Unassigned'}</p></div>
+                        <div><p className="text-gray-400">Status</p><p><StatusBadge status={user.status} /></p></div>
+                    </div>
+                </div>
+                 <div className="flex justify-end mt-6">
+                    <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Close</button>
                 </div>
             </Card>
         </div>
@@ -119,6 +139,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
     
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<MockUser | null>(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [viewingUser, setViewingUser] = useState<MockUser | null>(null);
+
 
     const filteredUsers = useMemo(() => {
         if (!searchQuery) return users;
@@ -151,6 +174,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
         setIsEditModalOpen(false);
         setEditingUser(null);
     };
+    
+    const handleViewDetailsClick = (user: MockUser) => {
+        setViewingUser(user);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleCloseDetailsModal = () => {
+        setIsDetailsModalOpen(false);
+        setViewingUser(null);
+    };
+
 
     const handleSaveUser = (updatedUser: MockUser) => {
         setUsers(currentUsers =>
@@ -158,6 +192,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
         );
         handleCloseModal();
     };
+    
+    const handleStatusChange = (userId: string, newStatus: 'Active' | 'Rejected') => {
+        setUsers(currentUsers =>
+            currentUsers.map(u => u.id === userId ? { ...u, status: newStatus } : u)
+        );
+    };
+
 
     return (
         <div className="space-y-8">
@@ -211,7 +252,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
                                 <th className="px-6 py-3">Sub-Role</th>
                                 <th className="px-6 py-3">Account Officer</th>
                                 <th className="px-6 py-3">Status</th>
-                                <th className="px-6 py-3">Actions</th>
+                                <th className="px-6 py-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -231,8 +272,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
                                         }
                                     </td>
                                     <td className="px-6 py-4"><StatusBadge status={user.status} /></td>
-                                    <td className="px-6 py-4">
-                                        <button onClick={() => handleEditClick(user)} className="font-medium text-accent hover:underline">Edit</button>
+                                    <td className="px-6 py-4 space-x-2 whitespace-nowrap text-center">
+                                        {user.status === 'Pending' ? (
+                                            <>
+                                                <button onClick={() => handleStatusChange(user.id, 'Active')} className="font-medium text-green-400 hover:underline text-xs">Approve</button>
+                                                <button onClick={() => handleStatusChange(user.id, 'Rejected')} className="font-medium text-red-400 hover:underline text-xs">Reject</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => handleEditClick(user)} className="font-medium text-accent hover:underline text-xs">Edit</button>
+                                                <button onClick={() => handleViewDetailsClick(user)} className="font-medium text-accent hover:underline text-xs">View Details</button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -251,6 +302,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ searchQuery }) => {
                     user={editingUser}
                     onClose={handleCloseModal}
                     onSave={handleSaveUser}
+                />
+            )}
+            {isDetailsModalOpen && viewingUser && (
+                <UserDetailsModal
+                    user={viewingUser}
+                    onClose={handleCloseDetailsModal}
                 />
             )}
         </div>
