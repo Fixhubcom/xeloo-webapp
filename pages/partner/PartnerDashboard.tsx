@@ -16,6 +16,8 @@ import {
     UsersIcon,
     CubeIcon,
     MenuIcon,
+    SunIcon,
+    MoonIcon,
 } from '../../components/icons/Icons';
 import { User, UserRole } from '../../types';
 import PartnerSettlements from './PartnerSettlements';
@@ -26,6 +28,8 @@ import PartnerSettings from './PartnerSettings';
 import ReportsManagement from '../ReportsManagement';
 import SupportManagement from '../SupportManagement';
 import PartnerTransactions from './PartnerTransactions';
+import { useTheme } from '../../context/ThemeContext';
+import Avatar from '../../components/common/Avatar';
 
 // Data for the main dashboard chart
 const partnerFundsFlowData = [
@@ -85,6 +89,7 @@ const PartnerOverview: React.FC = () => (
 
 const PartnerDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [activeView, setActiveView] = useState<NavItem>('Dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -110,15 +115,15 @@ const PartnerDashboard: React.FC = () => {
     };
   
   return (
-        <div className="flex h-screen bg-primary overflow-hidden">
+        <div className="flex h-screen bg-gray-100 dark:bg-primary overflow-hidden">
             {isSidebarOpen && (
                 <div 
                     className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}
-            <aside className={`w-64 bg-primary flex flex-col shadow-lg fixed z-30 inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}>
-                <div className="h-20 flex items-center justify-center border-b border-primary-light">
+            <aside className={`w-64 bg-white dark:bg-primary flex flex-col shadow-lg fixed z-30 inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}>
+                <div className="h-20 flex items-center justify-center border-b border-gray-200 dark:border-primary-light">
                     <Logo className="text-3xl" />
                 </div>
                  <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
@@ -135,17 +140,17 @@ const PartnerDashboard: React.FC = () => {
                     <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={navigateTo} />
                     <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={navigateTo} />
                  </nav>
-                <div className="px-4 py-4 border-t border-primary-light">
-                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-primary-light hover:text-white rounded-md transition-colors">
+                <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
+                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white rounded-md transition-colors">
                         <LogoutIcon className="mr-3 w-5 h-5"/>
                         Logout
                     </button>
                 </div>
             </aside>
              <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-20 bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-primary-light flex-shrink-0">
+                <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-gray-200 dark:border-primary-light flex-shrink-0">
                      <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-400 focus:outline-none">
+                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-500 dark:text-gray-400 focus:outline-none">
                             <MenuIcon className="w-6 h-6" />
                         </button>
                         <div className="relative hidden md:block">
@@ -155,22 +160,32 @@ const PartnerDashboard: React.FC = () => {
                                 placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-primary-light border border-primary rounded-md py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
+                                className="bg-gray-100 dark:bg-primary-light border border-gray-300 dark:border-primary rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
                             />
                         </div>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-4">
-                         <button className="p-2 rounded-full text-gray-400 hover:bg-primary-light md:hidden">
+                         <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light md:hidden">
                             <SearchIcon className="w-6 h-6" />
                         </button>
-                        <div className="text-right">
-                            <p className="font-semibold text-white truncate">{(user as User)?.name}</p>
-                            <p className="text-sm text-gray-400 hidden sm:block truncate">{(user as User)?.companyName}</p>
+                        <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light">
+                            {theme === 'dark' ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-700" />}
+                        </button>
+                        <div className="flex items-center space-x-3">
+                            <Avatar 
+                                initials={user?.avatarInitials || ''}
+                                bgColor={user?.avatarBgColor || '#ccc'}
+                                className="w-10 h-10 text-lg"
+                            />
+                            <div className="text-right hidden sm:block">
+                                <p className="font-semibold text-gray-900 dark:text-white truncate">{(user as User)?.name}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{(user as User)?.companyName}</p>
+                            </div>
                         </div>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-primary">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">{activeView}</h1>
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-100 dark:bg-primary">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
             </main>
@@ -197,7 +212,7 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'
-          : 'text-gray-400 hover:bg-primary-light hover:text-white'
+          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white'
       }`}
     >
         {React.cloneElement(icon, { className: 'w-5 h-5' })}

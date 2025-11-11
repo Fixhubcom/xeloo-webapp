@@ -30,7 +30,7 @@ type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactio
 const UserDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
-    const [pageState, setPageState] = useState<{ view: NavItem, props?: any }>({ view: 'Dashboard' });
+    const [pageState, setPageState] = useState<{ view: NavItem, props?: any }>({ view: 'Transactions' });
     const [searchQuery, setSearchQuery] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
