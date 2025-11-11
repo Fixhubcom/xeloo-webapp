@@ -49,6 +49,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     const [recipientEmail, setRecipientEmail] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank');
     const [bankDetails, setBankDetails] = useState({ accountNumber: '', bankName: '', routingNumber: '' });
+    const [usdtDetails, setUsdtDetails] = useState({ walletAddress: '', network: 'Base' });
     const [xelooUsername, setXelooUsername] = useState(initialUsername || '');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -136,22 +137,19 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
         if (paymentMethod === 'bank' || paymentMethod === 'usdt') {
             const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-            if (paymentMethod === 'usdt') {
-                const rateFrom = MOCK_RATES[fromCurrency] || 1; // The currency the calculation was based on
-                const rateTo = MOCK_RATES['USDT'] || 1; // Target is USDT
-                const usdtAmount = totalCost * (rateTo / rateFrom);
-
+            // Pay-in method depends on the currency the user is SENDING FROM
+            if (fromCurrency === 'USDT') {
                 setGeneratedDetails({
                     type: 'usdt',
                     details: {
                         network: 'TRC20 (Tron)',
                         address: `T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
                         qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
-                        amount: usdtAmount,
+                        amount: totalCost,
                         currency: 'USDT',
                     }
                 });
-            } else { // paymentMethod === 'bank'
+            } else { // fromCurrency is fiat
                  setGeneratedDetails({
                     type: 'bank',
                     details: {
@@ -263,12 +261,25 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                     </>
                 )}
 
-                {(paymentMethod === 'bank' || paymentMethod === 'usdt') && (
+                {paymentMethod === 'bank' && (
                     <div className="space-y-4 pt-2">
                         <p className="text-xs text-gray-400 -mb-2">Recipient will receive funds directly in their bank account.</p>
                         <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({...p, bankName: e.target.value}))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                         <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({...p, accountNumber: e.target.value}))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                         <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({...p, routingNumber: e.target.value}))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                    </div>
+                )}
+
+                {paymentMethod === 'usdt' && (
+                    <div className="space-y-4 pt-2">
+                        <p className="text-xs text-gray-400 -mb-2">Recipient will receive USDT in their crypto wallet.</p>
+                        <input value={usdtDetails.walletAddress} onChange={e => setUsdtDetails(p => ({...p, walletAddress: e.target.value}))} placeholder="USDT Wallet Address" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                        <select value={usdtDetails.network} onChange={e => setUsdtDetails(p => ({...p, network: e.target.value}))} className="w-full bg-primary p-2 rounded border border-primary-light">
+                            <option>Base</option>
+                            <option>TRC20 (Tron)</option>
+                            <option>ERC20 (Ethereum)</option>
+                            <option>BEP20 (BNB Smart Chain)</option>
+                        </select>
                     </div>
                 )}
 
@@ -302,11 +313,20 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                             <span className="block text-xs text-gray-400">{paymentMethod === 'xeloo' ? `@${xelooUsername}` : recipientEmail}</span>
                         </div>
                     </div>
-                    {(paymentMethod === 'bank' || paymentMethod === 'usdt') && (
+                    {paymentMethod === 'bank' && (
                          <div className="flex justify-between items-center text-gray-light">
                             <span>Bank Details:</span>
                             <div className="text-right">
                                 <span className="font-mono text-white text-sm">{bankDetails.bankName} - {bankDetails.accountNumber}</span>
+                            </div>
+                        </div>
+                    )}
+                    {paymentMethod === 'usdt' && (
+                         <div className="flex justify-between items-center text-gray-light">
+                            <span>USDT Wallet:</span>
+                            <div className="text-right">
+                                <span className="font-mono text-white text-sm break-all">{usdtDetails.walletAddress}</span>
+                                <span className="block text-xs text-gray-400">{usdtDetails.network}</span>
                             </div>
                         </div>
                     )}
