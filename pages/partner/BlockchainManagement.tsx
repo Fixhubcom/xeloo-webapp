@@ -1,13 +1,19 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
 import { MultiSigTransaction } from '../../types';
+import Spinner from '../../components/common/Spinner';
 
-const mockPendingTransactions: MultiSigTransaction[] = [
+const mockPendingPartnerTransactions: MultiSigTransaction[] = [
     { id: 'TXN-HEDERA-001', partnerId: '1', partnerName: 'Global Bank', amount: 50000, currency: 'USDT', destinationAddress: '0.0.987654', status: 'Pending Partner' },
     { id: 'TXN-HEDERA-002', partnerId: '1', partnerName: 'Global Bank', amount: 25000, currency: 'USDT', destinationAddress: '0.0.112233', status: 'Pending Partner' },
 ];
+
+const mockPartnerHistoryTransactions: MultiSigTransaction[] = [
+    { id: 'TXN-HEDERA-P-001', partnerId: '1', partnerName: 'Global Bank', amount: 120000, currency: 'USDT', destinationAddress: '0.0.121212', status: 'Pending Admin' },
+    { id: 'TXN-HEDERA-P-002', partnerId: '1', partnerName: 'Global Bank', amount: 10000, currency: 'USDT', destinationAddress: '0.0.343434', status: 'Completed' },
+];
+
 
 const StatusBadge: React.FC<{ status: MultiSigTransaction['status'] }> = ({ status }) => {
     const baseClasses = "px-2.5 py-0.5 text-xs font-medium rounded-full";
@@ -26,16 +32,30 @@ interface BlockchainManagementProps {
 
 const BlockchainManagement: React.FC<BlockchainManagementProps> = ({ searchQuery }) => {
     const { user } = useAuth();
-    const [transactions, setTransactions] = useState(mockPendingTransactions);
+    const [pendingTransactions, setPendingTransactions] = useState(mockPendingPartnerTransactions);
+    const [historyTransactions, setHistoryTransactions] = useState(mockPartnerHistoryTransactions);
+    const [processingId, setProcessingId] = useState<string | null>(null);
 
-    const filteredTransactions = useMemo(() => {
-        if (!searchQuery) return transactions;
+    const filteredPendingTransactions = useMemo(() => {
+        if (!searchQuery) return pendingTransactions;
         const lowercasedQuery = searchQuery.toLowerCase();
-        return transactions.filter(tx => 
+        return pendingTransactions.filter(tx => 
             tx.id.toLowerCase().includes(lowercasedQuery) ||
             tx.destinationAddress.toLowerCase().includes(lowercasedQuery)
         );
-    }, [transactions, searchQuery]);
+    }, [pendingTransactions, searchQuery]);
+    
+    const handleAction = (txId: string, status: 'Pending Admin' | 'Rejected') => {
+        setProcessingId(txId);
+        setTimeout(() => {
+            const tx = pendingTransactions.find(t => t.id === txId);
+            if (tx) {
+                setPendingTransactions(prev => prev.filter(t => t.id !== txId));
+                setHistoryTransactions(prev => [{ ...tx, status }, ...prev]);
+            }
+            setProcessingId(null);
+        }, 1500);
+    };
 
     return (
         <div className="space-y-8">
@@ -67,19 +87,23 @@ const BlockchainManagement: React.FC<BlockchainManagementProps> = ({ searchQuery
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTransactions.map(tx => (
+                            {filteredPendingTransactions.map(tx => (
                                 <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-mono text-white">{tx.id}</td>
                                     <td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td>
                                     <td className="px-6 py-4 font-mono">{tx.destinationAddress}</td>
                                     <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
                                     <td className="px-6 py-4 space-x-2 text-center">
-                                        <button className="text-xs font-bold py-1 px-3 rounded bg-accent/20 text-accent hover:bg-accent/40">Approve</button>
-                                        <button className="text-xs font-bold py-1 px-3 rounded bg-red-500/20 text-red-300 hover:bg-red-500/40">Reject</button>
+                                        {processingId === tx.id ? <Spinner className="mx-auto"/> : (
+                                            <>
+                                                <button onClick={() => handleAction(tx.id, 'Pending Admin')} className="text-xs font-bold py-1 px-3 rounded bg-accent/20 text-accent hover:bg-accent/40">Approve</button>
+                                                <button onClick={() => handleAction(tx.id, 'Rejected')} className="text-xs font-bold py-1 px-3 rounded bg-red-500/20 text-red-300 hover:bg-red-500/40">Reject</button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
-                            {filteredTransactions.length === 0 && (
+                            {filteredPendingTransactions.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="text-center py-8 text-gray-400">No pending transactions found.</td>
                                 </tr>
@@ -87,6 +111,36 @@ const BlockchainManagement: React.FC<BlockchainManagementProps> = ({ searchQuery
                         </tbody>
                     </table>
                  </div>
+            </Card>
+            <Card>
+                <h2 className="text-xl font-bold mb-4">Transaction History</h2>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left text-gray-400">
+                        <thead className="text-xs text-gray-400 uppercase bg-primary">
+                            <tr>
+                                <th className="px-6 py-3">Transaction ID</th>
+                                <th className="px-6 py-3">Amount</th>
+                                <th className="px-6 py-3">Destination</th>
+                                <th className="px-6 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {historyTransactions.map(tx => (
+                                <tr key={tx.id} className="bg-primary-light border-b border-primary">
+                                    <td className="px-6 py-4 font-mono text-white">{tx.id}</td>
+                                    <td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td>
+                                    <td className="px-6 py-4 font-mono">{tx.destinationAddress}</td>
+                                    <td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
+                                </tr>
+                            ))}
+                            {historyTransactions.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="text-center py-8 text-gray-400">No history found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </Card>
         </div>
     );

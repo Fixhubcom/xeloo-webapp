@@ -1,10 +1,67 @@
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
+import Spinner from '../../components/common/Spinner';
 
 type SettingsTab = 'Platform' | 'Notifications' | 'Integrations';
+type TemplateName = 'Welcome Email' | 'Payment Confirmation' | 'Password Reset';
+
+const MOCK_TEMPLATES: { [key in TemplateName]: string } = {
+    'Welcome Email': "<h1>Welcome to Xeloo, {{userName}}!</h1>\n<p>We're excited to have you on board.</p>",
+    'Payment Confirmation': "<h1>Your payment has been sent!</h1>\n<p>Transaction ID: {{transactionId}}</p>",
+    'Password Reset': "<h1>Password Reset Request</h1>\n<p>Click the link below to reset your password. If you did not request this, please ignore this email.</p>",
+};
+
+
+const EditTemplateModal: React.FC<{
+    templateName: TemplateName;
+    onClose: () => void;
+}> = ({ templateName, onClose }) => {
+    const [content, setContent] = useState(MOCK_TEMPLATES[templateName]);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = () => {
+        setIsSaving(true);
+        // Simulate saving
+        setTimeout(() => {
+            console.log(`Saving template "${templateName}":`, content);
+            MOCK_TEMPLATES[templateName] = content; // "Save" to mock object
+            setIsSaving(false);
+            onClose();
+        }, 1000);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4">
+            <Card className="w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold mb-4">Edit Template: <span className="text-accent">{templateName}</span></h2>
+                {/* FIX: Replaced backticks with single quotes to prevent JSX parsing errors. */}
+                <p className="text-sm text-gray-400 mb-4">You can use variables like '{{userName}}', '{{transactionId}}', etc. based on the template context.</p>
+                <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="w-full h-80 bg-primary font-mono text-sm p-3 rounded border border-primary-light focus:ring-accent focus:border-accent"
+                />
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                    <button onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 flex items-center justify-center w-32">
+                        {isSaving ? <Spinner /> : 'Save'}
+                    </button>
+                </div>
+            </Card>
+        </div>
+    );
+};
+
 
 const AdminSettings: React.FC = () => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('Platform');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingTemplate, setEditingTemplate] = useState<TemplateName | null>(null);
+
+    const handleEditClick = (templateName: TemplateName) => {
+        setEditingTemplate(templateName);
+        setIsEditModalOpen(true);
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -54,15 +111,15 @@ const AdminSettings: React.FC = () => {
                         <div className="space-y-3">
                             <div className="flex justify-between items-center p-3 bg-primary rounded-md">
                                 <span>Welcome Email</span>
-                                <button className="font-medium text-accent hover:underline text-sm">Edit Template</button>
+                                <button onClick={() => handleEditClick('Welcome Email')} className="font-medium text-accent hover:underline text-sm">Edit Template</button>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-primary rounded-md">
                                 <span>Payment Confirmation</span>
-                                <button className="font-medium text-accent hover:underline text-sm">Edit Template</button>
+                                <button onClick={() => handleEditClick('Payment Confirmation')} className="font-medium text-accent hover:underline text-sm">Edit Template</button>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-primary rounded-md">
                                 <span>Password Reset</span>
-                                <button className="font-medium text-accent hover:underline text-sm">Edit Template</button>
+                                <button onClick={() => handleEditClick('Password Reset')} className="font-medium text-accent hover:underline text-sm">Edit Template</button>
                             </div>
                         </div>
                     </div>
@@ -111,6 +168,12 @@ const AdminSettings: React.FC = () => {
             <div>
                 {renderTabContent()}
             </div>
+            {isEditModalOpen && editingTemplate && (
+                <EditTemplateModal 
+                    templateName={editingTemplate}
+                    onClose={() => setIsEditModalOpen(false)}
+                />
+            )}
         </Card>
     );
 };

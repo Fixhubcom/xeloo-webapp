@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 
@@ -32,6 +31,17 @@ const AdminApiManagement: React.FC<AdminApiManagementProps> = ({ searchQuery }) 
             key.userType.toLowerCase().includes(lowercasedQuery)
         );
     }, [apiKeys, searchQuery]);
+    
+    const handleRevokeKey = (keyId: string) => {
+        if (window.confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
+            setApiKeys(currentKeys =>
+                currentKeys.map(key =>
+                    key.id === keyId ? { ...key, status: 'Revoked' } : key
+                )
+            );
+        }
+    };
+
 
     return (
         <div className="space-y-8">
@@ -64,7 +74,7 @@ const AdminApiManagement: React.FC<AdminApiManagementProps> = ({ searchQuery }) 
                                         <span className={`px-2 py-0.5 text-xs rounded-full ${key.status === 'Active' ? 'bg-accent/20 text-accent' : 'bg-gray-500/20 text-gray-300'}`}>{key.status}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {key.status === 'Active' && <button className="font-medium text-red-400 hover:underline">Revoke</button>}
+                                        {key.status === 'Active' && <button onClick={() => handleRevokeKey(key.id)} className="font-medium text-red-400 hover:underline">Revoke</button>}
                                     </td>
                                 </tr>
                             ))}

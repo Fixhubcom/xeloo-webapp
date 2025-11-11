@@ -29,6 +29,11 @@ const BlockchainManagement: React.FC = () => {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    
+    const [pendingTransactions, setPendingTransactions] = useState(mockPendingAdminTransactions);
+    const [historyTransactions, setHistoryTransactions] = useState(mockHistoryTransactions);
+    const [processingId, setProcessingId] = useState<string | null>(null);
+
 
     const handleInitiateTransfer = (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +46,19 @@ const BlockchainManagement: React.FC = () => {
             setTimeout(() => setIsSuccess(false), 5000);
         }, 2000);
     }
+    
+    const handleAction = (txId: string, status: 'Completed' | 'Rejected') => {
+        setProcessingId(txId);
+        setTimeout(() => {
+            const tx = pendingTransactions.find(t => t.id === txId);
+            if (tx) {
+                setPendingTransactions(prev => prev.filter(t => t.id !== txId));
+                setHistoryTransactions(prev => [{ ...tx, status }, ...prev]);
+            }
+            setProcessingId(null);
+        }, 1500); // Simulate API call
+    };
+
 
     return (
         <div className="space-y-8">
@@ -86,13 +104,20 @@ const BlockchainManagement: React.FC = () => {
                     <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Transaction ID</th><th className="px-6 py-3">Partner</th><th className="px-6 py-3">Amount</th><th className="px-6 py-3">Destination</th><th className="px-6 py-3">Status</th><th className="px-6 py-3 text-center">Actions</th></tr></thead>
                         <tbody>
-                            {mockPendingAdminTransactions.map(tx => (
+                            {pendingTransactions.map(tx => (
                                 <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-mono text-white">{tx.id}</td><td className="px-6 py-4">{tx.partnerName}</td><td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td><td className="px-6 py-4 font-mono">{tx.destinationAddress}</td><td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
-                                    <td className="px-6 py-4 space-x-2 text-center"><button className="text-xs font-bold py-1 px-3 rounded bg-accent/20 text-accent hover:bg-accent/40">Co-Sign & Approve</button><button className="text-xs font-bold py-1 px-3 rounded bg-red-500/20 text-red-300 hover:bg-red-500/40">Reject</button></td>
+                                    <td className="px-6 py-4 space-x-2 text-center">
+                                        {processingId === tx.id ? <Spinner className="mx-auto" /> : (
+                                            <>
+                                                <button onClick={() => handleAction(tx.id, 'Completed')} className="text-xs font-bold py-1 px-3 rounded bg-accent/20 text-accent hover:bg-accent/40">Co-Sign & Approve</button>
+                                                <button onClick={() => handleAction(tx.id, 'Rejected')} className="text-xs font-bold py-1 px-3 rounded bg-red-500/20 text-red-300 hover:bg-red-500/40">Reject</button>
+                                            </>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
-                             {mockPendingAdminTransactions.length === 0 && (<tr><td colSpan={6} className="text-center py-4 text-gray-400">No transactions require your signature.</td></tr>)}
+                             {pendingTransactions.length === 0 && (<tr><td colSpan={6} className="text-center py-4 text-gray-400">No transactions require your signature.</td></tr>)}
                         </tbody>
                     </table>
                  </div>
@@ -104,7 +129,7 @@ const BlockchainManagement: React.FC = () => {
                     <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Transaction ID</th><th className="px-6 py-3">Partner</th><th className="px-6 py-3">Amount</th><th className="px-6 py-3">Status</th></tr></thead>
                         <tbody>
-                            {mockHistoryTransactions.map(tx => (
+                            {historyTransactions.map(tx => (
                                 <tr key={tx.id} className="bg-primary-light border-b border-primary">
                                     <td className="px-6 py-4 font-mono text-white">{tx.id}</td><td className="px-6 py-4">{tx.partnerName}</td><td className="px-6 py-4 font-mono">{tx.amount.toLocaleString()} {tx.currency}</td><td className="px-6 py-4"><StatusBadge status={tx.status} /></td>
                                 </tr>
