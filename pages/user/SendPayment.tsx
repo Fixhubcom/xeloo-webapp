@@ -236,12 +236,14 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     
     const BankDetailsForm = () => (
         <div className="space-y-4 pt-2">
-            <p className="text-xs text-gray-400 -mb-2">
+             <p className="text-xs text-gray-400 -mb-2">
                 {paymentMethod === 'bank'
                     ? 'Recipient will receive funds directly in their bank account.'
                     : 'You will pay with USDT, and the recipient will receive fiat in their bank account.'
                 }
             </p>
+            <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+            <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
             <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({ ...p, bankName: e.target.value }))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
             <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({ ...p, accountNumber: e.target.value }))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
             <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({ ...p, routingNumber: e.target.value }))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
@@ -269,13 +271,6 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                     </div>
                 </div>
                 
-                {paymentMethod !== 'xeloo' && (
-                    <>
-                        <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                        <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                    </>
-                )}
-
                 {(paymentMethod === 'bank' || paymentMethod === 'usdt') && <BankDetailsForm />}
 
                 {paymentMethod === 'xeloo' && (
