@@ -34,7 +34,7 @@ const EditTemplateModal: React.FC<{
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4">
             <Card className="w-full max-w-3xl" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-4">Edit Template: <span className="text-accent">{templateName}</span></h2>
-                {/* FIX: Replaced backticks with single quotes to prevent JSX parsing errors. */}
+                {/* FIX: The JSX parser was misinterpreting the backticks, causing it to treat the variables inside as code. Replaced with single quotes to ensure it's parsed as plain text. */}
                 <p className="text-sm text-gray-400 mb-4">You can use variables like '{{userName}}', '{{transactionId}}', etc. based on the template context.</p>
                 <textarea
                     value={content}

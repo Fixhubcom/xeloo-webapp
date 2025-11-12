@@ -48,8 +48,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     const [recipientName, setRecipientName] = useState('');
     const [recipientEmail, setRecipientEmail] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank');
-    const [bankDetails, setBankDetails] = useState({ accountNumber: '', bankName: '', routingNumber: '' });
-    const [usdtDetails, setUsdtDetails] = useState({ walletAddress: '', network: 'Base' });
+    const [bankDetails, setBankDetails] = useState({ accountNumber: '', bankName: '', routingNumber: '', iban: '', swiftCode: '' });
     const [xelooUsername, setXelooUsername] = useState(initialUsername || '');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -137,19 +136,19 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
         if (paymentMethod === 'bank' || paymentMethod === 'usdt') {
             const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-            // Pay-in method depends on the currency the user is SENDING FROM
-            if (fromCurrency === 'USDT') {
+            if (paymentMethod === 'usdt') {
+                const costInUSD = totalCost / (MOCK_RATES[fromCurrency] || 1);
                 setGeneratedDetails({
                     type: 'usdt',
                     details: {
                         network: 'TRC20 (Tron)',
                         address: `T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
                         qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
-                        amount: totalCost,
+                        amount: costInUSD,
                         currency: 'USDT',
                     }
                 });
-            } else { // fromCurrency is fiat
+            } else { // paymentMethod === 'bank'
                  setGeneratedDetails({
                     type: 'bank',
                     details: {
@@ -235,6 +234,22 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
         </Card>
     );
     
+    const BankDetailsForm = () => (
+        <div className="space-y-4 pt-2">
+            <p className="text-xs text-gray-400 -mb-2">
+                {paymentMethod === 'bank'
+                    ? 'Recipient will receive funds directly in their bank account.'
+                    : 'You will pay with USDT, and the recipient will receive fiat in their bank account.'
+                }
+            </p>
+            <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({ ...p, bankName: e.target.value }))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+            <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({ ...p, accountNumber: e.target.value }))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+            <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({ ...p, routingNumber: e.target.value }))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+            <input value={bankDetails.iban} onChange={e => setBankDetails(p => ({ ...p, iban: e.target.value }))} placeholder="IBAN (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+            <input value={bankDetails.swiftCode} onChange={e => setBankDetails(p => ({ ...p, swiftCode: e.target.value }))} placeholder="SWIFT/BIC Code (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+        </div>
+    );
+
     const renderDetailsStep = () => (
          <Card>
             <h2 className="text-2xl font-bold mb-4">Recipient Details</h2>
@@ -248,7 +263,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                     <div className="grid grid-cols-3 gap-2">
                         {(['bank', 'usdt', 'xeloo'] as PaymentMethod[]).map(m => (
                              <button key={m} onClick={() => setPaymentMethod(m)} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === m ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
-                                {m === 'bank' ? 'Bank Transfer' : m === 'usdt' ? 'USDT' : 'Xeloo User'}
+                                {m === 'bank' ? 'Bank Transfer' : m === 'usdt' ? 'Pay with USDT' : 'Xeloo User'}
                             </button>
                         ))}
                     </div>
@@ -261,27 +276,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                     </>
                 )}
 
-                {paymentMethod === 'bank' && (
-                    <div className="space-y-4 pt-2">
-                        <p className="text-xs text-gray-400 -mb-2">Recipient will receive funds directly in their bank account.</p>
-                        <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({...p, bankName: e.target.value}))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                        <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({...p, accountNumber: e.target.value}))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                        <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({...p, routingNumber: e.target.value}))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-                    </div>
-                )}
-
-                {paymentMethod === 'usdt' && (
-                    <div className="space-y-4 pt-2">
-                        <p className="text-xs text-gray-400 -mb-2">Recipient will receive USDT in their crypto wallet.</p>
-                        <input value={usdtDetails.walletAddress} onChange={e => setUsdtDetails(p => ({...p, walletAddress: e.target.value}))} placeholder="USDT Wallet Address" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                        <select value={usdtDetails.network} onChange={e => setUsdtDetails(p => ({...p, network: e.target.value}))} className="w-full bg-primary p-2 rounded border border-primary-light">
-                            <option>Base</option>
-                            <option>TRC20 (Tron)</option>
-                            <option>ERC20 (Ethereum)</option>
-                            <option>BEP20 (BNB Smart Chain)</option>
-                        </select>
-                    </div>
-                )}
+                {(paymentMethod === 'bank' || paymentMethod === 'usdt') && <BankDetailsForm />}
 
                 {paymentMethod === 'xeloo' && (
                      <div>
@@ -313,20 +308,13 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                             <span className="block text-xs text-gray-400">{paymentMethod === 'xeloo' ? `@${xelooUsername}` : recipientEmail}</span>
                         </div>
                     </div>
-                    {paymentMethod === 'bank' && (
+                    {(paymentMethod === 'bank' || paymentMethod === 'usdt') && (
                          <div className="flex justify-between items-center text-gray-light">
                             <span>Bank Details:</span>
                             <div className="text-right">
                                 <span className="font-mono text-white text-sm">{bankDetails.bankName} - {bankDetails.accountNumber}</span>
-                            </div>
-                        </div>
-                    )}
-                    {paymentMethod === 'usdt' && (
-                         <div className="flex justify-between items-center text-gray-light">
-                            <span>USDT Wallet:</span>
-                            <div className="text-right">
-                                <span className="font-mono text-white text-sm break-all">{usdtDetails.walletAddress}</span>
-                                <span className="block text-xs text-gray-400">{usdtDetails.network}</span>
+                                {bankDetails.iban && <span className="block text-xs text-gray-400 font-mono">IBAN: {bankDetails.iban}</span>}
+                                {bankDetails.swiftCode && <span className="block text-xs text-gray-400 font-mono">SWIFT: {bankDetails.swiftCode}</span>}
                             </div>
                         </div>
                     )}
