@@ -18,6 +18,7 @@ import {
     MenuIcon,
     SunIcon,
     MoonIcon,
+    ArrowLeftIcon,
 } from '../../components/icons/Icons';
 import { User, UserRole } from '../../types';
 import PartnerSettlements from './PartnerSettlements';
@@ -52,52 +53,77 @@ type NavItem =
     | 'Settings'
     | 'Support';
 
-const PartnerOverview: React.FC = () => (
-    <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="text-center">
-                <h3 className="text-lg text-gray-400">Total Volume (30d)</h3>
-                <p className="text-3xl font-bold text-accent">$2.5M</p>
-            </Card>
-            <Card className="text-center">
-                <h3 className="text-lg text-gray-400">Pending Settlements</h3>
-                <p className="text-3xl font-bold text-accent">$150,000</p>
-            </Card>
-            <Card className="text-center">
-                <h3 className="text-lg text-gray-400">Total Funds Sent Out (30d)</h3>
-                <p className="text-3xl font-bold text-accent">$1.8M</p>
+const PartnerOverview: React.FC = () => {
+    const { theme } = useTheme();
+    const gridColor = theme === 'dark' ? '#294A21' : '#e5e7eb';
+    const textColor = theme === 'dark' ? '#a8a29e' : '#6b7280';
+    const tooltipStyles = {
+        contentStyle: {
+            backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
+            border: `1px solid ${theme === 'dark' ? '#294A21' : '#e5e7eb'}`,
+        }
+    };
+
+    return (
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="text-center">
+                    <h3 className="text-lg text-gray-500 dark:text-gray-400">Total Volume (30d)</h3>
+                    <p className="text-3xl font-bold text-accent">$2.5M</p>
+                </Card>
+                <Card className="text-center">
+                    <h3 className="text-lg text-gray-500 dark:text-gray-400">Pending Settlements</h3>
+                    <p className="text-3xl font-bold text-accent">$150,000</p>
+                </Card>
+                <Card className="text-center">
+                    <h3 className="text-lg text-gray-500 dark:text-gray-400">Total Funds Sent Out (30d)</h3>
+                    <p className="text-3xl font-bold text-accent">$1.8M</p>
+                </Card>
+            </div>
+            <Card>
+                <h3 className="text-xl font-bold mb-4">Transaction Volume by Currency (Last 30d)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={partnerFundsFlowData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                        <XAxis dataKey="currency" stroke={textColor} />
+                        <YAxis stroke={textColor} tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
+                        <Tooltip 
+                            {...tooltipStyles}
+                            formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']}
+                        />
+                        <Bar dataKey="volume" fill="#FDDA1A" />
+                    </BarChart>
+                </ResponsiveContainer>
             </Card>
         </div>
-        <Card>
-            <h3 className="text-xl font-bold mb-4">Transaction Volume by Currency (Last 30d)</h3>
-            <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={partnerFundsFlowData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#294A21" />
-                    <XAxis dataKey="currency" stroke="#a8a29e" />
-                    <YAxis stroke="#a8a29e" tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                    <Tooltip 
-                        contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} 
-                        formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']}
-                    />
-                    <Bar dataKey="volume" fill="#FDDA1A" />
-                </BarChart>
-            </ResponsiveContainer>
-        </Card>
-    </div>
-);
+    );
+};
 
 
 const PartnerDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<NavItem>('Dashboard');
+  const [history, setHistory] = useState<{ view: NavItem, props?: any }[]>([{ view: 'Dashboard', props: {} }]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const activeView = history[history.length - 1].view;
+
   const navigateTo = (view: NavItem) => {
-    setActiveView(view);
+    setHistory(prev => [...prev, { view, props: {} }]);
     setIsSidebarOpen(false);
   }
+
+  const selectSidebarItem = (view: NavItem) => {
+    setHistory([{ view, props: {} }]);
+    setIsSidebarOpen(false);
+  }
+
+  const goBack = () => {
+    if (history.length > 1) {
+        setHistory(prev => prev.slice(0, -1));
+    }
+  };
 
   const renderContent = () => {
         switch (activeView) {
@@ -115,7 +141,7 @@ const PartnerDashboard: React.FC = () => {
     };
   
   return (
-        <div className="flex h-screen bg-gray-100 dark:bg-primary overflow-hidden">
+        <div className="flex h-screen bg-slate-50 dark:bg-primary overflow-hidden">
             {isSidebarOpen && (
                 <div 
                     className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
@@ -128,20 +154,20 @@ const PartnerDashboard: React.FC = () => {
                 </div>
                  <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
-                    <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<BriefcaseIcon />} label="Settlements" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<DashboardIcon />} label="Dashboard" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<TransactionsIcon />} label="Transactions" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<BriefcaseIcon />} label="Settlements" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<UsersIcon />} label="Team Management" activeItem={activeView} setItem={selectSidebarItem} />
                     
                     <p className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</p>
-                    <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<CubeIcon />} label="Blockchain" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={navigateTo} />
-                    <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={navigateTo} />
+                    <NavItemLink icon={<CodeIcon />} label="API Management" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<CubeIcon />} label="Blockchain" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<AnalyticsIcon />} label="Reports" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<SettingsIcon />} label="Settings" activeItem={activeView} setItem={selectSidebarItem} />
+                    <NavItemLink icon={<SupportIcon />} label="Support" activeItem={activeView} setItem={selectSidebarItem} />
                  </nav>
                 <div className="px-4 py-4 border-t border-gray-200 dark:border-primary-light">
-                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white rounded-md transition-colors">
+                     <button onClick={logout} className="w-full flex items-center px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light hover:text-slate-800 dark:hover:text-white rounded-md transition-colors">
                         <LogoutIcon className="mr-3 w-5 h-5"/>
                         Logout
                     </button>
@@ -149,10 +175,15 @@ const PartnerDashboard: React.FC = () => {
             </aside>
              <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-gray-200 dark:border-primary-light flex-shrink-0">
-                     <div className="flex items-center gap-4">
+                     <div className="flex items-center gap-2 sm:gap-4">
                         <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-500 dark:text-gray-400 focus:outline-none">
                             <MenuIcon className="w-6 h-6" />
                         </button>
+                        {history.length > 1 && (
+                            <button onClick={goBack} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light">
+                                <ArrowLeftIcon className="w-5 h-5" />
+                            </button>
+                        )}
                         <div className="relative hidden md:block">
                             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <input
@@ -160,15 +191,15 @@ const PartnerDashboard: React.FC = () => {
                                 placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-gray-100 dark:bg-primary-light border border-gray-300 dark:border-primary rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
+                                className="bg-slate-100 dark:bg-primary-light border border-gray-300 dark:border-primary rounded-md py-2 pl-10 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent w-64 lg:w-96"
                             />
                         </div>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-4">
-                         <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light md:hidden">
+                         <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light md:hidden">
                             <SearchIcon className="w-6 h-6" />
                         </button>
-                        <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light">
+                        <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light">
                             {theme === 'dark' ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-700" />}
                         </button>
                         <div className="flex items-center space-x-3">
@@ -184,7 +215,7 @@ const PartnerDashboard: React.FC = () => {
                         </div>
                     </div>
                 </header>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-100 dark:bg-primary">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100 dark:bg-primary">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8">{activeView}</h1>
                     {renderContent()}
                 </div>
@@ -212,7 +243,7 @@ const NavItemLink: React.FC<NavItemLinkProps> = ({ icon, label, activeItem, setI
       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${
         isActive
           ? 'bg-accent text-primary'
-          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-primary-light hover:text-gray-900 dark:hover:text-white'
+          : 'text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light hover:text-slate-800 dark:hover:text-white'
       }`}
     >
         {React.cloneElement(icon, { className: 'w-5 h-5' })}

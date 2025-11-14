@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import Card from '../../components/common/Card';
+import { useTheme } from '../../context/ThemeContext';
 
 const transactionData = [
   { name: 'Jan', Sent: 4000, Received: 2400 },
@@ -27,20 +28,31 @@ const userFundsFlowData = [
 ];
 
 const UserAnalytics: React.FC = () => {
+    const { theme } = useTheme();
+
+    const gridColor = theme === 'dark' ? '#374151' : '#e5e7eb';
+    const textColor = theme === 'dark' ? '#9ca3af' : '#6b7280';
+    const tooltipStyles = {
+        contentStyle: {
+            backgroundColor: theme === 'dark' ? '#111827' : '#ffffff',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+        }
+    };
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="text-center">
-            <h3 className="text-lg text-gray-light">Total Sent (Month)</h3>
+            <h3 className="text-lg text-gray-500 dark:text-gray-light">Total Sent (Month)</h3>
             <p className="text-3xl font-bold text-accent">$12,450.00</p>
         </Card>
         <Card className="text-center">
-            <h3 className="text-lg text-gray-light">Total Received (Month)</h3>
-            <p className="text-3xl font-bold text-green-400">$22,206.00</p>
+            <h3 className="text-lg text-gray-500 dark:text-gray-light">Total Received (Month)</h3>
+            <p className="text-3xl font-bold text-green-500 dark:text-green-400">$22,206.00</p>
         </Card>
         <Card className="text-center">
-            <h3 className="text-lg text-gray-light">Net Balance</h3>
-            <p className="text-3xl font-bold text-white">$98,750.50</p>
+            <h3 className="text-lg text-gray-500 dark:text-gray-light">Net Balance</h3>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">$98,750.50</p>
         </Card>
       </div>
       
@@ -48,13 +60,13 @@ const UserAnalytics: React.FC = () => {
         <h3 className="text-xl font-bold mb-4">Monthly Transaction Volume</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={transactionData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="name" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
-            <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="name" stroke={textColor} />
+            <YAxis stroke={textColor} />
+            <Tooltip {...tooltipStyles} />
             <Legend />
             <Bar dataKey="Received" fill="#FDDA1A" />
-            <Bar dataKey="Sent" fill="#FDDA1A" />
+            <Bar dataKey="Sent" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -63,13 +75,13 @@ const UserAnalytics: React.FC = () => {
         <h3 className="text-xl font-bold mb-4">Funds Flow by Country</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={userFundsFlowData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="country" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
-            <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="country" stroke={textColor} />
+            <YAxis stroke={textColor} />
+            <Tooltip {...tooltipStyles} />
             <Legend />
-            <Bar dataKey="Received" fill="#FDDA1A" />
-            <Bar dataKey="Sent" fill="#FDDA1A" />
+            <Bar dataKey="Received" stackId="a" fill="#4ade80" />
+            <Bar dataKey="Sent" stackId="a" fill="#f87171" />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -78,10 +90,10 @@ const UserAnalytics: React.FC = () => {
         <h3 className="text-xl font-bold mb-4">Weekly Cash Flow</h3>
         <ResponsiveContainer width="100%" height={300}>
             <LineChart data={cashflowData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151"/>
-                <XAxis dataKey="name" stroke="#9ca3af" />
-                <YAxis stroke="#9ca3af" />
-                <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor}/>
+                <XAxis dataKey="name" stroke={textColor} />
+                <YAxis stroke={textColor} />
+                <Tooltip {...tooltipStyles} />
                 <Legend />
                 <Line type="monotone" dataKey="Inflow" stroke="#4ade80" strokeWidth={2} />
                 <Line type="monotone" dataKey="Outflow" stroke="#f87171" strokeWidth={2} />

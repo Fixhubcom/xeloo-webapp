@@ -101,6 +101,8 @@ export interface Employee {
     bankName?: string;
     accountNumber?: string;
     routingNumber?: string;
+    swiftCode?: string;
+    iban?: string;
     xelooUsername?: string;
 }
 

@@ -14,7 +14,7 @@ const countries = Object.keys(countryToCurrency);
 const mockEmployees: Employee[] = [
     { id: 'emp_1', name: 'Adebayo Adekunle', email: 'adebayo@example.com', country: 'Nigeria', currency: 'NGN', salary: 750000, paymentMethod: 'bank', bankName: 'GTBank', accountNumber: '0123456789' },
     { id: 'emp_2', name: 'Kwame Osei', email: 'kwame@example.com', country: 'Ghana', currency: 'GHS', salary: 4000, paymentMethod: 'bank', bankName: 'EcoBank', accountNumber: '1234567890' },
-    { id: 'emp_3', name: 'Jane Smith', email: 'jane.s@example.com', country: 'UK', currency: 'GBP', salary: 3000, paymentMethod: 'bank', bankName: 'Barclays', accountNumber: '20-05-05 12345678' },
+    { id: 'emp_3', name: 'Jane Smith', email: 'jane.s@example.com', country: 'UK', currency: 'GBP', salary: 3000, paymentMethod: 'bank', bankName: 'Barclays', accountNumber: '20-05-05 12345678', swiftCode: 'BARCGB22', iban: 'GB29 NWBK 6016 1331 9268 19' },
     { id: 'emp_4', name: 'Sam Wilson', email: 'sam@xeloo.user', country: 'USA', currency: 'USD', salary: 2500, paymentMethod: 'xeloo', xelooUsername: 'samwilson' },
 ];
 // --- END MOCK DATA ---
@@ -33,6 +33,8 @@ const EmployeeForm: React.FC<{
     const [bankName, setBankName] = useState(employee?.bankName || '');
     const [accountNumber, setAccountNumber] = useState(employee?.accountNumber || '');
     const [routingNumber, setRoutingNumber] = useState(employee?.routingNumber || '');
+    const [swiftCode, setSwiftCode] = useState(employee?.swiftCode || '');
+    const [iban, setIban] = useState(employee?.iban || '');
     const [xelooUsername, setXelooUsername] = useState(employee?.xelooUsername || '');
 
     const [equivalentValue, setEquivalentValue] = useState(0);
@@ -66,6 +68,8 @@ const EmployeeForm: React.FC<{
             bankName: paymentMethod === 'bank' ? bankName : undefined,
             accountNumber: paymentMethod === 'bank' ? accountNumber : undefined,
             routingNumber: paymentMethod === 'bank' ? routingNumber : undefined,
+            swiftCode: paymentMethod === 'bank' ? swiftCode : undefined,
+            iban: paymentMethod === 'bank' ? iban : undefined,
             xelooUsername: paymentMethod === 'xeloo' ? xelooUsername : undefined,
         });
     };
@@ -91,6 +95,8 @@ const EmployeeForm: React.FC<{
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                             <input value={routingNumber} onChange={e => setRoutingNumber(e.target.value)} placeholder="Routing Number (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                            <input value={swiftCode} onChange={e => setSwiftCode(e.target.value)} placeholder="SWIFT/BIC Code (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                            <input value={iban} onChange={e => setIban(e.target.value)} placeholder="IBAN (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
                         </div>
                     </div>
                 ) : (

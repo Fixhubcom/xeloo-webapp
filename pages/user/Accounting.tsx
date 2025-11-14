@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { JournalEntry, Bill } from '../../types';
 import AIAccountingAssistant from './accounting/AIAccountingAssistant';
 import { SparklesIcon, InvoiceIcon } from '../../components/icons/Icons';
+import { useTheme } from '../../context/ThemeContext';
 
 type AccountingView = 'Dashboard' | 'AI Assistant' | 'Chart of Accounts' | 'Journal' | 'Bills' | 'Reports';
 type ReportType = 'pnl' | 'balance' | 'cashflow' | 'ledger';
@@ -41,7 +41,8 @@ const mockBills: Bill[] = [
 
 const pnlData = [ { name: 'Revenue', value: 95000 }, { name: 'Expenses', value: 19500 }, ];
 const expenseBreakdown = [ { name: 'Software', value: 2500 }, { name: 'Marketing', value: 5000 }, { name: 'Rent', value: 12000 }, ]
-const COLORS = ['#FDDA1A', '#FFFFFF', '#a8a29e'];
+const COLORS_DARK = ['#FDDA1A', '#FFFFFF', '#a8a29e'];
+const COLORS_LIGHT = ['#D97706', '#4B5563', '#9CA3AF'];
 
 const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view: AccountingView) => void }> = ({ activeView, setActiveView }) => {
     const views: { name: AccountingView, icon?: React.ReactElement }[] = [
@@ -53,12 +54,12 @@ const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view:
         { name: 'Reports' }
     ];
     return (
-        <div className="mb-6 flex flex-wrap justify-center gap-2 p-1 bg-primary rounded-lg">
+        <div className="mb-6 flex flex-wrap justify-center gap-2 p-1 bg-white dark:bg-primary rounded-lg">
             {views.map(view => (
                 <button
                     key={view.name}
                     onClick={() => setActiveView(view.name)}
-                    className={`flex-grow sm:flex-grow-0 flex items-center justify-center text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view.name ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary-light'}`}
+                    className={`flex-grow sm:flex-grow-0 flex items-center justify-center text-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeView === view.name ? 'bg-accent text-primary' : 'text-gray-500 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-primary-light'}`}
                 >
                     {view.icon}
                     {view.name}
@@ -69,7 +70,7 @@ const ViewSwitcher: React.FC<{ activeView: AccountingView, setActiveView: (view:
 };
 
 const ReportTable: React.FC<{ title: string, sections: { title: string, items: { name: string, value: number }[], total: number }[], grandTotal?: { label: string, value: number } }> = ({ title, sections, grandTotal }) => (
-    <div className="bg-primary-light p-4 sm:p-6 rounded-lg">
+    <div className="bg-white dark:bg-primary-light p-4 sm:p-6 rounded-lg">
         <h3 className="text-xl font-bold text-center mb-4">{title}</h3>
         <div className="overflow-x-auto">
             <table className="w-full">
@@ -85,7 +86,7 @@ const ReportTable: React.FC<{ title: string, sections: { title: string, items: {
                                     <td className="text-right font-mono">{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                                 </tr>
                             ))}
-                            <tr className="border-t border-primary">
+                            <tr className="border-t border-slate-200 dark:border-primary">
                                 <td className="font-semibold pt-2">Total {section.title}</td>
                                 <td className="text-right font-mono font-semibold pt-2">{section.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                             </tr>
@@ -108,11 +109,21 @@ interface AccountingProps {
 }
 
 const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
+    const { theme } = useTheme();
     const [activeView, setActiveView] = useState<AccountingView>('Dashboard');
     const [accounts, setAccounts] = useState(initialAccounts);
     const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(initialJournalEntries);
     const [bills, setBills] = useState<Bill[]>(mockBills);
     const [activeReport, setActiveReport] = useState<ReportType>('pnl');
+
+    const textColor = theme === 'dark' ? '#a8a29e' : '#475569';
+    const tooltipStyles = {
+        contentStyle: {
+            backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
+            border: `1px solid ${theme === 'dark' ? '#294A21' : '#e2e8f0'}`,
+        }
+    };
+    const COLORS = theme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
 
     const filteredJournalEntries = useMemo(() => {
         if (!searchQuery) return journalEntries;
@@ -141,17 +152,17 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                 return (
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Revenue</h3><p className="text-3xl font-bold text-accent">${totalRevenue.toLocaleString()}</p></Card>
-                            <Card className="text-center"><h3 className="text-lg text-gray-400">Total Expenses</h3><p className="text-3xl font-bold text-yellow-400">${totalExpenses.toLocaleString()}</p></Card>
-                            <Card className="text-center"><h3 className="text-lg text-gray-400">Net Income</h3><p className="text-3xl font-bold text-accent">${netIncome.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-500 dark:text-gray-400">Total Revenue</h3><p className="text-3xl font-bold text-accent">${totalRevenue.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-500 dark:text-gray-400">Total Expenses</h3><p className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">${totalExpenses.toLocaleString()}</p></Card>
+                            <Card className="text-center"><h3 className="text-lg text-gray-500 dark:text-gray-400">Net Income</h3><p className="text-3xl font-bold text-accent">${netIncome.toLocaleString()}</p></Card>
                         </div>
                         <Card>
                             <h3 className="text-xl font-bold mb-4">Income vs Expense</h3>
                              <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={pnlData}>
-                                    <XAxis dataKey="name" stroke="#a8a29e" />
-                                    <YAxis stroke="#a8a29e" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} />
+                                    <XAxis dataKey="name" stroke={textColor} />
+                                    <YAxis stroke={textColor} />
+                                    <Tooltip {...tooltipStyles} />
                                     <Bar dataKey="value" fill="#FDDA1A" />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -160,10 +171,10 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                              <h3 className="text-xl font-bold mb-4">Expense Breakdown</h3>
                              <ResponsiveContainer width="100%" height={300}>
                                  <PieChart>
-                                     <Pie data={expenseBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
+                                     <Pie data={expenseBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={{ fill: textColor }}>
                                         {expenseBreakdown.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                      </Pie>
-                                     <Tooltip contentStyle={{ backgroundColor: '#041401', border: '1px solid #294A21' }} />
+                                     <Tooltip {...tooltipStyles} />
                                  </PieChart>
                             </ResponsiveContainer>
                         </Card>
@@ -175,9 +186,9 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                 return (
                     <Card>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-400">
-                                <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Code</th><th className="px-6 py-3">Account Name</th><th className="px-6 py-3">Type</th><th className="px-6 py-3 text-right">Balance</th></tr></thead>
-                                <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
+                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-slate-100 dark:bg-primary"><tr><th className="px-6 py-3">Code</th><th className="px-6 py-3">Account Name</th><th className="px-6 py-3">Type</th><th className="px-6 py-3 text-right">Balance</th></tr></thead>
+                                <tbody>{accounts.map(acc => (<tr key={acc.code} className="bg-white dark:bg-primary-light border-b border-slate-100 dark:border-primary"><td className="px-6 py-4">{acc.code}</td><td className="px-6 py-4 font-medium text-slate-800 dark:text-white">{acc.name}</td><td className="px-6 py-4">{acc.type}</td><td className="px-6 py-4 font-mono text-right">${acc.balance.toLocaleString()}</td></tr>))}</tbody>
                             </table>
                         </div>
                     </Card>
@@ -186,13 +197,13 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                  return (
                     <Card>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-400">
-                                <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
+                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-slate-100 dark:bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
                                 <tbody>
-                                    {filteredJournalEntries.map(entry => (<tr key={entry.id} className="bg-primary-light border-b border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}
+                                    {filteredJournalEntries.map(entry => (<tr key={entry.id} className="bg-white dark:bg-primary-light border-b border-slate-100 dark:border-primary"><td className="px-6 py-4">{entry.date}</td><td className="px-6 py-4 font-medium text-slate-800 dark:text-white">{entry.description}</td><td className="px-6 py-4">{entry.account}</td><td className="px-6 py-4 font-mono text-yellow-600 dark:text-yellow-400 text-right">{entry.debit > 0 ? entry.debit.toFixed(2) : '-'}</td><td className="px-6 py-4 font-mono text-accent text-right">{entry.credit > 0 ? entry.credit.toFixed(2) : '-'}</td></tr>))}
                                     {filteredJournalEntries.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="text-center py-8 text-gray-400">No journal entries found.</td>
+                                            <td colSpan={5} className="text-center py-8 text-gray-500 dark:text-gray-400">No journal entries found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -202,7 +213,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                 );
             case 'Bills':
                  const StatusBadge: React.FC<{ status: Bill['status'] }> = ({ status }) => {
-                    const classes = { 'Paid': 'bg-green-500/20 text-green-300', 'Unpaid': 'bg-yellow-500/20 text-yellow-300', 'Overdue': 'bg-red-500/20 text-red-300' };
+                    const classes = { 'Paid': 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300', 'Unpaid': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300', 'Overdue': 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300' };
                     return <span className={`px-2 py-1 text-xs font-medium rounded-full ${classes[status]}`}>{status}</span>;
                 };
                 return (
@@ -212,14 +223,14 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                              <button className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add New Bill</button>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-400">
-                                <thead className="text-xs text-gray-400 uppercase bg-primary">
+                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-slate-100 dark:bg-primary">
                                     <tr><th className="px-4 py-3">Vendor</th><th className="px-4 py-3">Due Date</th><th className="px-4 py-3 text-right">Amount</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Action</th></tr>
                                 </thead>
                                 <tbody>
                                     {bills.map(bill => (
-                                        <tr key={bill.id} className="bg-primary-light border-b border-primary">
-                                            <td className="px-4 py-3 font-medium text-white">{bill.vendorName}</td>
+                                        <tr key={bill.id} className="bg-white dark:bg-primary-light border-b border-slate-100 dark:border-primary">
+                                            <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{bill.vendorName}</td>
                                             <td className="px-4 py-3">{bill.dueDate}</td>
                                             <td className="px-4 py-3 text-right font-mono">{bill.amount.toLocaleString('en-US', {style: 'currency', currency: bill.currency})}</td>
                                             <td className="px-4 py-3"><StatusBadge status={bill.status} /></td>
@@ -253,7 +264,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                         case 'cashflow':
                             return <ReportTable title="Cash Flow Statement" sections={[ { title: 'Operating Activities', items: [{name: 'Net Income', value: 75500}, {name: 'Change in Payables', value: -1500}], total: 74000 }, { title: 'Investing Activities', items: [{name: 'Equipment Purchase', value: -25000}], total: -25000 }, { title: 'Financing Activities', items: [{name: 'Loan Proceeds', value: 30000}, {name: 'Owner Investment', value: 50000}], total: 80000 }, ]} grandTotal={{ label: 'Net Change in Cash', value: 129000 }} />;
                         case 'ledger':
-                            return <div className="bg-primary-light p-4 rounded-lg">
+                            return <div className="bg-white dark:bg-primary-light p-4 rounded-lg">
                                 <h3 className="text-xl font-bold text-center mb-4">General Ledger</h3>
                                 <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
                                     {accounts.map(account => {
@@ -263,14 +274,14 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                                         <div key={account.code}>
                                             <h4 className="font-bold text-accent">{account.code} - {account.name}</h4>
                                             <table className="w-full text-sm mt-2">
-                                                <thead className="text-xs text-gray-400 uppercase bg-primary"><tr><th className="px-2 py-1">Date</th><th className="px-2 py-1">Description</th><th className="px-2 py-1 text-right">Debit</th><th className="px-2 py-1 text-right">Credit</th><th className="px-2 py-1 text-right">Balance</th></tr></thead>
+                                                <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-slate-100 dark:bg-primary"><tr><th className="px-2 py-1">Date</th><th className="px-2 py-1">Description</th><th className="px-2 py-1 text-right">Debit</th><th className="px-2 py-1 text-right">Credit</th><th className="px-2 py-1 text-right">Balance</th></tr></thead>
                                                 <tbody>
-                                                     <tr className="border-b border-primary"><td colSpan={4} className="px-2 py-1 text-gray-400">Opening Balance</td><td className="px-2 py-1 font-mono text-right text-gray-400">{runningBalance.toFixed(2)}</td></tr>
+                                                     <tr className="border-b border-slate-200 dark:border-primary"><td colSpan={4} className="px-2 py-1 text-gray-500 dark:text-gray-400">Opening Balance</td><td className="px-2 py-1 font-mono text-right text-gray-500 dark:text-gray-400">{runningBalance.toFixed(2)}</td></tr>
                                                     {entries.map(entry => {
                                                         runningBalance += entry.debit - entry.credit;
-                                                        return <tr key={entry.id} className="border-b border-primary"><td className="px-2 py-1">{entry.date}</td><td className="px-2 py-1">{entry.description}</td><td className="px-2 py-1 font-mono text-right text-yellow-400">{entry.debit > 0 ? entry.debit.toFixed(2) : null}</td><td className="px-2 py-1 font-mono text-right text-accent">{entry.credit > 0 ? entry.credit.toFixed(2) : null}</td><td className="px-2 py-1 font-mono text-right">{runningBalance.toFixed(2)}</td></tr>
+                                                        return <tr key={entry.id} className="border-b border-slate-200 dark:border-primary"><td className="px-2 py-1">{entry.date}</td><td className="px-2 py-1">{entry.description}</td><td className="px-2 py-1 font-mono text-right text-yellow-600 dark:text-yellow-400">{entry.debit > 0 ? entry.debit.toFixed(2) : null}</td><td className="px-2 py-1 font-mono text-right text-accent">{entry.credit > 0 ? entry.credit.toFixed(2) : null}</td><td className="px-2 py-1 font-mono text-right">{runningBalance.toFixed(2)}</td></tr>
                                                     })}
-                                                    <tr className="font-bold bg-primary"><td colSpan={4} className="px-2 py-1 text-white">Closing Balance</td><td className="px-2 py-1 font-mono text-right text-white">{account.balance.toFixed(2)}</td></tr>
+                                                    <tr className="font-bold bg-slate-100 dark:bg-primary"><td colSpan={4} className="px-2 py-1 text-slate-800 dark:text-white">Closing Balance</td><td className="px-2 py-1 font-mono text-right text-slate-800 dark:text-white">{account.balance.toFixed(2)}</td></tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -282,8 +293,8 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                 
                 return (
                     <div>
-                        <div className="mb-4 flex flex-wrap justify-center gap-2 p-1 bg-primary-light rounded-lg">
-                            {reports.map(r => <button key={r.id} onClick={() => setActiveReport(r.id)} className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold ${activeReport === r.id ? 'bg-accent text-primary' : 'text-gray-300 hover:bg-primary'}`}>{r.name}</button>)}
+                        <div className="mb-4 flex flex-wrap justify-center gap-2 p-1 bg-white dark:bg-primary-light rounded-lg">
+                            {reports.map(r => <button key={r.id} onClick={() => setActiveReport(r.id)} className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold ${activeReport === r.id ? 'bg-accent text-primary' : 'text-gray-500 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-primary'}`}>{r.name}</button>)}
                         </div>
                         {renderReportContent()}
                     </div>
