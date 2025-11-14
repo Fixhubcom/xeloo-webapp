@@ -4,9 +4,10 @@ import { RocketIcon, CheckCircleIcon } from '../icons/Icons';
 
 interface UpgradePromptProps {
     featureName: string;
+    onUpgrade: () => void;
 }
 
-const UpgradePrompt: React.FC<UpgradePromptProps> = ({ featureName }) => {
+const UpgradePrompt: React.FC<UpgradePromptProps> = ({ featureName, onUpgrade }) => {
     return (
         <div className="flex items-center justify-center h-full">
             <Card className="max-w-2xl text-center p-10">
@@ -24,11 +25,13 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({ featureName }) => {
                     <p className="flex items-center"><CheckCircleIcon className="w-5 h-5 text-accent mr-2" /> <strong>Automated Payroll</strong></p>
                 </div>
                 <div>
-                    <button className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-transform transform hover:scale-105">
+                    <button 
+                        onClick={onUpgrade}
+                        className="bg-accent text-primary font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-transform transform hover:scale-105">
                         Upgrade Now
                     </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-4">Subscription plans are managed in the Settings page.</p>
+                <p className="text-xs text-gray-400 mt-4">Subscription plans are managed on the Subscription page.</p>
             </Card>
         </div>
     );

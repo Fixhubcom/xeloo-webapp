@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -47,14 +46,14 @@ const UserDashboard: React.FC = () => {
             case 'Recurring Payments': return <RecurringPayments searchQuery={searchQuery} />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
             case 'Invoices':
-                return user?.isSubscribed ? <Invoices searchQuery={searchQuery} /> : <UpgradePrompt featureName="Invoicing" />;
+                return user?.isSubscribed ? <Invoices searchQuery={searchQuery} /> : <UpgradePrompt featureName="Invoicing" onUpgrade={() => navigateTo('Subscription')} />;
             case 'Payroll':
-                return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" />;
+                return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" onUpgrade={() => navigateTo('Subscription')} />;
             case 'Escrow': return <Escrow searchQuery={searchQuery} {...props} />;
             case 'Tax Payments': return <TaxPayments />;
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting':
-                return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" />;
+                return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" onUpgrade={() => navigateTo('Subscription')} />;
             case 'API Management':
                 return <ApiManagement />;
             case 'Subscription': return <SubscriptionPage />;

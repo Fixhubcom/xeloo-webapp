@@ -1,12 +1,72 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
-import { CheckCircleIcon, RocketIcon } from '../../components/icons/Icons';
+import { CheckCircleIcon, RocketIcon, CreditCardIcon } from '../../components/icons/Icons';
+import Spinner from '../../components/common/Spinner';
+
+const SubscriptionPaymentModal: React.FC<{ onClose: () => void; onPaymentSuccess: () => void; }> = ({ onClose, onPaymentSuccess }) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handlePayment = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsProcessing(true);
+        // Simulate API call
+        setTimeout(() => {
+            onPaymentSuccess();
+            setIsProcessing(false);
+            onClose();
+        }, 2000);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <Card>
+                    <h2 className="text-2xl font-bold text-white mb-2">Upgrade to Pro Plan</h2>
+                    <p className="text-gray-300 mb-6">You will be charged $29.99 per month.</p>
+                    <form onSubmit={handlePayment} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400">Card Number</label>
+                            <div className="relative mt-1">
+                                <CreditCardIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input type="text" placeholder="**** **** **** 1234" required className="w-full bg-primary p-2 pl-10 rounded border border-primary-light" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400">Expiry Date</label>
+                                <input type="text" placeholder="MM / YY" required className="mt-1 w-full bg-primary p-2 rounded border border-primary-light" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400">CVC</label>
+                                <input type="text" placeholder="123" required className="mt-1 w-full bg-primary p-2 rounded border border-primary-light" />
+                            </div>
+                        </div>
+                        <div className="pt-4">
+                             <button
+                                type="submit"
+                                disabled={isProcessing}
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-primary bg-accent hover:opacity-90 disabled:bg-gray-500"
+                            >
+                                {isProcessing ? <Spinner /> : 'Confirm Payment ($29.99)'}
+                            </button>
+                        </div>
+                    </form>
+                </Card>
+            </div>
+        </div>
+    );
+};
+
 
 const SubscriptionPage: React.FC = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const isSubscribed = user?.isSubscribed ?? false;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handlePaymentSuccess = () => {
+        updateUser({ isSubscribed: true });
+    };
 
     return (
         <div className="space-y-8">
@@ -30,10 +90,10 @@ const SubscriptionPage: React.FC = () => {
                         <li className="flex items-center"><CheckCircleIcon className="w-5 h-5 text-green-400 mr-2" /> 24/7 Support</li>
                     </ul>
                     <button
-                        disabled={!isSubscribed}
+                        disabled
                         className="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {!isSubscribed ? 'Current Plan' : 'Downgrade'}
+                        {!isSubscribed ? 'Current Plan' : 'Downgrade (Unavailable)'}
                     </button>
                 </Card>
 
@@ -54,13 +114,15 @@ const SubscriptionPage: React.FC = () => {
                         <li className="flex items-center"><CheckCircleIcon className="w-5 h-5 text-green-400 mr-2" /> Advanced Reporting</li>
                     </ul>
                     <button
+                         onClick={() => !isSubscribed && setIsModalOpen(true)}
                          disabled={isSubscribed}
-                        className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubscribed ? 'Current Plan' : 'Upgrade to Pro'}
                     </button>
                 </Card>
             </div>
+            {isModalOpen && <SubscriptionPaymentModal onClose={() => setIsModalOpen(false)} onPaymentSuccess={handlePaymentSuccess} />}
         </div>
     );
 };
