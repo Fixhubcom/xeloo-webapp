@@ -101,7 +101,7 @@ const SubscriptionEarnings: React.FC<{ searchQuery: string }> = ({ searchQuery }
                             {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip {...tooltipStyles} />
-                        <Legend />
+                        <Legend wrapperStyle={{ color: textColor }} />
                     </PieChart>
                 </ResponsiveContainer>
             </Card>

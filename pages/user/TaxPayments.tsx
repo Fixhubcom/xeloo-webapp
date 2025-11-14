@@ -1,12 +1,18 @@
+
+
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { useAuth } from '../../hooks/useAuth';
 import { CheckCircleIcon } from '../../components/icons/Icons';
 
-const TaxPayments: React.FC = () => {
-    const { user } = useAuth();
-    const [view, setView] = useState<'form' | 'confirm' | 'payin' | 'processing' | 'success'>('form');
+interface TaxPaymentsProps {
+    openAddFundsModal: () => void;
+}
+
+const TaxPayments: React.FC<TaxPaymentsProps> = ({ openAddFundsModal }) => {
+    const { user, updateWalletBalance } = useAuth();
+    const [view, setView] = useState<'form' | 'confirm' | 'processing' | 'success'>('form');
     
     // Form state
     const [tin, setTin] = useState('');
@@ -19,7 +25,6 @@ const TaxPayments: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState('');
     const [transactionId, setTransactionId] = useState('');
-    const [generatedDetails, setGeneratedDetails] = useState<{ bankName: string, accountNumber: string, beneficiary: string } | null>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,25 +36,16 @@ const TaxPayments: React.FC = () => {
         setView('confirm');
     };
 
-    const handleProceedToPayIn = () => {
-        const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-        setGeneratedDetails({
-            bankName: 'Xeloo TaxPay (Providus Bank)',
-            accountNumber: `8${Math.floor(100000000 + Math.random() * 900000000)}`,
-            beneficiary: `FIRS/${randomSuffix}`,
-        });
-        setView('payin');
-    };
-
     const handleConfirmPayment = () => {
         setView('processing');
         // Simulate API call to tax authority
         setTimeout(() => {
             const txId = `XELOO-TAX-${Date.now()}`;
             setTransactionId(txId);
+            updateWalletBalance(-parseFloat(amount));
             setIsProcessing(false);
             setView('success');
-        }, 3000);
+        }, 2000);
     };
 
     const resetForm = () => {
@@ -108,58 +104,56 @@ const TaxPayments: React.FC = () => {
         </Card>
     );
 
-    const renderConfirm = () => (
-        <Card className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Confirm Tax Payment</h2>
-            <div className="bg-primary p-4 rounded-lg space-y-3 text-gray-300">
-                <div className="flex justify-between"><span>Taxpayer ID (TIN):</span><span className="font-semibold text-white">{tin}</span></div>
-                <div className="flex justify-between"><span>Tax Type:</span><span className="font-semibold text-white">{taxType}</span></div>
-                <div className="flex justify-between"><span>Payment Period:</span><span className="font-semibold text-white">{periodStart} to {periodEnd}</span></div>
-                <hr className="border-primary-light" />
-                <div className="flex justify-between items-center text-lg">
-                    <span className="font-bold text-white">Total Payment:</span>
-                    <span className="font-mono font-bold text-2xl text-accent">
-                        {parseFloat(amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
-                    </span>
+    const renderConfirm = () => {
+        const hasSufficientFunds = (user?.walletBalance || 0) >= parseFloat(amount);
+        return (
+            <Card className="max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold mb-4">Confirm Tax Payment</h2>
+                <div className="bg-primary p-4 rounded-lg space-y-3 text-gray-300">
+                    <div className="flex justify-between"><span>Taxpayer ID (TIN):</span><span className="font-semibold text-white">{tin}</span></div>
+                    <div className="flex justify-between"><span>Tax Type:</span><span className="font-semibold text-white">{taxType}</span></div>
+                    <div className="flex justify-between"><span>Payment Period:</span><span className="font-semibold text-white">{periodStart} to {periodEnd}</span></div>
+                    <hr className="border-primary-light" />
+                    <div className="flex justify-between items-center text-lg">
+                        <span className="font-bold text-white">Total Payment:</span>
+                        <span className="font-mono font-bold text-2xl text-accent">
+                            {parseFloat(amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-400">Your Wallet Balance:</span>
+                        <span className="font-mono text-white">{(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</span>
+                    </div>
                 </div>
-            </div>
-            <div className="flex justify-end space-x-4 mt-6">
-                <button onClick={() => setView('form')} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
-                    Back
-                </button>
-                <button onClick={handleProceedToPayIn} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
-                    Proceed to Payment
-                </button>
-            </div>
-        </Card>
-    );
-
-    const renderPayIn = () => (
-        <Card>
-            <h2 className="text-2xl font-bold mb-2">Complete Your Tax Payment</h2>
-            <p className="text-gray-400 mb-4">To proceed, please deposit the exact amount to the unique account details below. These details are valid for this transaction only.</p>
-            <div className="bg-primary p-4 rounded-lg space-y-3">
-                <div className="text-center mb-2">
-                    <p className="text-sm text-gray-400">Total Amount to Deposit</p>
-                    <p className="text-3xl font-bold text-accent font-mono">{parseFloat(amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}</p>
-                </div>
-                {generatedDetails && (
-                    <>
-                        <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">{generatedDetails.bankName}</strong></div>
-                        <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">{generatedDetails.accountNumber}</strong></div>
-                        <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">{generatedDetails.beneficiary}</strong></div>
-                    </>
+                {!hasSufficientFunds && (
+                    <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-300 text-center rounded-lg">
+                        <p className="font-bold">Insufficient Funds</p>
+                        <p className="text-sm">Your wallet balance is too low to complete this payment.</p>
+                    </div>
                 )}
-            </div>
-            <button onClick={handleConfirmPayment} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90">I Have Made The Payment</button>
-        </Card>
-    );
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={() => setView('form')} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
+                        Back
+                    </button>
+                     {hasSufficientFunds ? (
+                        <button onClick={handleConfirmPayment} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                            Pay from Wallet
+                        </button>
+                    ) : (
+                        <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                            Add Funds
+                        </button>
+                    )}
+                </div>
+            </Card>
+        );
+    };
     
     const renderProcessing = () => (
          <Card className="text-center">
             <Spinner className="w-12 h-12 mx-auto border-4" />
-            <h2 className="text-2xl font-bold mt-4">Confirming Your Deposit...</h2>
-            <p className="text-gray-400 mt-2">Once confirmed, we will instantly process the payment to FIRS.</p>
+            <h2 className="text-2xl font-bold mt-4">Submitting Payment...</h2>
+            <p className="text-gray-400 mt-2">We are processing your tax payment to FIRS.</p>
         </Card>
     );
 
@@ -182,7 +176,6 @@ const TaxPayments: React.FC = () => {
 
     switch (view) {
         case 'confirm': return renderConfirm();
-        case 'payin': return renderPayIn();
         case 'processing': return renderProcessing();
         case 'success': return renderSuccess();
         default: return renderForm();

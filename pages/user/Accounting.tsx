@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo } from 'react';
 import Card from '../../components/common/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -5,6 +7,8 @@ import { JournalEntry, Bill } from '../../types';
 import AIAccountingAssistant from './accounting/AIAccountingAssistant';
 import { SparklesIcon, InvoiceIcon } from '../../components/icons/Icons';
 import { useTheme } from '../../context/ThemeContext';
+import Spinner from '../../components/common/Spinner';
+import { useAuth } from '../../hooks/useAuth';
 
 type AccountingView = 'Dashboard' | 'AI Assistant' | 'Chart of Accounts' | 'Journal' | 'Bills' | 'Reports';
 type ReportType = 'pnl' | 'balance' | 'cashflow' | 'ledger';
@@ -104,17 +108,264 @@ const ReportTable: React.FC<{ title: string, sections: { title: string, items: {
     </div>
 );
 
+
+const ManualJournalEntryModal: React.FC<{
+    accounts: { code: string; name: string; }[];
+    onClose: () => void;
+    onAddEntry: (newEntries: Omit<JournalEntry, 'id'>[]) => void;
+}> = ({ accounts, onClose, onAddEntry }) => {
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [description, setDescription] = useState('');
+    const [lines, setLines] = useState([
+        { account: '', debit: '', credit: '' },
+        { account: '', debit: '', credit: '' },
+    ]);
+    const [error, setError] = useState('');
+
+    const handleLineChange = (index: number, field: 'account' | 'debit' | 'credit', value: string) => {
+        const newLines = [...lines];
+        newLines[index][field] = value;
+        if (field === 'debit' && value) {
+            newLines[index].credit = '';
+        } else if (field === 'credit' && value) {
+            newLines[index].debit = '';
+        }
+        setLines(newLines);
+    };
+
+    const addLine = () => setLines([...lines, { account: '', debit: '', credit: '' }]);
+    const removeLine = (index: number) => {
+        if (lines.length > 2) {
+            setLines(lines.filter((_, i) => i !== index));
+        }
+    };
+
+    const { totalDebit, totalCredit } = useMemo(() => {
+        return lines.reduce((totals, line) => {
+            totals.totalDebit += parseFloat(line.debit) || 0;
+            totals.totalCredit += parseFloat(line.credit) || 0;
+            return totals;
+        }, { totalDebit: 0, totalCredit: 0 });
+    }, [lines]);
+
+    const isBalanced = totalDebit > 0 && totalDebit === totalCredit;
+
+    const handleSubmit = () => {
+        setError('');
+        if (!isBalanced) {
+            setError('Total debits must equal total credits and cannot be zero.');
+            return;
+        }
+        if (!description.trim()) {
+            setError('Description is required.');
+            return;
+        }
+        if (lines.some(line => !line.account)) {
+            setError('Please select an account for each line.');
+            return;
+        }
+
+        const newEntries: Omit<JournalEntry, 'id'>[] = lines
+            .filter(line => (parseFloat(line.debit) || 0) > 0 || (parseFloat(line.credit) || 0) > 0)
+            .map(line => ({
+                date,
+                description,
+                account: line.account,
+                debit: parseFloat(line.debit) || 0,
+                credit: parseFloat(line.credit) || 0,
+            }));
+        
+        onAddEntry(newEntries);
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <Card className="w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold mb-4">Add Manual Journal Entry</h2>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="md:col-span-1">
+                            <label className="text-sm text-gray-400">Date</label>
+                            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" />
+                        </div>
+                        <div className="md:col-span-2">
+                             <label className="text-sm text-gray-400">Description</label>
+                            <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Transaction description" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        {lines.map((line, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <select value={line.account} onChange={e => handleLineChange(index, 'account', e.target.value)} className="w-1/2 bg-primary p-2 rounded border border-primary-light">
+                                    <option value="">-- Select Account --</option>
+                                    {accounts.map(acc => <option key={acc.code} value={`${acc.code} - ${acc.name}`}>{acc.code} - {acc.name}</option>)}
+                                </select>
+                                <input type="number" value={line.debit} onChange={e => handleLineChange(index, 'debit', e.target.value)} placeholder="Debit" className="w-1/4 bg-primary p-2 rounded border border-primary-light font-mono text-right" />
+                                <input type="number" value={line.credit} onChange={e => handleLineChange(index, 'credit', e.target.value)} placeholder="Credit" className="w-1/4 bg-primary p-2 rounded border border-primary-light font-mono text-right" />
+                                <button onClick={() => removeLine(index)} disabled={lines.length <= 2} className="text-red-400 hover:text-red-300 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed">&times;</button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-primary-light">
+                        <div>
+                            <button onClick={addLine} className="text-sm text-accent font-semibold hover:underline">+ Add Line</button>
+                        </div>
+                        <div className="text-right text-sm">
+                            <div className="flex gap-4 font-mono text-gray-300">
+                                <span>Total Debit: {totalDebit.toFixed(2)}</span>
+                                <span>Total Credit: {totalCredit.toFixed(2)}</span>
+                            </div>
+                            <p className={`font-bold mt-1 ${isBalanced ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {isBalanced ? 'Balanced' : `Out of balance by ${Math.abs(totalDebit - totalCredit).toFixed(2)}`}
+                            </p>
+                        </div>
+                    </div>
+                    {error && <p className="text-yellow-400 text-center text-sm">{error}</p>}
+                </div>
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                    <button onClick={handleSubmit} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Save Entry</button>
+                </div>
+            </Card>
+        </div>
+    );
+};
+
+const AddBillModal: React.FC<{
+    onClose: () => void;
+    onAddBill: (newBill: Omit<Bill, 'id' | 'status'>) => void;
+}> = ({ onClose, onAddBill }) => {
+    const [vendorName, setVendorName] = useState('');
+    const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
+    const [dueDate, setDueDate] = useState('');
+    const [amount, setAmount] = useState('');
+    const [currency, setCurrency] = useState('USD');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSaving(true);
+        setTimeout(() => {
+            onAddBill({
+                vendorName,
+                issueDate,
+                dueDate,
+                amount: parseFloat(amount),
+                currency,
+            });
+            setIsSaving(false);
+            onClose();
+        }, 1000);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <Card className="w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold mb-4">Add New Bill</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <input value={vendorName} onChange={e => setVendorName(e.target.value)} placeholder="Vendor Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                    <div className="grid grid-cols-2 gap-4">
+                        <input value={amount} onChange={e => setAmount(e.target.value)} type="number" step="0.01" placeholder="Amount" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                        <select value={currency} onChange={e => setCurrency(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light">
+                            <option>USD</option>
+                            <option>NGN</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm text-gray-400">Issue Date</label>
+                            <input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" />
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-400">Due Date</label>
+                            <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required />
+                        </div>
+                    </div>
+                    <div className="flex justify-end space-x-4 mt-6">
+                        <button type="button" onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                        <button type="submit" disabled={isSaving} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 flex items-center justify-center w-32">
+                            {isSaving ? <Spinner /> : 'Save Bill'}
+                        </button>
+                    </div>
+                </form>
+            </Card>
+        </div>
+    );
+};
+
+const PayBillModal: React.FC<{
+    bill: Bill;
+    onClose: () => void;
+    onConfirm: (billId: string, amount: number) => void;
+    openAddFundsModal: () => void;
+}> = ({ bill, onClose, onConfirm, openAddFundsModal }) => {
+    const { user } = useAuth();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const hasSufficientFunds = (user?.walletBalance || 0) >= bill.amount;
+
+    const handlePay = () => {
+        setIsProcessing(true);
+        setTimeout(() => {
+            onConfirm(bill.id, bill.amount);
+            setIsProcessing(false);
+            onClose();
+        }, 1500);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold mb-4">Pay Bill</h2>
+                <div className="bg-primary p-4 rounded-lg space-y-3">
+                    <div className="flex justify-between"><span>Vendor:</span><span className="font-semibold text-white">{bill.vendorName}</span></div>
+                    <div className="flex justify-between"><span>Due Date:</span><span className="font-semibold text-white">{bill.dueDate}</span></div>
+                    <hr className="border-primary-light"/>
+                    <div className="flex justify-between items-center font-bold text-lg"><span className="text-white">Amount Due:</span><span className="font-mono text-accent">{bill.amount.toLocaleString('en-US', { style: 'currency', currency: bill.currency })}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-400">Your Wallet Balance:</span><span className="font-mono text-white">{(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</span></div>
+                </div>
+
+                {!hasSufficientFunds && (
+                    <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-300 text-center rounded-lg">
+                        <p className="font-bold">Insufficient Funds</p>
+                    </div>
+                )}
+
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
+                    {hasSufficientFunds ? (
+                        <button onClick={handlePay} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-40 flex justify-center items-center">
+                            {isProcessing ? <Spinner/> : 'Pay from Wallet'}
+                        </button>
+                    ) : (
+                        <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Add Funds</button>
+                    )}
+                </div>
+            </Card>
+        </div>
+    );
+};
+
 interface AccountingProps {
     searchQuery: string;
+    openAddFundsModal: () => void;
 }
 
-const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
+const Accounting: React.FC<AccountingProps> = ({ searchQuery, openAddFundsModal }) => {
     const { theme } = useTheme();
+    const { updateWalletBalance } = useAuth();
     const [activeView, setActiveView] = useState<AccountingView>('Dashboard');
     const [accounts, setAccounts] = useState(initialAccounts);
     const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(initialJournalEntries);
     const [bills, setBills] = useState<Bill[]>(mockBills);
     const [activeReport, setActiveReport] = useState<ReportType>('pnl');
+    const [showManualEntryModal, setShowManualEntryModal] = useState(false);
+    const [showAddBillModal, setShowAddBillModal] = useState(false);
+    const [payingBill, setPayingBill] = useState<Bill | null>(null);
 
     const textColor = theme === 'dark' ? '#a8a29e' : '#475569';
     const tooltipStyles = {
@@ -124,6 +375,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
         }
     };
     const COLORS = theme === 'dark' ? COLORS_DARK : COLORS_LIGHT;
+    const barFillColor = theme === 'dark' ? '#FDDA1A' : '#D97706';
 
     const filteredJournalEntries = useMemo(() => {
         if (!searchQuery) return journalEntries;
@@ -141,6 +393,20 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
             id: nextId + index,
         }));
         setJournalEntries(prev => [...entriesToAdd, ...prev]);
+    };
+
+    const handleAddBill = (newBillData: Omit<Bill, 'id' | 'status'>) => {
+        const newBill: Bill = {
+            id: `bill-${Date.now()}`,
+            ...newBillData,
+            status: 'Unpaid',
+        };
+        setBills(prev => [newBill, ...prev]);
+    };
+    
+    const handleConfirmPayBill = (billId: string, amount: number) => {
+        updateWalletBalance(-amount);
+        setBills(prev => prev.map(b => b.id === billId ? { ...b, status: 'Paid' } : b));
     };
 
     const renderView = () => {
@@ -163,7 +429,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                                     <XAxis dataKey="name" stroke={textColor} />
                                     <YAxis stroke={textColor} />
                                     <Tooltip {...tooltipStyles} />
-                                    <Bar dataKey="value" fill="#FDDA1A" />
+                                    <Bar dataKey="value" fill={barFillColor} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Card>
@@ -196,6 +462,12 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
             case 'Journal':
                  return (
                     <Card>
+                        <div className="flex justify-between items-center mb-4">
+                             <h2 className="text-xl font-bold">Journal Entries</h2>
+                            <button onClick={() => setShowManualEntryModal(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">
+                                Add Manual Entry
+                            </button>
+                        </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-slate-100 dark:bg-primary"><tr><th className="px-6 py-3">Date</th><th className="px-6 py-3">Description</th><th className="px-6 py-3">Account</th><th className="px-6 py-3 text-right">Debit</th><th className="px-6 py-3 text-right">Credit</th></tr></thead>
@@ -220,7 +492,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                     <Card>
                         <div className="flex justify-between items-center mb-4">
                              <h2 className="text-xl font-bold">Bills to Pay</h2>
-                             <button className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add New Bill</button>
+                             <button onClick={() => setShowAddBillModal(true)} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add New Bill</button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -234,7 +506,7 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
                                             <td className="px-4 py-3">{bill.dueDate}</td>
                                             <td className="px-4 py-3 text-right font-mono">{bill.amount.toLocaleString('en-US', {style: 'currency', currency: bill.currency})}</td>
                                             <td className="px-4 py-3"><StatusBadge status={bill.status} /></td>
-                                            <td className="px-4 py-3">{bill.status === 'Unpaid' && <button className="text-accent text-xs font-bold">Pay Now</button>}</td>
+                                            <td className="px-4 py-3">{bill.status === 'Unpaid' && <button onClick={() => setPayingBill(bill)} className="text-accent text-xs font-bold">Pay Now</button>}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -307,6 +579,9 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery }) => {
         <div>
             <ViewSwitcher activeView={activeView} setActiveView={setActiveView} />
             {renderView()}
+            {showManualEntryModal && <ManualJournalEntryModal accounts={accounts} onClose={() => setShowManualEntryModal(false)} onAddEntry={handleAddEntry} />}
+            {showAddBillModal && <AddBillModal onClose={() => setShowAddBillModal(false)} onAddBill={handleAddBill} />}
+            {payingBill && <PayBillModal bill={payingBill} onClose={() => setPayingBill(null)} onConfirm={handleConfirmPayBill} openAddFundsModal={openAddFundsModal} />}
         </div>
     )
 }

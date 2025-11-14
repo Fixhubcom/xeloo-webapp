@@ -38,6 +38,11 @@ const UserAnalytics: React.FC = () => {
             border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
         }
     };
+    
+    const barColor1 = theme === 'dark' ? '#FDDA1A' : '#F59E0B';
+    const barColor2 = theme === 'dark' ? '#818CF8' : '#4F46E5';
+    const greenColor = theme === 'dark' ? '#4ADE80' : '#16A34A';
+    const redColor = theme === 'dark' ? '#F87171' : '#DC2626';
 
   return (
     <div className="space-y-8">
@@ -65,8 +70,8 @@ const UserAnalytics: React.FC = () => {
             <YAxis stroke={textColor} />
             <Tooltip {...tooltipStyles} />
             <Legend />
-            <Bar dataKey="Received" fill="#FDDA1A" />
-            <Bar dataKey="Sent" fill="#8884d8" />
+            <Bar dataKey="Received" fill={barColor1} />
+            <Bar dataKey="Sent" fill={barColor2} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -80,8 +85,8 @@ const UserAnalytics: React.FC = () => {
             <YAxis stroke={textColor} />
             <Tooltip {...tooltipStyles} />
             <Legend />
-            <Bar dataKey="Received" stackId="a" fill="#4ade80" />
-            <Bar dataKey="Sent" stackId="a" fill="#f87171" />
+            <Bar dataKey="Received" stackId="a" fill={greenColor} />
+            <Bar dataKey="Sent" stackId="a" fill={redColor} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -95,8 +100,8 @@ const UserAnalytics: React.FC = () => {
                 <YAxis stroke={textColor} />
                 <Tooltip {...tooltipStyles} />
                 <Legend />
-                <Line type="monotone" dataKey="Inflow" stroke="#4ade80" strokeWidth={2} />
-                <Line type="monotone" dataKey="Outflow" stroke="#f87171" strokeWidth={2} />
+                <Line type="monotone" dataKey="Inflow" stroke={greenColor} strokeWidth={2} />
+                <Line type="monotone" dataKey="Outflow" stroke={redColor} strokeWidth={2} />
             </LineChart>
         </ResponsiveContainer>
       </Card>

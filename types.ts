@@ -1,4 +1,5 @@
 
+
 export enum UserRole {
   USER = 'USER',
   PARTNER = 'PARTNER',
@@ -37,6 +38,7 @@ export interface User {
   isSubscribed?: boolean;
   hederaWalletAddress?: string;
   accountOfficerId?: string;
+  walletBalance?: number;
 }
 
 export interface Transaction {

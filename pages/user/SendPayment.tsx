@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -22,15 +23,16 @@ const mockXelooUsers: { [key: string]: { name: string, company: string } } = {
     'acmeinc': { name: 'Acme Inc.', company: 'Acme Incorporated' },
 };
 
-type PaymentStep = 'input' | 'details' | 'confirm' | 'payin' | 'processing' | 'success';
+type PaymentStep = 'input' | 'details' | 'confirm' | 'processing' | 'success';
 type PaymentMethod = 'bank' | 'usdt' | 'xeloo';
 
 interface SendPaymentProps {
     initialUsername?: string;
+    openAddFundsModal: () => void;
 }
 
-const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
-    const { user } = useAuth();
+const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFundsModal }) => {
+    const { user, updateWalletBalance } = useAuth();
     const [step, setStep] = useState<PaymentStep>('input');
 
     // Amount state
@@ -54,9 +56,9 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     const [isSearching, setIsSearching] = useState(false);
     const searchTimeout = useRef<number | null>(null);
     
-    // Pay-in state
-    const [generatedDetails, setGeneratedDetails] = useState<{ type: 'bank' | 'usdt', details: any } | null>(null);
+    // Flow state
     const [isProcessing, setIsProcessing] = useState(false);
+    const hasSufficientFunds = (user?.walletBalance || 0) >= totalCost;
 
     // Initial setup if coming from directory
     useEffect(() => {
@@ -131,51 +133,15 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     }, [xelooUsername, paymentMethod, searchUser]);
 
     const handleContinueToDetails = () => setStep('details');
-
-    const handleContinueToPayIn = () => {
-        if (paymentMethod === 'bank' || paymentMethod === 'usdt') {
-            const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-            if (paymentMethod === 'usdt') {
-                const costInUSD = totalCost / (MOCK_RATES[fromCurrency] || 1);
-                setGeneratedDetails({
-                    type: 'usdt',
-                    details: {
-                        network: 'TRC20 (Tron)',
-                        address: `T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
-                        qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=T${[...Array(33)].map(() => Math.random().toString(36)[2]).join('')}`,
-                        amount: costInUSD,
-                        currency: 'USDT',
-                    }
-                });
-            } else { // paymentMethod === 'bank'
-                 setGeneratedDetails({
-                    type: 'bank',
-                    details: {
-                        bankName: 'Xeloo Pay-In (Providus Bank)',
-                        accountNumber: `9${Math.floor(100000000 + Math.random() * 900000000)}`,
-                        beneficiary: `XELOO/${randomSuffix}`,
-                        amount: totalCost,
-                        currency: fromCurrency,
-                    }
-                });
-            }
-            setStep('payin');
-        } else { // Xeloo Transfer
-            setIsProcessing(true);
-            setTimeout(() => {
-                setIsProcessing(false);
-                setStep('success');
-            }, 2000);
-        }
-    };
     
     const handleConfirmPayment = () => {
-        setStep('processing');
+        setIsProcessing(true);
         setTimeout(() => {
+            updateWalletBalance(-totalCost);
+            setIsProcessing(false);
             setStep('success');
-        }, 3000); // Simulate confirmation time
-    }
+        }, 2000);
+    };
     
     const reset = () => {
         setStep('input');
@@ -227,7 +193,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                 <div className="mt-6 space-y-2 text-sm">
                     <div className="flex justify-between text-gray-400"><span>Transaction Fee (1.5%):</span><span className="font-mono">{fee.toLocaleString(undefined, {style:'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency})}</span></div>
                     <hr className="border-primary-light" />
-                    <div className="flex justify-between font-bold text-white text-base"><span>Total to pay:</span><span className="font-mono">{totalCost.toLocaleString(undefined, {style:'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency})}</span></div>
+                    <div className="flex justify-between font-bold text-white text-base"><span>Total Cost:</span><span className="font-mono">{totalCost.toLocaleString(undefined, {style:'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency})}</span></div>
                 </div>
             )}
             <button onClick={handleContinueToDetails} disabled={!(totalCost > 0)} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500">Continue</button>
@@ -237,10 +203,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
     const BankDetailsForm = () => (
         <div className="space-y-4 pt-2">
              <p className="text-xs text-gray-400 -mb-2">
-                {paymentMethod === 'bank'
-                    ? 'Recipient will receive funds directly in their bank account.'
-                    : 'You will pay with USDT, and the recipient will receive fiat in their bank account.'
-                }
+                Recipient will receive funds directly in their bank account.
             </p>
             <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
             <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
@@ -262,16 +225,17 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
             <div className="space-y-4">
                 <div>
                     <label className="text-sm font-medium text-gray-400 mb-2 block">Payment Method</label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {(['bank', 'usdt', 'xeloo'] as PaymentMethod[]).map(m => (
-                             <button key={m} onClick={() => setPaymentMethod(m)} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === m ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
-                                {m === 'bank' ? 'Bank Transfer' : m === 'usdt' ? 'Pay with USDT' : 'Xeloo User'}
-                            </button>
-                        ))}
+                    <div className="grid grid-cols-2 gap-2">
+                         <button onClick={() => setPaymentMethod('bank')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'bank' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
+                            Bank Transfer
+                        </button>
+                         <button onClick={() => setPaymentMethod('xeloo')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'xeloo' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
+                            Xeloo User
+                        </button>
                     </div>
                 </div>
                 
-                {(paymentMethod === 'bank' || paymentMethod === 'usdt') && <BankDetailsForm />}
+                {paymentMethod === 'bank' && <BankDetailsForm />}
 
                 {paymentMethod === 'xeloo' && (
                      <div>
@@ -303,87 +267,54 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
                             <span className="block text-xs text-gray-400">{paymentMethod === 'xeloo' ? `@${xelooUsername}` : recipientEmail}</span>
                         </div>
                     </div>
-                    {(paymentMethod === 'bank' || paymentMethod === 'usdt') && (
+                    {paymentMethod === 'bank' && (
                          <div className="flex justify-between items-center text-gray-light">
                             <span>Bank Details:</span>
                             <div className="text-right">
                                 <span className="font-mono text-white text-sm">{bankDetails.bankName} - {bankDetails.accountNumber}</span>
-                                {bankDetails.iban && <span className="block text-xs text-gray-400 font-mono">IBAN: {bankDetails.iban}</span>}
-                                {bankDetails.swiftCode && <span className="block text-xs text-gray-400 font-mono">SWIFT: {bankDetails.swiftCode}</span>}
                             </div>
                         </div>
                     )}
                     <hr className="border-primary-light" />
-                    <div className="flex justify-between items-center text-gray-light">
-                        <span>Amount:</span>
-                        <span className="font-mono text-white">{totalCost.toLocaleString('en-US', { style: 'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency })}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-gray-light">
-                        <span>Recipient Gets:</span>
-                        <span className="font-mono text-white">{parseFloat(receiveAmount).toLocaleString('en-US', { style: 'currency', currency: toCurrency === 'USDT' ? 'USD' : toCurrency })}</span>
-                    </div>
-                     <hr className="border-primary-light" />
-                     <div className="flex justify-between items-center font-bold text-white text-lg">
-                        <span>Total to Pay:</span>
+                    <div className="flex justify-between items-center font-bold text-white text-lg">
+                        <span>Total Cost:</span>
                         <span className="font-mono text-accent">{totalCost.toLocaleString('en-US', { style: 'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency })}</span>
                     </div>
+                     <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-400">Your Wallet Balance:</span>
+                        <span className="font-mono text-white">{(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</span>
+                    </div>
                 </div>
+                 {!hasSufficientFunds && (
+                    <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-300 text-center rounded-lg">
+                        <p className="font-bold">Insufficient Funds</p>
+                        <p className="text-sm">Your wallet balance is too low to complete this transaction.</p>
+                    </div>
+                )}
                 <div className="flex justify-end space-x-4 mt-6">
                     <button onClick={() => setStep('details')} disabled={isProcessing} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
                         Back
                     </button>
-                    <button onClick={handleContinueToPayIn} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-48 flex items-center justify-center">
-                        {isProcessing ? <Spinner /> : (paymentMethod === 'xeloo' ? 'Send Instantly' : 'Confirm & Proceed')}
-                    </button>
-                </div>
-            </Card>
-        );
-    }
-
-    const renderPayInStep = () => {
-        if (!generatedDetails) return null;
-        return (
-            <Card>
-                <h2 className="text-2xl font-bold mb-2">Complete Your Transfer</h2>
-                <p className="text-gray-400 mb-4">To proceed, please deposit the exact amount to the unique account details below. These details are valid for this transaction only.</p>
-                <div className="bg-primary p-4 rounded-lg space-y-3">
-                    <div className="text-center mb-2">
-                        <p className="text-sm text-gray-400">Total Amount to Deposit</p>
-                        <p className="text-3xl font-bold text-accent font-mono">{generatedDetails.details.amount.toLocaleString(undefined, {style:'currency', currency: generatedDetails.details.currency === 'USDT' ? 'USD' : generatedDetails.details.currency})}</p>
-                    </div>
-                    {generatedDetails.type === 'bank' ? (
-                        <>
-                            <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">{generatedDetails.details.bankName}</strong></div>
-                            <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">{generatedDetails.details.accountNumber}</strong></div>
-                            <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">{generatedDetails.details.beneficiary}</strong></div>
-                        </>
+                     {hasSufficientFunds ? (
+                        <button onClick={handleConfirmPayment} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-48 flex items-center justify-center">
+                            {isProcessing ? <Spinner /> : 'Pay from Wallet'}
+                        </button>
                     ) : (
-                         <>
-                            <div className="flex justify-between"><span className="text-gray-400">Network:</span> <strong className="text-white">{generatedDetails.details.network}</strong></div>
-                            <div className="flex justify-between items-start"><span className="text-gray-400">Address:</span> <strong className="font-mono text-white text-right break-all">{generatedDetails.details.address}</strong></div>
-                            <div className="flex justify-center"><img src={generatedDetails.details.qrCode} alt="USDT Address QR Code" /></div>
-                        </>
+                        <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                            Add Funds
+                        </button>
                     )}
                 </div>
-                <button onClick={handleConfirmPayment} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90">I Have Made The Payment</button>
             </Card>
         );
     }
-
-    const renderProcessingStep = () => (
-         <Card className="text-center">
-            <Spinner className="w-12 h-12 mx-auto border-4" />
-            <h2 className="text-2xl font-bold mt-4">Confirming Your Deposit...</h2>
-            <p className="text-gray-400 mt-2">This may take a few moments. Once confirmed, we will instantly process the payout to your recipient.</p>
-        </Card>
-    );
-
+    
     const renderSuccessStep = () => (
         <Card className="text-center">
             <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-green-400 mb-2">Transfer in Progress!</h2>
             <p className="text-gray-light mb-6">
-                {paymentMethod === 'xeloo' ? `Your instant transfer to @${xelooUsername} was successful.` : 'We have received your deposit. Your transfer is now being processed and will be completed shortly.'}
+                Your payment has been sent from your wallet. The transfer is now being processed and will be completed shortly.
             </p>
             <button onClick={reset} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
                 Make Another Payment
@@ -395,8 +326,6 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername }) => {
         case 'input': return renderInputStep();
         case 'details': return renderDetailsStep();
         case 'confirm': return renderConfirmStep();
-        case 'payin': return renderPayInStep();
-        case 'processing': return renderProcessingStep();
         case 'success': return renderSuccessStep();
         default: return renderInputStep();
     }

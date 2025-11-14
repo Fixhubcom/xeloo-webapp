@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -34,12 +36,13 @@ const StatusBadge: React.FC<{ status: EscrowStatus }> = ({ status }) => {
 interface EscrowProps {
     searchQuery: string;
     initialSeller?: string;
+    openAddFundsModal: () => void;
 }
 
-const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
-    const { user } = useAuth();
+const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller, openAddFundsModal }) => {
+    const { user, updateWalletBalance } = useAuth();
     // Assuming the current user's username is their name in lowercase
-    const currentUser = user?.name.toLowerCase().replace(' ', '') || 'johndoe'; 
+    const currentUser = user?.username || user?.name.toLowerCase().replace(' ', '') || 'johndoe'; 
 
     const [transactions, setTransactions] = useState(mockEscrowTransactions);
     const [view, setView] = useState<'list' | 'create' | 'detail' | 'dispute' | 'dispute_submitted'>(initialSeller ? 'create' : 'list');
@@ -77,7 +80,6 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
             newErrors.push('You can upload a maximum of 5 files.');
         }
 
-        // FIX: Explicitly type `file` as `File` to resolve TypeScript errors.
         files.forEach((file: File) => {
             if (file.size > 10 * 1024 * 1024) { // 10MB
                 newErrors.push(`${file.name} is too large (max 10MB).`);
@@ -150,6 +152,19 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
     };
 
     const handleAction = (txId: string, newStatus: EscrowStatus) => {
+        const txToUpdate = transactions.find(tx => tx.id === txId);
+        if (!txToUpdate) return;
+        
+        // Special case for funding
+        if (newStatus === 'In Escrow' && txToUpdate.status === 'Awaiting Funding') {
+            const balance = user?.walletBalance || 0;
+            if (balance < txToUpdate.amount) {
+                openAddFundsModal();
+                return;
+            }
+            updateWalletBalance(-txToUpdate.amount);
+        }
+
         setTransactions(prev => prev.map(tx => {
             if (tx.id === txId) {
                 const updatedTx = { ...tx, status: newStatus };
@@ -266,6 +281,7 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
     const renderDetailView = () => {
         if (!selectedTx) return null;
         const isBuyer = currentUser === selectedTx.buyerUsername;
+        const hasSufficientFunds = (user?.walletBalance || 0) >= selectedTx.amount;
         
         return (
             <div>
@@ -296,7 +312,16 @@ const Escrow: React.FC<EscrowProps> = ({ searchQuery, initialSeller }) => {
                         ) : (
                             <>
                                 <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
-                                {isBuyer && selectedTx.status === 'Awaiting Funding' && <button onClick={() => handleAction(selectedTx.id, 'In Escrow')} className="w-full bg-accent text-primary font-bold py-3 rounded">Fund Escrow Now</button>}
+                                {isBuyer && selectedTx.status === 'Awaiting Funding' && (
+                                    hasSufficientFunds ? (
+                                        <button onClick={() => handleAction(selectedTx.id, 'In Escrow')} className="w-full bg-accent text-primary font-bold py-3 rounded">Fund Escrow from Wallet</button>
+                                    ) : (
+                                        <div className="text-center">
+                                            <p className="text-yellow-300 mb-3">Insufficient wallet balance to fund this escrow.</p>
+                                            <button onClick={openAddFundsModal} className="w-full bg-accent text-primary font-bold py-3 rounded">Add Funds to Wallet</button>
+                                        </div>
+                                    )
+                                )}
                                 {isBuyer && selectedTx.status === 'In Escrow' && <p className="text-gray-300">Waiting for the seller to deliver. Once you have received the goods/services, you can release the funds.</p>}
                                 {isBuyer && selectedTx.status === 'Awaiting Release' && <button onClick={() => handleAction(selectedTx.id, 'Completed')} className="w-full bg-green-600 text-white font-bold py-3 rounded">Release Funds to Seller</button>}
                                 {!isBuyer && selectedTx.status === 'Awaiting Funding' && <p className="text-gray-300">Waiting for the buyer to fund the escrow.</p>}

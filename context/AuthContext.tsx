@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import { User, UserRole, UserSubRole, BankAccount } from '../types';
 
@@ -8,6 +9,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
   updateUser: (updates: Partial<User>) => void;
+  updateWalletBalance: (amount: number) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let hederaWalletAddress: string | undefined = undefined;
       let accountOfficerId: string | undefined = undefined;
       let username: string | undefined = undefined;
+      let walletBalance: number | undefined = undefined;
 
       switch (role) {
         case UserRole.ADMIN: name = 'Super Admin'; companyName = 'Xeloo Corp'; avatarInitials="SA"; avatarBgColor="#ef4444"; username = 'superadmin'; break;
@@ -60,6 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             { id: 'acc_2', bankName: 'Access Bank', accountNumber: '**** **** **** 5678', country: 'Nigeria', currency: 'NGN' },
           ];
           accountOfficerId = '7';
+          walletBalance = 10000; // Give user a starting balance
           break;
       }
       const mockUser: User = { 
@@ -77,6 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isSubscribed,
         hederaWalletAddress,
         accountOfficerId,
+        walletBalance,
       };
       setUser(mockUser);
       setIsLoading(false);
@@ -91,8 +96,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(currentUser => currentUser ? { ...currentUser, ...updates } : null);
   }, []);
 
+  const updateWalletBalance = useCallback((amount: number) => {
+    setUser(currentUser => {
+        if (!currentUser) return null;
+        const newBalance = (currentUser.walletBalance || 0) + amount;
+        return { ...currentUser, walletBalance: newBalance };
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUser }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUser, updateWalletBalance }}>
       {children}
     </AuthContext.Provider>
   );

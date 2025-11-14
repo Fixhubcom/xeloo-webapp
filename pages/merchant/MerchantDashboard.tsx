@@ -61,6 +61,7 @@ const MerchantOverview: React.FC = () => {
     const { theme } = useTheme();
     const gridColor = theme === 'dark' ? '#294A21' : '#e5e7eb';
     const textColor = theme === 'dark' ? '#a8a29e' : '#6b7280';
+    const barColor = theme === 'dark' ? '#FDDA1A' : '#F59E0B';
     const tooltipStyles = {
         contentStyle: {
             backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
@@ -87,7 +88,7 @@ const MerchantOverview: React.FC = () => {
                             formatter={(value: number, name: string, props) => [`${value.toLocaleString()} ${props.payload.currency}`, 'Volume']}
                             labelFormatter={() => ''}
                         />
-                        <Bar dataKey="volume" fill="#FDDA1A" />
+                        <Bar dataKey="volume" fill={barColor} />
                     </BarChart>
                 </ResponsiveContainer>
             </Card>

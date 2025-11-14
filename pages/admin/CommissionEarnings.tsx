@@ -33,6 +33,7 @@ const CommissionEarnings: React.FC<{ searchQuery: string }> = ({ searchQuery }) 
 
     const gridColor = theme === 'dark' ? '#294A21' : '#e5e7eb';
     const textColor = theme === 'dark' ? '#a8a29e' : '#6b7280';
+    const barColor = theme === 'dark' ? '#FDDA1A' : '#F59E0B';
     const tooltipStyles = {
         contentStyle: {
             backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
@@ -105,7 +106,7 @@ const CommissionEarnings: React.FC<{ searchQuery: string }> = ({ searchQuery }) 
                         <XAxis dataKey="date" stroke={textColor} fontSize={12} />
                         <YAxis stroke={textColor} fontSize={12} tickFormatter={(value) => `$${value}`} />
                         <Tooltip {...tooltipStyles} formatter={(value: number) => [value.toLocaleString('en-US', { style: 'currency', currency: 'USD' }), 'Commission']} />
-                        <Bar dataKey="commission" fill="#FDDA1A" />
+                        <Bar dataKey="commission" fill={barColor} />
                     </BarChart>
                 </ResponsiveContainer>
             </Card>

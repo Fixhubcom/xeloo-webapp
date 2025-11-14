@@ -71,6 +71,7 @@ const AdminOverview: React.FC<{ setActiveView: (view: NavItem) => void }> = ({ s
     const { theme } = useTheme();
     const gridColor = theme === 'dark' ? '#294A21' : '#e5e7eb';
     const textColor = theme === 'dark' ? '#a8a29e' : '#6b7280';
+    const barColor = theme === 'dark' ? '#FDDA1A' : '#F59E0B';
     const tooltipStyles = {
         contentStyle: {
             backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
@@ -106,7 +107,7 @@ const AdminOverview: React.FC<{ setActiveView: (view: NavItem) => void }> = ({ s
                         <XAxis dataKey="corridor" stroke={textColor} />
                         <YAxis stroke={textColor} tickFormatter={(value) => `$${Number(value / 1000000)}M`} />
                         <Tooltip {...tooltipStyles} formatter={(value: number) => [`$${value.toLocaleString()}`, 'Volume']} />
-                        <Bar dataKey="volume" fill="#FDDA1A" />
+                        <Bar dataKey="volume" fill={barColor} />
                     </BarChart>
                 </ResponsiveContainer>
             </Card>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -23,15 +24,72 @@ import UpgradePrompt from '../../components/common/UpgradePrompt';
 import Escrow from './Escrow';
 import Directory from './Directory';
 import TaxPayments from './TaxPayments';
+import Card from '../../components/common/Card';
+import Spinner from '../../components/common/Spinner';
 
 type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactions' | 'Invoices' | 'Payroll' | 'Escrow' | 'Tax Payments' | 'Currency Converter' | 'Accounting' | 'API Management' | 'Subscription' | 'Settings' | 'Reports' | 'Support' | 'Directory';
 
+const AddFundsModal: React.FC<{ onClose: () => void, onFund: (amount: number) => void }> = ({ onClose, onFund }) => {
+    const [amount, setAmount] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [step, setStep] = useState<'form' | 'processing' | 'success'>('form');
+
+    const handleConfirmDeposit = () => {
+        setStep('processing');
+        setTimeout(() => {
+            onFund(parseFloat(amount));
+            setStep('success');
+        }, 2000);
+    };
+
+    return (
+         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+            <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                {step === 'form' && (
+                    <>
+                        <h2 className="text-2xl font-bold mb-2">Add Funds to Your Wallet</h2>
+                        <p className="text-gray-400 mb-4">Deposit funds into the unique account below. The funds will be credited to your Xeloo balance instantly.</p>
+                        <div>
+                            <label className="text-sm text-gray-400">Amount (USD)</label>
+                            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required/>
+                        </div>
+                        <div className="bg-primary p-4 rounded-lg space-y-3 mt-4">
+                            <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">Xeloo Pay-In (Providus)</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">9{Math.floor(100000000 + Math.random() * 900000000)}</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">XELOO/{Math.random().toString(36).substring(2, 8).toUpperCase()}</strong></div>
+                        </div>
+                        <div className="flex justify-end space-x-4 mt-6">
+                            <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
+                            <button onClick={handleConfirmDeposit} disabled={!amount} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 disabled:bg-gray-500">I've Made the Deposit</button>
+                        </div>
+                    </>
+                )}
+                {step === 'processing' && (
+                    <div className="text-center py-8">
+                        <Spinner className="w-12 h-12 mx-auto border-4" />
+                        <h2 className="text-2xl font-bold mt-4">Confirming Deposit...</h2>
+                    </div>
+                )}
+                 {step === 'success' && (
+                    <div className="text-center py-8">
+                        <h2 className="text-2xl font-bold text-accent mb-2">Funds Added!</h2>
+                        <p className="text-gray-300 mb-6">{parseFloat(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} has been added to your wallet.</p>
+                        <button onClick={onClose} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Done</button>
+                    </div>
+                )}
+            </Card>
+        </div>
+    );
+};
+
+
 const UserDashboard: React.FC = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateWalletBalance } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [history, setHistory] = useState<{ view: NavItem, props?: any }[]>([{ view: 'Transactions', props: {} }]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false);
 
     const pageState = history[history.length - 1];
 
@@ -50,23 +108,28 @@ const UserDashboard: React.FC = () => {
             setHistory(prev => prev.slice(0, -1));
         }
     };
+    
+    const handleFund = (amount: number) => {
+        updateWalletBalance(amount);
+    }
 
     const renderContent = () => {
         const { view, props } = pageState;
+        const sharedProps = { openAddFundsModal: () => setIsAddFundsModalOpen(true) };
         switch (view) {
             case 'Dashboard': return <UserAnalytics />;
-            case 'Send Payment': return <SendPayment {...props} />;
+            case 'Send Payment': return <SendPayment {...props} {...sharedProps} />;
             case 'Recurring Payments': return <RecurringPayments searchQuery={searchQuery} />;
             case 'Transactions': return <Transactions searchQuery={searchQuery} />;
             case 'Invoices':
                 return user?.isSubscribed ? <Invoices searchQuery={searchQuery} /> : <UpgradePrompt featureName="Invoicing" onUpgrade={() => selectSidebarItem('Subscription')} />;
             case 'Payroll':
-                return user?.isSubscribed ? <Payroll searchQuery={searchQuery} /> : <UpgradePrompt featureName="Payroll" onUpgrade={() => selectSidebarItem('Subscription')} />;
-            case 'Escrow': return <Escrow searchQuery={searchQuery} {...props} />;
-            case 'Tax Payments': return <TaxPayments />;
+                return user?.isSubscribed ? <Payroll searchQuery={searchQuery} {...sharedProps} /> : <UpgradePrompt featureName="Payroll" onUpgrade={() => selectSidebarItem('Subscription')} />;
+            case 'Escrow': return <Escrow searchQuery={searchQuery} {...props} {...sharedProps} />;
+            case 'Tax Payments': return <TaxPayments {...sharedProps} />;
             case 'Currency Converter': return <CurrencyConverter />;
             case 'Accounting':
-                return user?.isSubscribed ? <Accounting searchQuery={searchQuery} /> : <UpgradePrompt featureName="Accounting" onUpgrade={() => selectSidebarItem('Subscription')} />;
+                return user?.isSubscribed ? <Accounting searchQuery={searchQuery} {...sharedProps} /> : <UpgradePrompt featureName="Accounting" onUpgrade={() => selectSidebarItem('Subscription')} />;
             case 'API Management':
                 return <ApiManagement />;
             case 'Subscription': return <SubscriptionPage />;
@@ -80,7 +143,6 @@ const UserDashboard: React.FC = () => {
     
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-primary overflow-hidden">
-            {/* Overlay for mobile */}
             {isSidebarOpen && (
                 <div 
                     className="fixed inset-0 bg-black opacity-50 z-20 lg:hidden"
@@ -88,7 +150,6 @@ const UserDashboard: React.FC = () => {
                 ></div>
             )}
 
-            {/* Sidebar */}
             <aside className={`w-64 bg-white dark:bg-primary flex flex-col shadow-lg fixed z-30 inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}>
                 <div className="h-20 flex items-center justify-center border-b border-gray-200 dark:border-primary-light">
                     <Logo className="text-3xl" />
@@ -124,7 +185,6 @@ const UserDashboard: React.FC = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
                 <header className="h-20 bg-white dark:bg-primary flex items-center justify-between px-4 sm:px-8 border-b border-gray-200 dark:border-primary-light flex-shrink-0">
                     <div className="flex items-center gap-2 sm:gap-4">
@@ -148,8 +208,12 @@ const UserDashboard: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-4">
-                        <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light md:hidden">
-                            <SearchIcon className="w-6 h-6" />
+                        <div className="bg-primary-light p-2 rounded-lg text-center hidden sm:block">
+                            <div className="text-xs text-gray-400">Wallet Balance</div>
+                            <div className="font-bold text-white">{(user?.walletBalance ?? 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</div>
+                        </div>
+                         <button onClick={() => setIsAddFundsModalOpen(true)} className="bg-accent text-primary text-sm font-bold py-2 px-3 rounded-md hover:opacity-90">
+                            + Add Funds
                         </button>
                         <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light">
                             {theme === 'dark' ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-700" />}
@@ -160,7 +224,7 @@ const UserDashboard: React.FC = () => {
                                 bgColor={user?.avatarBgColor || '#ccc'}
                                 className="w-10 h-10 text-lg"
                             />
-                            <div className="text-right hidden sm:block">
+                            <div className="text-right hidden md:block">
                                 <p className="font-semibold text-gray-900 dark:text-white truncate">{(user as User)?.name}</p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{(user as User)?.companyName}</p>
                             </div>
@@ -173,6 +237,7 @@ const UserDashboard: React.FC = () => {
                 </div>
                 <HelpWidget />
             </main>
+            {isAddFundsModalOpen && <AddFundsModal onClose={() => setIsAddFundsModalOpen(false)} onFund={handleFund} />}
         </div>
     );
 }

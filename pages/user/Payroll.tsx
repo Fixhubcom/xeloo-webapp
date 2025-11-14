@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -28,7 +27,6 @@ const EmployeeForm: React.FC<{
     const [name, setName] = useState(employee?.name || '');
     const [email, setEmail] = useState(employee?.email || '');
     const [country, setCountry] = useState(employee?.country || 'Nigeria');
-    const [salary, setSalary] = useState(employee?.salary?.toString() || '');
     const [paymentMethod, setPaymentMethod] = useState<'bank' | 'xeloo'>(employee?.paymentMethod || 'bank');
     const [bankName, setBankName] = useState(employee?.bankName || '');
     const [accountNumber, setAccountNumber] = useState(employee?.accountNumber || '');
@@ -37,23 +35,56 @@ const EmployeeForm: React.FC<{
     const [iban, setIban] = useState(employee?.iban || '');
     const [xelooUsername, setXelooUsername] = useState(employee?.xelooUsername || '');
 
-    const [equivalentValue, setEquivalentValue] = useState(0);
-
-    const currency = countryToCurrency[country];
+    // New salary state
     const displayCurrency = user?.preferredCurrency || 'USD';
+    const localCurrency = useMemo(() => countryToCurrency[country], [country]);
+    const [activeInput, setActiveInput] = useState<'local' | 'display'>('local');
+    const [salaryLocal, setSalaryLocal] = useState('');
+    const [salaryDisplay, setSalaryDisplay] = useState('');
+    const [rate, setRate] = useState(0);
+
+    const currencyToSymbol: { [key: string]: string } = { USD: '$', NGN: '₦', GHS: '₵', KES: 'KSh', GBP: '£', EUR: '€', CAD: '$' };
 
     useEffect(() => {
-        const numSalary = parseFloat(salary);
-        const fromRate = MOCK_RATES[currency] || 0;
-        const toRate = MOCK_RATES[displayCurrency] || 0;
-
-        if (!isNaN(numSalary) && fromRate > 0 && toRate > 0) {
-            const valueInUSD = numSalary / fromRate;
-            setEquivalentValue(valueInUSD * toRate);
-        } else {
-            setEquivalentValue(0);
+        if (employee) {
+            setSalaryLocal(employee.salary.toString());
+            // Trigger calculation for display currency
+            const fromRate = MOCK_RATES[employee.currency] || 0;
+            const toRate = MOCK_RATES[displayCurrency] || 0;
+            if (fromRate > 0 && toRate > 0) {
+                const valueInBase = employee.salary / fromRate;
+                setSalaryDisplay((valueInBase * toRate).toFixed(2));
+            }
         }
-    }, [salary, currency, displayCurrency]);
+    }, [employee, displayCurrency]);
+
+    useEffect(() => {
+        const rateDisplay = MOCK_RATES[displayCurrency] || 0;
+        const rateLocal = MOCK_RATES[localCurrency] || 0;
+        if (rateDisplay === 0 || rateLocal === 0) return;
+
+        const effectiveRate = rateLocal / rateDisplay;
+        setRate(effectiveRate);
+
+        if (activeInput === 'display') {
+            const display = parseFloat(salaryDisplay);
+            if (!isNaN(display) && display > 0) {
+                const local = display * effectiveRate;
+                setSalaryLocal(local.toFixed(2));
+            } else {
+                setSalaryLocal('');
+            }
+        } else if (activeInput === 'local') {
+            const local = parseFloat(salaryLocal);
+            if (!isNaN(local) && local > 0) {
+                const display = local / effectiveRate;
+                setSalaryDisplay(display.toFixed(2));
+            } else {
+                setSalaryDisplay('');
+            }
+        }
+    }, [salaryLocal, salaryDisplay, localCurrency, displayCurrency, activeInput]);
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,8 +93,8 @@ const EmployeeForm: React.FC<{
             name,
             email,
             country,
-            currency,
-            salary: parseFloat(salary),
+            currency: localCurrency,
+            salary: parseFloat(salaryLocal),
             paymentMethod,
             bankName: paymentMethod === 'bank' ? bankName : undefined,
             accountNumber: paymentMethod === 'bank' ? accountNumber : undefined,
@@ -75,12 +106,35 @@ const EmployeeForm: React.FC<{
     };
 
     return (
-        <Card className="max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">{employee ? 'Edit Employee' : 'Add New Employee'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <Card className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold mb-6">{employee ? 'Edit Employee' : 'Add New Employee'}</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                 <input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="Email Address" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                 
+                <div>
+                    <label className="text-sm font-medium text-gray-400 mb-2 block">Set Salary</label>
+                    <div className="space-y-2">
+                        <div className="bg-primary p-3 rounded-lg">
+                            <label className="text-xs text-gray-400">In Your Currency ({displayCurrency})</label>
+                            <div className="flex items-center">
+                                <span className="text-xl text-gray-400 mr-2">{currencyToSymbol[displayCurrency]}</span>
+                                <input type="number" value={salaryDisplay} onChange={e => setSalaryDisplay(e.target.value)} onFocus={() => setActiveInput('display')} placeholder="0.00" className="w-full bg-transparent text-xl text-white focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div className="text-center text-xs text-accent font-mono">1 {displayCurrency} ≈ {rate.toFixed(2)} {localCurrency}</div>
+
+                        <div className="bg-primary p-3 rounded-lg">
+                            <label className="text-xs text-gray-400">In Recipient's Currency ({localCurrency})</label>
+                             <div className="flex items-center">
+                                <span className="text-xl text-gray-400 mr-2">{currencyToSymbol[localCurrency]}</span>
+                                <input type="number" value={salaryLocal} onChange={e => setSalaryLocal(e.target.value)} onFocus={() => setActiveInput('local')} placeholder="0.00" className="w-full bg-transparent text-xl text-white focus:outline-none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label className="text-sm font-medium text-gray-400 mb-2 block">Payment Method</label>
                     <div className="grid grid-cols-2 gap-2">
@@ -90,38 +144,26 @@ const EmployeeForm: React.FC<{
                 </div>
 
                 {paymentMethod === 'bank' ? (
-                    <div className="space-y-4">
-                        <input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                    <div className="space-y-4 pt-2 border-t border-primary-light">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-                            <input value={routingNumber} onChange={e => setRoutingNumber(e.target.value)} placeholder="Routing Number (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-                            <input value={swiftCode} onChange={e => setSwiftCode(e.target.value)} placeholder="SWIFT/BIC Code (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-                            <input value={iban} onChange={e => setIban(e.target.value)} placeholder="IBAN (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                             <input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                             <input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+                             <input value={swiftCode} onChange={e => setSwiftCode(e.target.value)} placeholder="SWIFT/BIC Code (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                             <input value={iban} onChange={e => setIban(e.target.value)} placeholder="IBAN (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                             <input value={routingNumber} onChange={e => setRoutingNumber(e.target.value)} placeholder="Routing Number (Optional)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+                             <div>
+                                <select value={country} onChange={e => setCountry(e.target.value)} className="w-full bg-primary p-2 rounded border border-primary-light h-full">
+                                    {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 ) : (
-                    <div>
+                     <div className="pt-2 border-t border-primary-light">
                         <input value={xelooUsername} onChange={e => setXelooUsername(e.target.value)} placeholder="Employee's @username" className="w-full bg-primary p-2 rounded border border-primary-light" required />
                     </div>
                 )}
                 
-                <div className="flex gap-4">
-                    <div className="w-1/2">
-                        <label className="text-sm text-gray-400">Country</label>
-                        <select value={country} onChange={e => setCountry(e.target.value)} className="w-full mt-1 bg-primary p-2 rounded border border-primary-light">
-                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                    </div>
-                    <div className="w-1/2">
-                        <label className="text-sm text-gray-400">Salary (in {currency})</label>
-                        <input value={salary} onChange={e => setSalary(e.target.value)} type="number" step="0.01" placeholder="5000" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required />
-                    </div>
-                </div>
-                {equivalentValue > 0 && (
-                    <p className="text-sm text-gray-400 text-right -mt-2">
-                        ≈ {equivalentValue.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}
-                    </p>
-                )}
                 <div className="flex justify-end space-x-3 pt-4">
                     <button type="button" onClick={onCancel} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
                     <button type="submit" className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Save Employee</button>

@@ -22,6 +22,7 @@ const AdminReports: React.FC = () => {
     const { theme } = useTheme();
     const gridColor = theme === 'dark' ? '#294A21' : '#e5e7eb';
     const textColor = theme === 'dark' ? '#a8a29e' : '#6b7280';
+    const chartColor = theme === 'dark' ? '#FDDA1A' : '#F59E0B';
     const tooltipStyles = {
         contentStyle: {
             backgroundColor: theme === 'dark' ? '#041401' : '#ffffff',
@@ -42,7 +43,7 @@ const AdminReports: React.FC = () => {
                             <YAxis stroke={textColor} />
                             <Tooltip {...tooltipStyles} />
                             <Legend />
-                            <Line type="monotone" dataKey="Users" stroke="#FDDA1A" strokeWidth={2} />
+                            <Line type="monotone" dataKey="Users" stroke={chartColor} strokeWidth={2} />
                         </LineChart>
                     </ResponsiveContainer>
                 </Card>
@@ -55,7 +56,7 @@ const AdminReports: React.FC = () => {
                             <YAxis stroke={textColor} />
                             <Tooltip {...tooltipStyles} />
                             <Legend />
-                            <Bar dataKey="Volume" fill="#FDDA1A" />
+                            <Bar dataKey="Volume" fill={chartColor} />
                         </BarChart>
                     </ResponsiveContainer>
                 </Card>
