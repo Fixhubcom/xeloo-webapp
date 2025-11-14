@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import Card from '../../components/common/Card';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,25 +17,40 @@ const mockTeam = [
 
 const Settings: React.FC = () => {
     const { user, updateUser } = useAuth();
+    // Profile
     const [formData, setFormData] = useState({
         name: user?.name || '',
         companyName: user?.companyName || '',
     });
     const [isSaving, setIsSaving] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [team, setTeam] = useState(mockTeam);
-    const [apiKey, setApiKey] = useState<string | null>('xel_sk_test_************************a1b2');
+    
+    // Bank Accounts
     const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(user?.bankAccounts || []);
     const [showAddAccountForm, setShowAddAccountForm] = useState(false);
+    
+    // USDT Wallet
+    const [usdtWallet, setUsdtWallet] = useState(user?.usdtWalletAddress || '');
+    const [isSavingWallet, setIsSavingWallet] = useState(false);
+    const [walletSuccess, setWalletSuccess] = useState(false);
+
+    // Security
     const [newPassword, setNewPassword] = useState('');
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [show2FASetup, setShow2FASetup] = useState(false);
 
-    // State for username management
+    // Username
     const [username, setUsername] = useState(user?.username || '');
     const [isUsernameSet, setIsUsernameSet] = useState(!!user?.username);
     const [isSavingUsername, setIsSavingUsername] = useState(false);
     const [usernameError, setUsernameError] = useState('');
+    
+    // Team
+    const [team, setTeam] = useState(mockTeam);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteRole, setInviteRole] = useState(UserSubRole.STANDARD);
+    const [isInviting, setIsInviting] = useState(false);
+    const [inviteSuccess, setInviteSuccess] = useState(false);
 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,13 +62,11 @@ const Settings: React.FC = () => {
         e.preventDefault();
         setIsSaving(true);
         setIsSuccess(false);
-        // Simulate API call to save data
         setTimeout(() => {
-            console.log("Saving user data:", formData);
             updateUser(formData);
             setIsSaving(false);
             setIsSuccess(true);
-            setTimeout(() => setIsSuccess(false), 3000); // Hide success message after 3s
+            setTimeout(() => setIsSuccess(false), 3000);
         }, 1500);
     };
     
@@ -71,6 +85,17 @@ const Settings: React.FC = () => {
         e.currentTarget.reset();
     };
 
+    const handleSaveWallet = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSavingWallet(true);
+        setWalletSuccess(false);
+        setTimeout(() => {
+            updateUser({ usdtWalletAddress: usdtWallet });
+            setIsSavingWallet(false);
+            setWalletSuccess(true);
+            setTimeout(() => setWalletSuccess(false), 3000);
+        }, 1500);
+    };
 
     const handleRoleChange = (memberId: number, newRole: UserSubRole) => {
         setTeam(currentTeam => 
@@ -79,20 +104,33 @@ const Settings: React.FC = () => {
             )
         );
     };
-    
-    const generateNewKey = () => {
-        // In a real app, this would be a secure, random string from the server.
-        const newKey = `xel_sk_test_${[...Array(24)].map(() => Math.random().toString(36)[2]).join('')}${Math.random().toString(16).slice(10, 14)}`;
-        setApiKey(newKey);
-    };
 
+    const handleInvite = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsInviting(true);
+        setInviteSuccess(false);
+        setTimeout(() => {
+            const newMember = {
+                id: Date.now(),
+                name: 'Invited User', // In a real app, this would be pending
+                email: inviteEmail,
+                subRole: inviteRole,
+            };
+            setTeam(prev => [...prev, newMember]);
+            setIsInviting(false);
+            setInviteSuccess(true);
+            setInviteEmail('');
+            setInviteRole(UserSubRole.STANDARD);
+            setTimeout(() => setInviteSuccess(false), 3000);
+        }, 1500);
+    };
+    
     const handleSetUsername = (e: React.FormEvent) => {
         e.preventDefault();
         if (!username || username.length < 3) {
             setUsernameError('Username must be at least 3 characters long and contain only letters, numbers, and underscores.');
             return;
         }
-        // Mock check for availability
         setIsSavingUsername(true);
         setUsernameError('');
         setTimeout(() => {
@@ -275,27 +313,85 @@ const Settings: React.FC = () => {
                 )}
             </Card>
 
+            <Card>
+                <h2 className="text-2xl font-bold mb-6">USDT Payout Wallet</h2>
+                <p className="text-sm text-gray-400 mb-4">Add your USDT (TRC20) wallet address to receive crypto payouts.</p>
+                <form onSubmit={handleSaveWallet} className="space-y-4">
+                    <div>
+                        <label htmlFor="usdtWallet" className="block text-sm font-medium text-gray-400">USDT Wallet Address (TRC20)</label>
+                        <input 
+                            id="usdtWallet" 
+                            name="usdtWallet" 
+                            value={usdtWallet} 
+                            onChange={(e) => setUsdtWallet(e.target.value)} 
+                            placeholder="T..."
+                            className="mt-1 w-full bg-primary p-2 rounded border border-primary-light font-mono" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <button type="submit" disabled={isSavingWallet} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 flex items-center disabled:bg-gray-500">
+                            {isSavingWallet ? <Spinner className="mr-2" /> : null}
+                            {isSavingWallet ? 'Saving...' : 'Save Wallet'}
+                        </button>
+                        {walletSuccess && <span className="text-accent">Wallet address updated!</span>}
+                    </div>
+                </form>
+            </Card>
 
             <Card>
                 <h2 className="text-2xl font-bold mb-6">Team Management</h2>
-                <div className="space-y-3">
-                    {team.map(member => (
-                        <div key={member.id} className="flex items-center justify-between p-3 bg-primary rounded-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4">Invite New Member</h3>
+                        <form onSubmit={handleInvite} className="space-y-4">
                             <div>
-                                <p className="font-semibold text-white">{member.name}</p>
-                                <p className="text-sm text-gray-400">{member.email}</p>
+                                <label className="text-sm text-gray-400">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    required 
+                                    placeholder="member@example.com" 
+                                    value={inviteEmail}
+                                    onChange={e => setInviteEmail(e.target.value)}
+                                    className="w-full bg-primary p-2 rounded border border-primary-light" />
                             </div>
-                            <select 
-                                value={member.subRole} 
-                                onChange={(e) => handleRoleChange(member.id, e.target.value as UserSubRole)}
-                                className="bg-primary border border-primary-light rounded-md py-1 px-2 text-xs text-accent focus:outline-none focus:ring-accent focus:border-accent"
-                            >
-                                {Object.values(UserSubRole).map(role => (
-                                    <option key={role} value={role}>{role}</option>
-                                ))}
-                            </select>
+                            <div>
+                                <label className="text-sm text-gray-400">Role</label>
+                                 <select 
+                                    value={inviteRole}
+                                    onChange={e => setInviteRole(e.target.value as UserSubRole)}
+                                    className="w-full bg-primary p-2 rounded border border-primary-light">
+                                    {Object.values(UserSubRole).map(role => (
+                                        <option key={role} value={role}>{role}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button type="submit" disabled={isInviting} className="w-full bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 flex items-center justify-center">
+                                {isInviting ? <Spinner /> : 'Send Invite'}
+                            </button>
+                            {inviteSuccess && <p className="text-accent text-sm text-center">Invitation sent!</p>}
+                        </form>
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4">Current Team</h3>
+                        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                            {team.map(member => (
+                                <div key={member.id} className="flex items-center justify-between p-3 bg-primary rounded-md">
+                                    <div>
+                                        <p className="font-semibold text-white">{member.name}</p>
+                                        <p className="text-sm text-gray-400">{member.email}</p>
+                                    </div>
+                                    <select 
+                                        value={member.subRole} 
+                                        onChange={(e) => handleRoleChange(member.id, e.target.value as UserSubRole)}
+                                        className="bg-primary border border-primary-light rounded-md py-1 px-2 text-xs text-accent focus:outline-none focus:ring-accent focus:border-accent"
+                                    >
+                                        {Object.values(UserSubRole).map(role => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </Card>
         </div>

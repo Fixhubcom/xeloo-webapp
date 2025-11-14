@@ -409,6 +409,79 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery, openAddFundsModal 
         setBills(prev => prev.map(b => b.id === billId ? { ...b, status: 'Paid' } : b));
     };
 
+    const handleDownloadReport = () => {
+        let data: Record<string, any>[] = [];
+        let headers: string[] = [];
+        let filename = `${activeReport}_report.csv`;
+
+        const escapeCsvCell = (cell: any) => {
+            if (cell == null) {
+                return '';
+            }
+            const str = String(cell);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
+
+        switch(activeReport) {
+            case 'pnl':
+                filename = 'profit_and_loss.csv';
+                headers = ['Category', 'Account', 'Amount'];
+                const revenues = accounts.filter(a => a.type === 'Revenue');
+                const expenses = accounts.filter(a => a.type === 'Expense');
+                data = [
+                    ...revenues.map(a => ({ Category: 'Revenue', Account: a.name, Amount: a.balance })),
+                    ...expenses.map(a => ({ Category: 'Expense', Account: a.name, Amount: a.balance }))
+                ];
+                break;
+            case 'balance':
+                filename = 'balance_sheet.csv';
+                headers = ['Type', 'Account', 'Balance'];
+                data = accounts
+                    .filter(a => ['Asset', 'Liability', 'Equity'].includes(a.type))
+                    .map(a => ({ Type: a.type, Account: a.name, Balance: a.balance }));
+                break;
+            case 'cashflow':
+                filename = 'cash_flow_statement.csv';
+                headers = ['Category', 'Item', 'Amount'];
+                data = [
+                    { Category: 'Operating Activities', Item: 'Net Income', Amount: 75500 },
+                    { Category: 'Operating Activities', Item: 'Change in Payables', Amount: -1500 },
+                    { Category: 'Investing Activities', Item: 'Equipment Purchase', Amount: -25000 },
+                    { Category: 'Financing Activities', Item: 'Loan Proceeds', Amount: 30000 },
+                    { Category: 'Financing Activities', Item: 'Owner Investment', Amount: 50000 },
+                ];
+                break;
+            case 'ledger':
+                filename = 'general_ledger.csv';
+                headers = ['Date', 'Account', 'Description', 'Debit', 'Credit'];
+                data = journalEntries.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                     .map(e => ({ Date: e.date, Account: e.account, Description: e.description, Debit: e.debit, Credit: e.credit }));
+                break;
+            default:
+                return;
+        }
+
+        const csvRows = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => escapeCsvCell(row[header])).join(','))
+        ];
+
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     const renderView = () => {
         switch (activeView) {
             case 'Dashboard':
@@ -567,6 +640,11 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery, openAddFundsModal 
                     <div>
                         <div className="mb-4 flex flex-wrap justify-center gap-2 p-1 bg-white dark:bg-primary-light rounded-lg">
                             {reports.map(r => <button key={r.id} onClick={() => setActiveReport(r.id)} className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold ${activeReport === r.id ? 'bg-accent text-primary' : 'text-gray-500 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-primary'}`}>{r.name}</button>)}
+                        </div>
+                        <div className="text-right mb-4">
+                            <button onClick={handleDownloadReport} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">
+                                Download CSV
+                            </button>
                         </div>
                         {renderReportContent()}
                     </div>

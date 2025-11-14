@@ -39,6 +39,7 @@ export interface User {
   hederaWalletAddress?: string;
   accountOfficerId?: string;
   walletBalance?: number;
+  usdtWalletAddress?: string;
 }
 
 export interface Transaction {
