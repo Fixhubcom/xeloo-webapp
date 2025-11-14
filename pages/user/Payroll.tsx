@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
@@ -175,12 +177,13 @@ const EmployeeForm: React.FC<{
 
 interface PayrollProps {
     searchQuery: string;
+    openAddFundsModal: () => void;
 }
 
-const Payroll: React.FC<PayrollProps> = ({ searchQuery }) => {
-    const { user } = useAuth();
+const Payroll: React.FC<PayrollProps> = ({ searchQuery, openAddFundsModal }) => {
+    const { user, updateWalletBalance } = useAuth();
     const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
-    const [view, setView] = useState<'list' | 'form' | 'confirm' | 'payin' | 'processing' | 'success'>('list');
+    const [view, setView] = useState<'list' | 'form' | 'confirm' | 'processing' | 'success'>('list');
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     
@@ -221,11 +224,10 @@ const Payroll: React.FC<PayrollProps> = ({ searchQuery }) => {
         setEditingEmployee(null);
     };
 
-    const handleConfirmPayroll = () => setView('payin');
-    
-    const handleFundPayroll = () => {
+    const handleConfirmPayroll = () => {
         setView('processing');
         setTimeout(() => {
+            updateWalletBalance(-totalPayrollDisplayCurrency);
             setIsProcessing(false);
             setView('success');
         }, 2000);
@@ -265,40 +267,19 @@ const Payroll: React.FC<PayrollProps> = ({ searchQuery }) => {
             <Card className="text-center max-w-2xl mx-auto">
                 <Spinner className="w-12 h-12 mx-auto border-4" />
                 <h2 className="text-2xl font-bold mt-4">Processing Payroll...</h2>
-                <p className="text-gray-400 mt-2">We are confirming your deposit and initiating payouts to your employees.</p>
+                <p className="text-gray-400 mt-2">Deducting from your wallet and initiating payouts to your employees.</p>
             </Card>
         );
     }
 
-    if (view === 'payin') {
-        const fundingAmount = totalPayrollUSD * MOCK_RATES['NGN'];
-        return (
-             <Card className="max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold mb-2">Fund Payroll Run</h2>
-                <p className="text-gray-400 mb-4">To proceed, please deposit the total payroll amount to the unique account details below. This ensures all your employees are paid in a single batch.</p>
-                <div className="bg-primary p-4 rounded-lg space-y-3">
-                    <div className="text-center mb-2">
-                        <p className="text-sm text-gray-400">Total Amount to Deposit (NGN)</p>
-                        <p className="text-3xl font-bold text-accent font-mono">{fundingAmount.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}</p>
-                         <p className="text-sm text-gray-400">~ {totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
-                    </div>
-                    <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">Xeloo Payroll (Providus)</strong></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">7{Math.floor(100000000 + Math.random() * 900000000)}</strong></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">XELOO/{user?.companyName?.replace(' ', '').toUpperCase()}</strong></div>
-                </div>
-                <div className="flex justify-end space-x-4 mt-6">
-                    <button onClick={() => setView('confirm')} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Back</button>
-                    <button onClick={handleFundPayroll} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90">I Have Made The Deposit</button>
-                </div>
-            </Card>
-        )
-    }
-
     if (view === 'confirm') {
+        const hasSufficientFunds = (user?.walletBalance || 0) >= totalPayrollDisplayCurrency;
         return (
             <Card className="max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold mb-4">Confirm Payroll Run</h2>
-                <p className="text-gray-light mb-6">Review the payment details below. A total of ~{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} will be required to fund this payroll.</p>
+                <p className="text-gray-light mb-2">Review the payment details below. A total of ~{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })} will be deducted from your wallet.</p>
+                <p className="text-sm text-gray-400 mb-6">Your current balance: {(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
+                
                 <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
                     {filteredEmployees.map(emp => (
                         <div key={emp.id} className="p-3 bg-primary rounded-md flex justify-between items-center">
@@ -317,82 +298,107 @@ const Payroll: React.FC<PayrollProps> = ({ searchQuery }) => {
                         </div>
                     ))}
                 </div>
+                 {!hasSufficientFunds && (
+                    <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-300 text-center rounded-lg">
+                        <p className="font-bold">Insufficient Wallet Funds</p>
+                    </div>
+                )}
                 <div className="flex justify-end space-x-4 mt-6 pt-4 border-t border-primary-light">
                     <button onClick={() => setView('list')} disabled={isProcessing} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">Cancel</button>
-                    <button onClick={handleConfirmPayroll} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-48 flex items-center justify-center">
-                        {isProcessing ? <Spinner /> : 'Confirm & Proceed'}
-                    </button>
+                    {hasSufficientFunds ? (
+                        <button onClick={handleConfirmPayroll} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-48 flex items-center justify-center">
+                            {isProcessing ? <Spinner /> : 'Pay from Wallet'}
+                        </button>
+                    ) : (
+                        <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">Add Funds to Wallet</button>
+                    )}
                 </div>
             </Card>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-                <Card>
-                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-bold text-white">Manage Employees</h2>
-                        <button onClick={() => { setEditingEmployee(null); setView('form'); }} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
-                    </div>
-                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-400">
-                            <thead className="text-xs text-gray-400 uppercase bg-primary">
-                                <tr>
-                                    <th className="px-6 py-3">Employee</th>
-                                    <th className="px-6 py-3">Salary</th>
-                                    <th className="px-6 py-3">Payment Method</th>
-                                    <th className="px-6 py-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredEmployees.map(emp => (
-                                    <tr key={emp.id} className="bg-primary-light border-b border-primary">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-white">{emp.name}</div>
-                                            <div className="text-xs">{emp.country}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-mono">{emp.salary.toLocaleString(undefined, { maximumFractionDigits: 2 })} {emp.currency}</div>
-                                            <div className="text-xs font-mono text-gray-500">~ {getEquivalentValue(emp.salary, emp.currency)}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-xs">
-                                            {emp.paymentMethod === 'bank' ? (
-                                                <>{emp.bankName} <br /> {emp.accountNumber}</>
-                                            ) : (
-                                                <span className="flex items-center gap-1 font-bold text-accent"><UsersIcon className="w-4 h-4" /> @{emp.xelooUsername}</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <button onClick={() => { setEditingEmployee(emp); setView('form'); }} className="font-medium text-accent hover:underline text-xs">Edit</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {filteredEmployees.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="text-center py-8 text-gray-400">No employees found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
-            </div>
-            <div className="lg:col-span-1">
-                <Card className="space-y-4 text-center">
-                    <h2 className="text-xl font-bold">Payroll Summary</h2>
+        <div>
+            <Card className="mb-6">
+                <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-gray-400">Total Employees</p>
-                        <p className="text-2xl font-bold text-white">{filteredEmployees.length}</p>
+                        <h3 className="text-lg text-gray-400">Wallet Balance</h3>
+                        <p className="text-3xl font-bold text-white">
+                            {(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}
+                        </p>
                     </div>
-                    <div>
-                        <p className="text-gray-400">Estimated Monthly Payroll</p>
-                        <p className="text-3xl font-bold text-accent">{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
-                    </div>
-                    <button onClick={() => setView('confirm')} disabled={filteredEmployees.length === 0} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                        Run Payroll
+                    <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                        + Add Funds
                     </button>
-                </Card>
+                </div>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <Card>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-white">Manage Employees</h2>
+                            <button onClick={() => { setEditingEmployee(null); setView('form'); }} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">Add Employee</button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-400">
+                                <thead className="text-xs text-gray-400 uppercase bg-primary">
+                                    <tr>
+                                        <th className="px-6 py-3">Employee</th>
+                                        <th className="px-6 py-3">Salary</th>
+                                        <th className="px-6 py-3">Payment Method</th>
+                                        <th className="px-6 py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredEmployees.map(emp => (
+                                        <tr key={emp.id} className="bg-primary-light border-b border-primary">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-white">{emp.name}</div>
+                                                <div className="text-xs">{emp.country}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-mono">{emp.salary.toLocaleString(undefined, { maximumFractionDigits: 2 })} {emp.currency}</div>
+                                                <div className="text-xs font-mono text-gray-500">~ {getEquivalentValue(emp.salary, emp.currency)}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs">
+                                                {emp.paymentMethod === 'bank' ? (
+                                                    <>{emp.bankName} <br /> {emp.accountNumber}</>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 font-bold text-accent"><UsersIcon className="w-4 h-4" /> @{emp.xelooUsername}</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <button onClick={() => { setEditingEmployee(emp); setView('form'); }} className="font-medium text-accent hover:underline text-xs">Edit</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredEmployees.length === 0 && (
+                                        <tr>
+                                            <td colSpan={4} className="text-center py-8 text-gray-400">No employees found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
+                <div className="lg:col-span-1">
+                    <Card className="space-y-4 text-center">
+                        <h2 className="text-xl font-bold">Payroll Summary</h2>
+                        <div>
+                            <p className="text-gray-400">Total Employees</p>
+                            <p className="text-2xl font-bold text-white">{filteredEmployees.length}</p>
+                        </div>
+                        <div>
+                            <p className="text-gray-400">Estimated Monthly Payroll</p>
+                            <p className="text-3xl font-bold text-accent">{totalPayrollDisplayCurrency.toLocaleString('en-US', { style: 'currency', currency: displayCurrency })}</p>
+                        </div>
+                        <button onClick={() => setView('confirm')} disabled={filteredEmployees.length === 0} className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                            Run Payroll
+                        </button>
+                    </Card>
+                </div>
             </div>
         </div>
     )

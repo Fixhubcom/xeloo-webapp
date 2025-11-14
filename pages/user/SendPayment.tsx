@@ -23,13 +23,40 @@ const mockXelooUsers: { [key: string]: { name: string, company: string } } = {
     'acmeinc': { name: 'Acme Inc.', company: 'Acme Incorporated' },
 };
 
-type PaymentStep = 'input' | 'details' | 'confirm' | 'processing' | 'success';
+type PaymentStep = 'input' | 'details' | 'confirm' | 'deposit' | 'processing' | 'success';
 type PaymentMethod = 'bank' | 'usdt' | 'xeloo';
 
 interface SendPaymentProps {
     initialUsername?: string;
     openAddFundsModal: () => void;
 }
+
+interface BankDetailsFormProps {
+    recipientName: string;
+    setRecipientName: (value: string) => void;
+    recipientEmail: string;
+    setRecipientEmail: (value: string) => void;
+    bankDetails: { accountNumber: string; bankName: string; routingNumber: string; iban: string; swiftCode: string; };
+    setBankDetails: (value: React.SetStateAction<{ accountNumber: string; bankName: string; routingNumber: string; iban: string; swiftCode: string; }>) => void;
+}
+
+const BankDetailsForm: React.FC<BankDetailsFormProps> = ({
+    recipientName, setRecipientName, recipientEmail, setRecipientEmail, bankDetails, setBankDetails
+}) => (
+    <div className="space-y-4 pt-2">
+        <p className="text-xs text-gray-400 -mb-2">
+            Recipient will receive funds directly in their bank account.
+        </p>
+        <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+        <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+        <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({ ...p, bankName: e.target.value }))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+        <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({ ...p, accountNumber: e.target.value }))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
+        <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({ ...p, routingNumber: e.target.value }))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+        <input value={bankDetails.iban} onChange={e => setBankDetails(p => ({ ...p, iban: e.target.value }))} placeholder="IBAN (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+        <input value={bankDetails.swiftCode} onChange={e => setBankDetails(p => ({ ...p, swiftCode: e.target.value }))} placeholder="SWIFT/BIC Code (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
+    </div>
+);
+
 
 const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFundsModal }) => {
     const { user, updateWalletBalance } = useAuth();
@@ -51,6 +78,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
     const [recipientEmail, setRecipientEmail] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank');
     const [bankDetails, setBankDetails] = useState({ accountNumber: '', bankName: '', routingNumber: '', iban: '', swiftCode: '' });
+    const [usdtWalletAddress, setUsdtWalletAddress] = useState('');
     const [xelooUsername, setXelooUsername] = useState(initialUsername || '');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -131,6 +159,15 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
             }
         }
     }, [xelooUsername, paymentMethod, searchUser]);
+    
+    const handlePaymentMethodChange = (method: PaymentMethod) => {
+        setPaymentMethod(method);
+        if (method === 'usdt') {
+            // Force the sender's currency to USDT for this flow
+            setFromCurrency('USDT');
+        }
+    };
+
 
     const handleContinueToDetails = () => setStep('details');
     
@@ -178,7 +215,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
                  <div className="bg-primary p-4 rounded-lg">
                     <label className="text-sm text-gray-400">Recipient gets</label>
                      <div className="flex items-center">
-                        <select value={recipientCountry} onChange={e => { setRecipientCountry(e.target.value); setToCurrency(countryToCurrency[e.target.value]); }} className="bg-primary-light border-r border-primary rounded-l-md font-bold text-white px-4 py-2 focus:outline-none appearance-none">
+                        <select value={recipientCountry} onChange={e => { setRecipientCountry(e.target.value); setToCurrency(countryToCurrency[e.target.value]); }} disabled={toCurrency === 'USDT'} className="bg-primary-light border-r border-primary rounded-l-md font-bold text-white px-4 py-2 focus:outline-none appearance-none disabled:opacity-50">
                             {countries.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                          <div className="relative flex-grow">
@@ -200,21 +237,6 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
         </Card>
     );
     
-    const BankDetailsForm = () => (
-        <div className="space-y-4 pt-2">
-             <p className="text-xs text-gray-400 -mb-2">
-                Recipient will receive funds directly in their bank account.
-            </p>
-            <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-            <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-            <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({ ...p, bankName: e.target.value }))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-            <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({ ...p, accountNumber: e.target.value }))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-            <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({ ...p, routingNumber: e.target.value }))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-            <input value={bankDetails.iban} onChange={e => setBankDetails(p => ({ ...p, iban: e.target.value }))} placeholder="IBAN (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-            <input value={bankDetails.swiftCode} onChange={e => setBankDetails(p => ({ ...p, swiftCode: e.target.value }))} placeholder="SWIFT/BIC Code (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-        </div>
-    );
-
     const renderDetailsStep = () => (
          <Card>
             <h2 className="text-2xl font-bold mb-4">Recipient Details</h2>
@@ -225,17 +247,44 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
             <div className="space-y-4">
                 <div>
                     <label className="text-sm font-medium text-gray-400 mb-2 block">Payment Method</label>
-                    <div className="grid grid-cols-2 gap-2">
-                         <button onClick={() => setPaymentMethod('bank')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'bank' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
+                    <div className="grid grid-cols-3 gap-2">
+                         <button onClick={() => handlePaymentMethodChange('bank')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'bank' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
                             Bank Transfer
                         </button>
-                         <button onClick={() => setPaymentMethod('xeloo')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'xeloo' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
+                         <button onClick={() => handlePaymentMethodChange('usdt')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'usdt' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
+                            Pay to Bank w/ USDT
+                        </button>
+                         <button onClick={() => handlePaymentMethodChange('xeloo')} className={`p-3 rounded-md border-2 text-center text-sm font-semibold ${paymentMethod === 'xeloo' ? 'border-accent bg-accent/10' : 'border-primary-light bg-primary'}`}>
                             Xeloo User
                         </button>
                     </div>
                 </div>
                 
-                {paymentMethod === 'bank' && <BankDetailsForm />}
+                {paymentMethod === 'bank' && <BankDetailsForm 
+                    recipientName={recipientName}
+                    setRecipientName={setRecipientName}
+                    recipientEmail={recipientEmail}
+                    setRecipientEmail={setRecipientEmail}
+                    bankDetails={bankDetails}
+                    setBankDetails={setBankDetails}
+                />}
+                
+                {paymentMethod === 'usdt' && (
+                     <div className="space-y-4 pt-2">
+                        <p className="text-xs text-yellow-400 -mb-2">
+                            The "You send" amount has been updated to USDT. The recipient will receive funds in their bank account.
+                        </p>
+                        <BankDetailsForm 
+                            recipientName={recipientName}
+                            setRecipientName={setRecipientName}
+                            recipientEmail={recipientEmail}
+                            setRecipientEmail={setRecipientEmail}
+                            bankDetails={bankDetails}
+                            setBankDetails={setBankDetails}
+                        />
+                    </div>
+                )}
+
 
                 {paymentMethod === 'xeloo' && (
                      <div>
@@ -248,7 +297,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
             </div>
             <div className="flex justify-between items-center mt-6">
                 <button onClick={() => setStep('input')} className="text-gray-400 hover:text-white">Back</button>
-                <button onClick={() => setStep('confirm')} disabled={paymentMethod === 'xeloo' && !foundUser} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 disabled:bg-gray-500">
+                <button onClick={() => setStep('confirm')} disabled={(paymentMethod === 'xeloo' && !foundUser) || (paymentMethod === 'usdt' && !bankDetails.accountNumber)} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 disabled:bg-gray-500">
                     Review Transfer
                 </button>
             </div>
@@ -275,6 +324,14 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
                             </div>
                         </div>
                     )}
+                    {paymentMethod === 'usdt' && (
+                         <div className="flex justify-between items-center text-gray-light">
+                            <span>Bank Details:</span>
+                            <div className="text-right">
+                                <span className="font-mono text-white text-sm break-all">{bankDetails.bankName} - {bankDetails.accountNumber}</span>
+                            </div>
+                        </div>
+                    )}
                     <hr className="border-primary-light" />
                     <div className="flex justify-between items-center font-bold text-white text-lg">
                         <span>Total Cost:</span>
@@ -285,23 +342,41 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
                         <span className="font-mono text-white">{(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</span>
                     </div>
                 </div>
-                 {!hasSufficientFunds && (
+
+                {!hasSufficientFunds && (
                     <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-300 text-center rounded-lg">
-                        <p className="font-bold">Insufficient Funds</p>
-                        <p className="text-sm">Your wallet balance is too low to complete this transaction.</p>
+                        <p className="font-bold">Insufficient Wallet Funds</p>
+                        <p className="text-sm">Your wallet balance is too low to pay directly. You can add funds or pay via an external transfer.</p>
                     </div>
                 )}
-                <div className="flex justify-end space-x-4 mt-6">
-                    <button onClick={() => setStep('details')} disabled={isProcessing} className="bg-gray-700 text-white font-bold py-2 px-6 rounded hover:bg-gray-600">
-                        Back
+
+                <div className="mt-6 space-y-3">
+                     <p className="text-sm font-semibold text-gray-400">Choose Payment Method:</p>
+                    
+                    <button 
+                        onClick={handleConfirmPayment} 
+                        disabled={isProcessing || !hasSufficientFunds} 
+                        className="w-full bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90 flex items-center justify-center disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    >
+                        {isProcessing ? <Spinner /> : 'Pay from Wallet'}
                     </button>
-                     {hasSufficientFunds ? (
-                        <button onClick={handleConfirmPayment} disabled={isProcessing} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90 w-48 flex items-center justify-center">
-                            {isProcessing ? <Spinner /> : 'Pay from Wallet'}
-                        </button>
-                    ) : (
-                        <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
-                            Add Funds
+
+                    <button 
+                        onClick={() => setStep('deposit')}
+                        disabled={isProcessing}
+                        className="w-full bg-primary-light text-white font-bold py-3 px-4 rounded hover:bg-primary"
+                    >
+                        {fromCurrency === 'USDT' ? 'Pay via Crypto Wallet' : 'Pay via Bank Transfer'}
+                    </button>
+                </div>
+
+                <div className="flex justify-between items-center mt-6">
+                    <button onClick={() => setStep('details')} disabled={isProcessing} className="text-gray-400 hover:text-white">
+                        &larr; Back to Details
+                    </button>
+                    {!hasSufficientFunds && (
+                         <button onClick={openAddFundsModal} className="text-sm font-bold text-accent hover:underline">
+                            + Add Funds to Wallet
                         </button>
                     )}
                 </div>
@@ -309,6 +384,51 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
         );
     }
     
+     const handleConfirmDeposit = () => {
+        setIsProcessing(true);
+        setTimeout(() => {
+            setIsProcessing(false);
+            setStep('success');
+        }, 3000);
+    };
+
+    const renderDepositStep = () => {
+        const isCrypto = fromCurrency === 'USDT';
+        const depositAmount = totalCost;
+
+        return (
+            <Card className="max-w-2xl mx-auto">
+                 <h2 className="text-2xl font-bold mb-2">{isCrypto ? 'Pay with Crypto' : 'Pay via Bank Transfer'}</h2>
+                <p className="text-gray-400 mb-4">To complete the transfer, please send the exact amount below to the provided address.</p>
+                <div className="bg-primary p-4 rounded-lg space-y-3">
+                    <div className="text-center mb-2">
+                        <p className="text-sm text-gray-400">Amount to Deposit</p>
+                        <p className="text-3xl font-bold text-accent font-mono">{depositAmount.toLocaleString('en-US', { style: 'currency', currency: fromCurrency === 'USDT' ? 'USD' : fromCurrency })}</p>
+                    </div>
+
+                    {isCrypto ? (
+                         <>
+                            <div className="flex justify-between"><span className="text-gray-400">Network:</span> <strong className="text-white">Tron (TRC20)</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">USDT Address:</span> <strong className="font-mono text-white break-all">T******************************WXYZ</strong></div>
+                            <p className="text-xs text-yellow-400 text-center pt-2">Send only USDT (TRC20) to this address. Sending any other currency will result in a loss of funds.</p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">Xeloo Pay-In (Providus)</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">9{Math.floor(100000000 + Math.random() * 900000000)}</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">XELOO/{Math.random().toString(36).substring(2, 8).toUpperCase()}</strong></div>
+                            <p className="text-xs text-yellow-400 text-center pt-2">This account is for this transaction only. Do not save for future use.</p>
+                        </>
+                    )}
+                </div>
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={() => setStep('confirm')} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Back</button>
+                    <button onClick={handleConfirmDeposit} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90">I've Made the Deposit</button>
+                </div>
+            </Card>
+        )
+    }
+
     const renderSuccessStep = () => (
         <Card className="text-center">
             <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
@@ -326,6 +446,7 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
         case 'input': return renderInputStep();
         case 'details': return renderDetailsStep();
         case 'confirm': return renderConfirmStep();
+        case 'deposit': return renderDepositStep();
         case 'success': return renderSuccessStep();
         default: return renderInputStep();
     }

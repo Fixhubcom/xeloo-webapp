@@ -357,7 +357,7 @@ interface AccountingProps {
 
 const Accounting: React.FC<AccountingProps> = ({ searchQuery, openAddFundsModal }) => {
     const { theme } = useTheme();
-    const { updateWalletBalance } = useAuth();
+    const { user, updateWalletBalance } = useAuth();
     const [activeView, setActiveView] = useState<AccountingView>('Dashboard');
     const [accounts, setAccounts] = useState(initialAccounts);
     const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(initialJournalEntries);
@@ -578,6 +578,19 @@ const Accounting: React.FC<AccountingProps> = ({ searchQuery, openAddFundsModal 
     return (
         <div>
             <ViewSwitcher activeView={activeView} setActiveView={setActiveView} />
+            <Card className="my-6">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h3 className="text-lg text-gray-400">Wallet Balance</h3>
+                        <p className="text-3xl font-bold text-white">
+                            {(user?.walletBalance || 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}
+                        </p>
+                    </div>
+                    <button onClick={openAddFundsModal} className="bg-accent text-primary font-bold py-2 px-6 rounded hover:opacity-90">
+                        + Add Funds
+                    </button>
+                </div>
+            </Card>
             {renderView()}
             {showManualEntryModal && <ManualJournalEntryModal accounts={accounts} onClose={() => setShowManualEntryModal(false)} onAddEntry={handleAddEntry} />}
             {showAddBillModal && <AddBillModal onClose={() => setShowAddBillModal(false)} onAddBill={handleAddBill} />}

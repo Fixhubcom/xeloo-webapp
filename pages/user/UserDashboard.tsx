@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../../components/common/Logo';
@@ -6,7 +7,8 @@ import Avatar from '../../components/common/Avatar';
 import HelpWidget from '../../components/common/HelpWidget';
 import { useTheme } from '../../context/ThemeContext';
 import { User, UserRole } from '../../types';
-import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon, ShieldCheckIcon, BriefcaseIcon, UsersIcon, MenuIcon, ArrowLeftIcon } from '../../components/icons/Icons';
+// FIX: Import 'CheckCircleIcon' from 'components/icons/Icons.tsx' to resolve the 'Cannot find name' error.
+import { DashboardIcon, SendIcon, PayrollIcon, InvoiceIcon, LogoutIcon, TransactionsIcon, ConverterIcon, AccountingIcon, SettingsIcon, SearchIcon, SunIcon, MoonIcon, RefreshIcon, LockIcon, CodeIcon, SubscriptionIcon, AnalyticsIcon, SupportIcon, ShieldCheckIcon, BriefcaseIcon, UsersIcon, MenuIcon, ArrowLeftIcon, CreditCardIcon, CheckCircleIcon } from '../../components/icons/Icons';
 import UserAnalytics from './UserAnalytics';
 import SendPayment from './SendPayment';
 import Transactions from './Transactions';
@@ -31,8 +33,7 @@ type NavItem = 'Dashboard' | 'Send Payment' | 'Recurring Payments' | 'Transactio
 
 const AddFundsModal: React.FC<{ onClose: () => void, onFund: (amount: number) => void }> = ({ onClose, onFund }) => {
     const [amount, setAmount] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [step, setStep] = useState<'form' | 'processing' | 'success'>('form');
+    const [step, setStep] = useState<'form' | 'method' | 'bank' | 'usdt' | 'processing' | 'success'>('form');
 
     const handleConfirmDeposit = () => {
         setStep('processing');
@@ -43,25 +44,62 @@ const AddFundsModal: React.FC<{ onClose: () => void, onFund: (amount: number) =>
     };
 
     return (
-         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in p-4" onClick={onClose}>
             <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
                 {step === 'form' && (
                     <>
-                        <h2 className="text-2xl font-bold mb-2">Add Funds to Your Wallet</h2>
-                        <p className="text-gray-400 mb-4">Deposit funds into the unique account below. The funds will be credited to your Xeloo balance instantly.</p>
+                        <h2 className="text-2xl font-bold mb-4">Add Funds to Your Wallet</h2>
                         <div>
                             <label className="text-sm text-gray-400">Amount (USD)</label>
                             <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full mt-1 bg-primary p-2 rounded border border-primary-light" required/>
                         </div>
+                        <div className="flex justify-end space-x-4 mt-6">
+                            <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
+                            <button onClick={() => setStep('method')} disabled={!amount || parseFloat(amount) <= 0} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 disabled:bg-gray-500">Continue</button>
+                        </div>
+                    </>
+                )}
+                {step === 'method' && (
+                    <>
+                        <button onClick={() => setStep('form')} className="text-sm text-accent mb-4">&larr; Back to Amount</button>
+                        <h2 className="text-2xl font-bold mb-2">Choose Deposit Method</h2>
+                        <p className="text-gray-300 mb-6">You are depositing <span className="font-bold text-accent">{parseFloat(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>.</p>
+                        <div className="space-y-4">
+                            <button onClick={() => setStep('bank')} className="w-full bg-primary-light text-white font-bold py-3 px-4 rounded hover:bg-primary text-left flex items-center">
+                                <CreditCardIcon className="w-6 h-6 mr-3" />
+                                Deposit via Bank Transfer
+                            </button>
+                             <button onClick={() => setStep('usdt')} className="w-full bg-primary-light text-white font-bold py-3 px-4 rounded hover:bg-primary text-left flex items-center">
+                                <CheckCircleIcon className="w-6 h-6 mr-3" />
+                                Deposit via Crypto (USDT)
+                            </button>
+                        </div>
+                    </>
+                )}
+                {step === 'bank' && (
+                     <>
+                        <button onClick={() => setStep('method')} className="text-sm text-accent mb-4">&larr; Back to Methods</button>
+                        <h2 className="text-2xl font-bold mb-2">Bank Transfer Details</h2>
+                        <p className="text-gray-400 mb-4">Deposit funds into the unique account below. The funds will be credited to your Xeloo balance instantly.</p>
                         <div className="bg-primary p-4 rounded-lg space-y-3 mt-4">
                             <div className="flex justify-between"><span className="text-gray-400">Bank Name:</span> <strong className="text-white">Xeloo Pay-In (Providus)</strong></div>
                             <div className="flex justify-between"><span className="text-gray-400">Account Number:</span> <strong className="font-mono text-white">9{Math.floor(100000000 + Math.random() * 900000000)}</strong></div>
                             <div className="flex justify-between"><span className="text-gray-400">Beneficiary:</span> <strong className="text-white">XELOO/{Math.random().toString(36).substring(2, 8).toUpperCase()}</strong></div>
                         </div>
-                        <div className="flex justify-end space-x-4 mt-6">
-                            <button onClick={onClose} className="bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">Cancel</button>
-                            <button onClick={handleConfirmDeposit} disabled={!amount} className="bg-accent text-primary font-bold py-2 px-4 rounded hover:opacity-90 disabled:bg-gray-500">I've Made the Deposit</button>
+                        <button onClick={handleConfirmDeposit} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90">I've Made the Deposit</button>
+                    </>
+                )}
+                 {step === 'usdt' && (
+                     <>
+                        <button onClick={() => setStep('method')} className="text-sm text-accent mb-4">&larr; Back to Methods</button>
+                        <h2 className="text-2xl font-bold mb-2">Crypto Deposit Details</h2>
+                        <p className="text-gray-400 mb-4">Send the exact USDT amount to the provided address. Your balance will be credited upon confirmation.</p>
+                        <div className="bg-primary p-4 rounded-lg space-y-3 mt-4">
+                            <div className="flex justify-between"><span className="text-gray-400">Network:</span> <strong className="text-white">Tron (TRC20)</strong></div>
+                            <div className="flex justify-between"><span className="text-gray-400">USDT Address:</span> <strong className="font-mono text-white break-all">T******************************WXYZ</strong></div>
+                            <p className="text-xs text-yellow-400 text-center pt-2">Send only USDT (TRC20) to this address. Sending any other currency will result in a loss of funds.</p>
                         </div>
+                        <button onClick={handleConfirmDeposit} className="w-full mt-6 bg-accent text-primary font-bold py-3 px-4 rounded hover:opacity-90">I've Made the Deposit</button>
                     </>
                 )}
                 {step === 'processing' && (
@@ -208,13 +246,6 @@ const UserDashboard: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-4">
-                        <div className="bg-primary-light p-2 rounded-lg text-center hidden sm:block">
-                            <div className="text-xs text-gray-400">Wallet Balance</div>
-                            <div className="font-bold text-white">{(user?.walletBalance ?? 0).toLocaleString('en-US', { style: 'currency', currency: user?.preferredCurrency || 'USD' })}</div>
-                        </div>
-                         <button onClick={() => setIsAddFundsModalOpen(true)} className="bg-accent text-primary text-sm font-bold py-2 px-3 rounded-md hover:opacity-90">
-                            + Add Funds
-                        </button>
                         <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-primary-light">
                             {theme === 'dark' ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-700" />}
                         </button>
