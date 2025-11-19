@@ -1,5 +1,4 @@
 
-
 export enum UserRole {
   USER = 'USER',
   PARTNER = 'PARTNER',
@@ -140,6 +139,16 @@ export interface JournalEntry {
   credit: number;
 }
 
+export interface Bill {
+  id: string;
+  vendorName: string;
+  issueDate: string;
+  dueDate: string;
+  amount: number;
+  currency: string;
+  status: 'Paid' | 'Unpaid' | 'Overdue';
+}
+
 export type EscrowStatus = 'Awaiting Funding' | 'In Escrow' | 'Awaiting Release' | 'Completed' | 'Disputed' | 'Canceled';
 
 export interface EscrowTransaction {
@@ -164,12 +173,14 @@ export interface PublicUserProfile {
   avatarBgColor: string;
 }
 
-export interface Bill {
-  id: string;
-  vendorName: string;
-  issueDate: string;
-  dueDate: string;
-  amount: number;
-  currency: string;
-  status: 'Paid' | 'Unpaid' | 'Overdue';
+export interface WalletAIAnalysis {
+    cashFlow: { date: string; amount: number }[];
+    fxSentiment: { pair: string; action: 'Buy' | 'Sell' | 'Hold'; reasoning: string }[];
+    insights: {
+        type: 'ANOMALY' | 'FX_ADVICE' | 'MISSING_INVOICE' | 'OPPORTUNITY';
+        title: string;
+        description: string;
+        severity: 'High' | 'Medium' | 'Low';
+        action?: string;
+    }[];
 }

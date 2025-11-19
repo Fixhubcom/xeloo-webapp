@@ -368,6 +368,7 @@ const CTA: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
+    const navigate = useNavigate();
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
     return (
         <footer className="bg-primary pt-16 pb-8">
@@ -400,9 +401,34 @@ const Footer: React.FC = () => {
                         <li><a href="#/affiliate" className="hover:text-accent">Affiliate</a></li>
                     </ul></div>
                 </div>
-                <div className="border-t border-primary-light pt-6 flex justify-between items-center text-gray-400 text-sm">
+
+                <div className="border-t border-primary-light pt-6 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
                     <p>© {new Date().getFullYear()} Xeloo ・All rights reserved by Fix Hub Communications Ltd</p>
                     <button onClick={scrollToTop} className="hover:text-accent">Return to top ↑</button>
+                </div>
+                
+                {/* Specialized Login Links Row */}
+                <div className="mt-8 pt-4 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600 space-y-2 md:space-y-0">
+                    <button 
+                        onClick={() => navigate('/admin/login')} 
+                        className="hover:text-accent transition-colors text-left w-full md:w-auto"
+                    >
+                        Admin Access
+                    </button>
+                    
+                    <button 
+                        onClick={() => navigate('/merchant/login')} 
+                        className="hover:text-accent transition-colors text-center w-full md:w-auto"
+                    >
+                        Merchant Portal
+                    </button>
+                    
+                    <button 
+                        onClick={() => navigate('/partner/login')} 
+                        className="hover:text-accent transition-colors text-right w-full md:w-auto"
+                    >
+                        Partner Login
+                    </button>
                 </div>
             </div>
         </footer>

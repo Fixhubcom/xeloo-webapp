@@ -64,7 +64,13 @@ const AppRoutes: React.FC = () => {
     return (
         <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Separate Login Routes */}
+            <Route path="/login" element={<LoginPage specificRole={UserRole.USER} />} />
+            <Route path="/admin/login" element={<LoginPage specificRole={UserRole.ADMIN} />} />
+            <Route path="/partner/login" element={<LoginPage specificRole={UserRole.PARTNER} />} />
+            <Route path="/merchant/login" element={<LoginPage specificRole={UserRole.MERCHANT} />} />
+
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/2fa" element={<TwoFactorAuthPage />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />

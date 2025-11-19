@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
-import { OnboardingSuggestions, Transaction, JournalEntry } from "../types";
+import { OnboardingSuggestions, Transaction, JournalEntry, WalletAIAnalysis } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -205,4 +206,88 @@ export const processAccountingEntry = async (prompt: string, image?: { mimeType:
             { date: new Date().toISOString().split('T')[0], description: "Mock - Software purchase", account: "1010 - Cash and Bank", debit: 0, credit: 50.00 }
         ];
     }
+};
+
+export const generateSmartWalletInsights = async (transactions: Transaction[], currentBalance: number): Promise<WalletAIAnalysis> => {
+  const prompt = `
+    Analyze the following financial data for a business wallet:
+    Current Balance: ${currentBalance}
+    Transactions: ${JSON.stringify(transactions.slice(0, 20))}
+
+    Generate a JSON response with:
+    1. cashFlow: Projected balance for the next 7 days (array of {date, amount}).
+    2. fxSentiment: Advice on currency pairs based on trends/mock data (array of {pair, action: Buy/Sell/Hold, reasoning}).
+    3. insights: Anomalies or opportunities (array of {type: ANOMALY|FX_ADVICE|MISSING_INVOICE|OPPORTUNITY, title, description, severity: High/Medium/Low, action}).
+  `;
+
+  try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+             responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    cashFlow: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                date: { type: Type.STRING },
+                                amount: { type: Type.NUMBER }
+                            },
+                            required: ["date", "amount"]
+                        }
+                    },
+                    fxSentiment: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                pair: { type: Type.STRING },
+                                action: { type: Type.STRING, enum: ["Buy", "Sell", "Hold"] },
+                                reasoning: { type: Type.STRING }
+                            },
+                            required: ["pair", "action", "reasoning"]
+                        }
+                    },
+                    insights: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                type: { type: Type.STRING, enum: ["ANOMALY", "FX_ADVICE", "MISSING_INVOICE", "OPPORTUNITY"] },
+                                title: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                severity: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
+                                action: { type: Type.STRING }
+                            },
+                            required: ["type", "title", "description", "severity"]
+                        }
+                    }
+                },
+                required: ["cashFlow", "fxSentiment", "insights"]
+             }
+        }
+      });
+      return JSON.parse(response.text.trim()) as WalletAIAnalysis;
+  } catch (error) {
+      console.error("Error calling Gemini API for Smart Wallet:", error);
+      // Fallback mock
+      return {
+          cashFlow: Array.from({length: 7}, (_, i) => {
+              const date = new Date();
+              date.setDate(date.getDate() + i);
+              return { date: date.toISOString().split('T')[0], amount: currentBalance + (Math.random() * 1000 - 200) * i };
+          }),
+          fxSentiment: [
+              { pair: 'USD/NGN', action: 'Hold', reasoning: 'Market is stable.' },
+              { pair: 'GBP/USD', action: 'Buy', reasoning: 'Expected strengthening of GBP.' }
+          ],
+          insights: [
+              { type: 'ANOMALY', title: 'Mock Insight', description: 'Could not fetch AI insights.', severity: 'Low', action: 'Retry' }
+          ]
+      };
+  }
 };

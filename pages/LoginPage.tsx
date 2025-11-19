@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -6,14 +7,26 @@ import Logo from '../components/common/Logo';
 import Spinner from '../components/common/Spinner';
 import { EyeIcon, EyeSlashIcon } from '../components/icons/Icons';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+    specificRole?: UserRole;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ specificRole }) => {
+  const defaultRole = specificRole || UserRole.USER;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>(UserRole.USER);
+  const [role, setRole] = useState<UserRole>(defaultRole);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const { login, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
+
+  // Ensure role state updates if prop changes (though usually remounts on route change)
+  useEffect(() => {
+      if (specificRole) {
+          setRole(specificRole);
+      }
+  }, [specificRole]);
 
   useEffect(() => {
     if (user && submitted) {
@@ -35,6 +48,15 @@ const LoginPage: React.FC = () => {
     setSubmitted(true);
   };
 
+  const getPortalTitle = () => {
+      switch (role) {
+          case UserRole.ADMIN: return 'Admin Access';
+          case UserRole.PARTNER: return 'Partner Portal';
+          case UserRole.MERCHANT: return 'Merchant Login';
+          default: return 'Welcome Back';
+      }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-primary p-4">
       <div className="w-full max-w-md">
@@ -44,25 +66,27 @@ const LoginPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-primary-light border border-gray-200 dark:border-primary rounded-lg shadow-xl p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">Welcome Back</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">{getPortalTitle()}</h2>
           
           <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
-                I am a...
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
-              >
-                <option value={UserRole.USER}>User (Business/Freelancer)</option>
-                <option value={UserRole.PARTNER}>Financial Partner</option>
-                <option value={UserRole.MERCHANT}>Merchant</option>
-                <option value={UserRole.ADMIN}>Super Admin</option>
-              </select>
-            </div>
+            {!specificRole && (
+                <div>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+                    I am a...
+                </label>
+                <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as UserRole)}
+                    className="mt-1 block w-full bg-gray-100 dark:bg-primary border border-gray-300 dark:border-primary-light rounded-md shadow-sm py-2 px-3 text-gray-900 dark:text-white focus:outline-none focus:ring-accent focus:border-accent"
+                >
+                    <option value={UserRole.USER}>User (Business/Freelancer)</option>
+                    <option value={UserRole.PARTNER}>Financial Partner</option>
+                    <option value={UserRole.MERCHANT}>Merchant</option>
+                    <option value={UserRole.ADMIN}>Super Admin</option>
+                </select>
+                </div>
+            )}
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -116,12 +140,14 @@ const LoginPage: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p className="mb-2">
-                Don't have an account?{' '}
-                <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:opacity-80 cursor-pointer">
-                Sign up
-                </a>
-            </p>
+            {role === UserRole.USER && (
+                <p className="mb-2">
+                    Don't have an account?{' '}
+                    <a onClick={() => navigate('/onboarding')} className="font-medium text-accent hover:opacity-80 cursor-pointer">
+                    Sign up
+                    </a>
+                </p>
+            )}
             <a onClick={() => navigate('/')} className="font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer">
               &larr; Back to Home
             </a>
