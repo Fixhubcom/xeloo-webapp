@@ -5,19 +5,76 @@ interface LogoProps {
   className?: string;
 }
 
-// Base64 encoded logo image with transparent background
-const LOGO_BASE64 = 'data:image/png;base64,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';
+const XelooIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg 
+    viewBox="0 0 512 512" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    className={className}
+    role="img"
+    aria-label="Xeloo Logo"
+  >
+    {/* Yellow Coin Background with Gradient */}
+    <circle cx="256" cy="256" r="256" fill="#FDDA1A"/>
+    <circle cx="256" cy="256" r="256" fill="url(#coin_shine)" fillOpacity="0.4"/>
+    
+    {/* Inner Rim */}
+    <circle cx="256" cy="256" r="230" stroke="#EAB308" strokeWidth="10" strokeOpacity="0.5"/>
+
+    {/* Money Bag Shadow */}
+    <ellipse cx="270" cy="400" rx="120" ry="30" fill="#CA8A04" fillOpacity="0.4"/>
+
+    {/* Money Bag Shape */}
+    <path 
+        d="M256 120C220 120 190 150 190 180C190 210 210 230 180 280C160 313 160 360 180 390C200 420 312 420 332 390C352 360 352 313 332 280C302 230 322 210 322 180C322 150 292 120 256 120Z" 
+        fill="#041401"
+    />
+    
+    {/* Bag Tie/Rope */}
+    <path 
+        d="M210 180L220 190H292L302 180" 
+        stroke="#FDDA1A" 
+        strokeWidth="12" 
+        strokeLinecap="round"
+    />
+    
+    {/* The 'X' Symbol */}
+    <text 
+        x="256" 
+        y="330" 
+        fontSize="140" 
+        fontFamily="sans-serif" 
+        fontWeight="900" 
+        fill="#FDDA1A" 
+        textAnchor="middle"
+    >
+        X
+    </text>
+    
+    {/* Money Bag Highlights */}
+    <path d="M290 140C290 140 270 130 250 130" stroke="white" strokeWidth="6" strokeLinecap="round" strokeOpacity="0.2"/>
+    <ellipse cx="220" cy="300" rx="20" ry="40" fill="white" fillOpacity="0.05" transform="rotate(-20 220 300)"/>
+
+    <defs>
+      <radialGradient id="coin_shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(150 150) rotate(45) scale(300)">
+        <stop stopColor="white"/>
+        <stop offset="1" stopColor="#EAB308" stopOpacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+);
 
 const Logo: React.FC<LogoProps> = ({ className = 'text-3xl' }) => {
-  // Check for a size class to make the image responsive
-  const isLarge = className.includes('text-5xl');
-  const imgSizeClass = isLarge ? 'w-14 h-14' : 'w-10 h-10';
+  // Determine icon size based on the text size class passed for responsiveness
+  const isLarge = className.includes('text-4xl') || className.includes('text-5xl') || className.includes('text-6xl');
+  const iconSizeClass = isLarge ? 'w-14 h-14 sm:w-16 sm:h-16' : 'w-8 h-8 sm:w-10 sm:h-10';
 
   return (
-    <div className={`flex items-center space-x-3`}>
-      <img src={LOGO_BASE64} alt="Xeloo Logo" className={imgSizeClass} />
-      <h1 className={`font-bold hidden sm:block ${className}`}>
-        <span className="text-white">Xeloo</span>
+    <div className={`flex items-center gap-2 sm:gap-3 select-none`}>
+      <XelooIcon className={`${iconSizeClass} flex-shrink-0 shadow-sm rounded-full`} />
+      {/* Used text-inherit to ensure logo matches the header color (white on landing, dark on light mode dashboard) */}
+      <h1 className={`font-bold tracking-tight hidden sm:flex items-baseline ${className} text-inherit`}>
+        <span>Xeloo</span>
         <span className="text-accent">.</span>
       </h1>
     </div>

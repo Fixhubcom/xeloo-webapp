@@ -1,10 +1,10 @@
 
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Card from '../../components/common/Card';
 import Spinner from '../../components/common/Spinner';
 import { useAuth } from '../../hooks/useAuth';
 import { CheckCircleIcon, SwitchVerticalIcon } from '../../components/icons/Icons';
+import BankDetailsForm from '../../components/payment/BankDetailsForm';
 
 // In a real app, these would come from a global state/config fetched from the backend,
 // which is managed by the Admin.
@@ -31,33 +31,6 @@ interface SendPaymentProps {
     openAddFundsModal: () => void;
 }
 
-interface BankDetailsFormProps {
-    recipientName: string;
-    setRecipientName: (value: string) => void;
-    recipientEmail: string;
-    setRecipientEmail: (value: string) => void;
-    bankDetails: { accountNumber: string; bankName: string; routingNumber: string; iban: string; swiftCode: string; };
-    setBankDetails: (value: React.SetStateAction<{ accountNumber: string; bankName: string; routingNumber: string; iban: string; swiftCode: string; }>) => void;
-}
-
-const BankDetailsForm: React.FC<BankDetailsFormProps> = ({
-    recipientName, setRecipientName, recipientEmail, setRecipientEmail, bankDetails, setBankDetails
-}) => (
-    <div className="space-y-4 pt-2">
-        <p className="text-xs text-gray-400 -mb-2">
-            Recipient will receive funds directly in their bank account.
-        </p>
-        <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Recipient's Full Name or Company" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-        <input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="Recipient's Email (for notifications)" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-        <input value={bankDetails.bankName} onChange={e => setBankDetails(p => ({ ...p, bankName: e.target.value }))} placeholder="Bank Name" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-        <input value={bankDetails.accountNumber} onChange={e => setBankDetails(p => ({ ...p, accountNumber: e.target.value }))} placeholder="Account Number" className="w-full bg-primary p-2 rounded border border-primary-light" required />
-        <input value={bankDetails.routingNumber} onChange={e => setBankDetails(p => ({ ...p, routingNumber: e.target.value }))} placeholder="Routing Number (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-        <input value={bankDetails.iban} onChange={e => setBankDetails(p => ({ ...p, iban: e.target.value }))} placeholder="IBAN (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-        <input value={bankDetails.swiftCode} onChange={e => setBankDetails(p => ({ ...p, swiftCode: e.target.value }))} placeholder="SWIFT/BIC Code (if applicable)" className="w-full bg-primary p-2 rounded border border-primary-light" />
-    </div>
-);
-
-
 const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFundsModal }) => {
     const { user, updateWalletBalance } = useAuth();
     const [step, setStep] = useState<PaymentStep>('input');
@@ -78,7 +51,6 @@ const SendPayment: React.FC<SendPaymentProps> = ({ initialUsername, openAddFunds
     const [recipientEmail, setRecipientEmail] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank');
     const [bankDetails, setBankDetails] = useState({ accountNumber: '', bankName: '', routingNumber: '', iban: '', swiftCode: '' });
-    const [usdtWalletAddress, setUsdtWalletAddress] = useState('');
     const [xelooUsername, setXelooUsername] = useState(initialUsername || '');
     const [foundUser, setFoundUser] = useState<{ name: string, company: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
